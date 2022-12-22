@@ -1,0 +1,15 @@
+[submodule "cmake/tools"]
+	path = cmake/tools
+	url = https://github.com/wang-bin/cmake-tools.git
+[submodule "projects/src/fribidi"]
+	path = src/fribidi
+	url = https://github.com/fribidi/fribidi.git
+[submodule "src/harfbuzz"]
+	path = src/harfbuzz
+	url = https://github.com/harfbuzz/harfbuzz.git
+[submodule "src/freetype"]
+	path = src/freetype
+	url = https://gitlab.freedesktop.org/freetype/freetype.git
+[submodule "src/libass"]
+	path = src/libass
+	url = https://github.com/libass/libass.git

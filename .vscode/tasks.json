@@ -1,0 +1,723 @@
+{
+    // See https://go.microsoft.com/fwlink/?LinkId=733558
+    // for the documentation about the tasks.json format
+    "version": "2.0.0",
+    //"runner": "terminal",
+    "command": "cmake",
+    //"isShellCommand": true,
+    "options": {
+        "env":{
+            "NINJA_STATUS": "[%f/%t %e %r %s]"
+        }
+    },
+    "tasks": [
+        {
+            "label": "config.host",
+            "args": [
+                "-DCMAKE_BUILD_TYPE=RelWithDebInfo",
+                "-H${workspaceRoot}",
+                "-B${workspaceRoot}/build/host",
+                "-GNinja",
+                "-DUSE_LTO=thin",
+                //"-DCMAKE_OSX_DEPLOYMENT_TARGET=10.9",
+                //"-DCMAKE_OSX_ARCHITECTURES=x86_64",
+                "-DCMAKE_INSTALL_PREFIX=${workspaceRoot}/build/host/install"
+            ],
+            "problemMatcher": []
+        },
+        {
+            "label": "build.host",
+            "command": "cmake",
+            "args": [
+                "--build",
+                "${workspaceRoot}/build/host"
+            ],
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "problemMatcher": []
+        },
+        {
+            "label": "build.host.sanitize",
+            "command": "cmake",
+            "args": [
+                "--build",
+                "${workspaceRoot}/build/host.sanitize"
+            ],
+            "group": "build",
+            "problemMatcher": []
+        },
+        {
+            "label": "config.macCatalyst",
+            "args": [
+                "-DCMAKE_TOOLCHAIN_FILE=${workspaceRoot}/cmake/tools/macCatalyst.cmake",
+                "-DCMAKE_OSX_ARCHITECTURES=x86_64;arm64",
+                "-DUSE_BITCODE=0",
+                "-DCMAKE_XCODE_ATTRIBUTE_ONLY_ACTIVE_ARCH=NO",
+                "-DCMAKE_IOS_INSTALL_COMBINED=YES",
+                "-DCMAKE_BUILD_TYPE=RelWithDebInfo",
+                "-DCMAKE_INSTALL_PREFIX=${workspaceRoot}/build/catalyst/install",
+                "-H${workspaceRoot}",
+                "-B${workspaceRoot}/build/catalyst",
+                "-GNinja"
+            ],
+            "problemMatcher": []
+        },
+        {
+            "label": "build.macCatalyst",
+            "command": "cmake",
+            "args": [
+                "--build",
+                "${workspaceRoot}/build/catalyst"
+            ],
+            "group": "build",
+            "problemMatcher": []
+        },
+        {
+            "label": "config.iOSSimulator",
+            "args": [
+                "-DCMAKE_SYSTEM_NAME=iOS",
+                "-DCMAKE_OSX_ARCHITECTURES=x86_64",
+                "-DCMAKE_OSX_DEPLOYMENT_TARGET=8.0",
+                "-DCMAKE_XCODE_ATTRIBUTE_ONLY_ACTIVE_ARCH=NO",
+                "-DCMAKE_IOS_INSTALL_COMBINED=YES",
+                "-DCMAKE_OSX_SYSROOT=iphonesimulator",
+                "-DCMAKE_BUILD_TYPE=RelWithDebInfo",
+                "-DCMAKE_INSTALL_PREFIX=${workspaceRoot}/build/iOSSimulator/install",
+                "-H${workspaceRoot}",
+                "-B${workspaceRoot}/build/iOSSimulator",
+                "-GNinja"
+            ],
+            "problemMatcher": []
+        },
+        {
+            "label": "build.iOSSimulator",
+            "command": "cmake",
+            "args": [
+                "--build",
+                "${workspaceRoot}/build/iOSSimulator"
+            ],
+            "group": "build",
+            "problemMatcher": []
+        },
+        {
+            "label": "config.iOS.device",
+            "args": [
+                "-DCMAKE_BUILD_TYPE=MinSizeRel",
+                "-H${workspaceRoot}",
+                "-B${workspaceRoot}/build/iOS.device",
+                "-GNinja",
+                "-DCMAKE_TOOLCHAIN_FILE=${workspaceRoot}/cmake/tools/ios.cmake",
+                "-DCMAKE_INSTALL_PREFIX=${workspaceRoot}/build/iOS.device/install",
+                "-DIOS_ARCH=arm64",
+                "-DIOS_BITCODE=0"
+            ],
+            "problemMatcher": []
+        },
+        {
+            "label": "build.iOS.device",
+            "command": "cmake",
+            "args": [
+                "--build",
+                "${workspaceRoot}/build/iOS.device"
+            ],
+            "group": "build",
+            "problemMatcher": []
+        },
+        {
+            "label": "config.android.armv7a",
+            "args": [
+                "-DCMAKE_TOOLCHAIN_FILE=${env:ANDROID_NDK}/build/cmake/android.toolchain.cmake",
+                "-DCMAKE_BUILD_TYPE=RelWithDebInfo",
+                "-DANDROID_TOOLCHAIN=clang",
+                "-DANDROID_STL=c++_shared",
+                "-DANDROID_ABI=armeabi-v7a",
+                "-DANDROID_PLATFORM=android-16",
+                "-DANDROID_PIE=ON",
+                "-DCMAKE_C_COMPILER_FRONTEND_VARIANT=GNU",
+                "-DCMAKE_CXX_COMPILER_FRONTEND_VARIANT=GNU",
+                "-H${workspaceRoot}",
+                "-B${workspaceRoot}/build/android-armv7",
+                "-DCMAKE_INSTALL_PREFIX=${workspaceRoot}/build/android-armv7/install",
+                "-GNinja"
+            ],
+            "problemMatcher": []
+        },
+        {
+            "label": "build.android.armv7a",
+            "command": "cmake",
+            "args": [
+                "--build",
+                "${workspaceRoot}/build/android-armv7"
+            ],
+            "group": "build",
+            "problemMatcher": []
+        },
+        {
+            "label": "config.android.arm64",
+            "args": [
+                "-DCMAKE_TOOLCHAIN_FILE=${env:ANDROID_NDK}/build/cmake/android.toolchain.cmake",
+                "-DCMAKE_BUILD_TYPE=MinSizeRel",
+                "-DANDROID_TOOLCHAIN=clang",
+                "-DANDROID_STL=c++_shared",
+                "-DANDROID_ABI=arm64-v8a",
+                "-DANDROID_PLATFORM=android-24",
+                "-DANDROID_PIE=ON",
+                "-DCMAKE_C_COMPILER_FRONTEND_VARIANT=GNU",
+                "-DCMAKE_CXX_COMPILER_FRONTEND_VARIANT=GNU",
+                "-H${workspaceRoot}",
+                "-B${workspaceRoot}/build/android-arm64",
+                "-GNinja",
+                "-DCMAKE_INSTALL_PREFIX=${workspaceRoot}/build/android-arm64/install",
+                "-DUSE_LTO=thin",
+                "-DANDROID_LD=lld",
+            ],
+            "problemMatcher": []
+        },
+        {
+            "label": "build.android.arm64",
+            "command": "cmake",
+            "args": [
+                "--build",
+                "${workspaceRoot}/build/android-arm64"
+            ],
+            "group": "build",
+            "problemMatcher": []
+        },
+        {
+            "label": "config.android.arm64.cmake",
+            "args": [
+                "-DCMAKE_BUILD_TYPE=RelWithDebInfo",
+                "-DCMAKE_SYSTEM_NAME=Android",
+                "-H${workspaceRoot}",
+                "-B${workspaceRoot}/build/android-arm64-cmake",
+                "-GNinja",
+                "-DCMAKE_ANDROID_NDK=${env:ANDROID_NDK}",
+                "-DCMAKE_ANDROID_NDK_TOOLCHAIN_VERSION=clang",
+                "-DCMAKE_ANDROID_STL_TYPE=c++_shared",
+                "-DCMAKE_ANDROID_ARCH_ABI=arm64-v8a",
+                "-DCMAKE_SYSTEM_VERSION=21"
+            ],
+            "problemMatcher": []
+        },
+        {
+            "label": "build.android.arm64.cmake",
+            "command": "cmake",
+            "args": [
+                "--build",
+                "${workspaceRoot}/build/android-arm64-cmake"
+            ],
+            "group": "build"
+        },
+        {
+            "label": "config.linux.arm64.clang",
+            "args": [
+                "-DCMAKE_TOOLCHAIN_FILE=${workspaceRoot}/cmake/tools/linux.clang.cmake",
+                "-DCMAKE_BUILD_TYPE=MinSizeRel",
+                "-H${workspaceRoot}",
+                "-B${workspaceRoot}/build/linux.arm64.clang",
+                "-GNinja",
+                "-DUSE_LTO=thin",
+                "-DUSE_COMPILER_RT=0",
+                "-DUSE_LIBCXX=1",
+                //"-DUSE_CXXABI=c++abi",
+                "-DCMAKE_INSTALL_PREFIX=${workspaceRoot}/build/linux.arm64.clang/install",
+                "-DCMAKE_CROSSCOMPILING=1",
+                "-DLINUX_SYSROOT=${env:LINUX_SYSROOT}",
+                "-DCMAKE_SYSTEM_PROCESSOR=arm64"
+            ],
+            "problemMatcher": []
+        },
+        {
+            "label": "build.linux.arm64.clang",
+            "command": "cmake",
+            "args": [
+                "--build",
+                "${workspaceRoot}/build/linux.arm64.clang"
+            ],
+            "group": "build",
+            "problemMatcher": []
+        },
+        {
+            "label": "config.linux.armhf.clang",
+            "args": [
+                "-DCMAKE_TOOLCHAIN_FILE=${workspaceRoot}/cmake/tools/linux.clang.cmake",
+                "-DCMAKE_BUILD_TYPE=MinSizeRel",
+                "-H${workspaceRoot}",
+                "-B${workspaceRoot}/build/linux.armhf.clang",
+                "-GNinja",
+                "-DUSE_COMPILER_RT=0",
+                "-DUSE_LIBCXX=1",
+                "-DCMAKE_INSTALL_PREFIX=${workspaceRoot}/build/linux.armhf.clang/install",
+                "-DCMAKE_CROSSCOMPILING=1",
+                "-DCMAKE_C_COMPILER=clang-15",
+                "-DLINUX_SYSROOT=${env:LINUX_SYSROOT}",
+                "-DUSE_LTO=thin",
+                "-DFT_DISABLE_BROTLI=1",
+                "-DFT_DISABLE_PNG=1",
+                "-DCMAKE_SYSTEM_PROCESSOR=armhf"
+            ],
+            "problemMatcher": []
+        },
+        {
+            "label": "build.linux.armhf.clang",
+            "command": "cmake",
+            "args": [
+                "--build",
+                "${workspaceRoot}/build/linux.armhf.clang"
+            ],
+            "group": "build",
+            "problemMatcher": []
+        },
+        {
+            "label": "config.linux64.clang",
+            "args": [
+                "-DCMAKE_TOOLCHAIN_FILE=${workspaceRoot}/cmake/tools/linux.clang.cmake",
+                "-DCMAKE_BUILD_TYPE=Release",
+                "-H${workspaceRoot}",
+                "-B${workspaceRoot}/build/linux64.clang",
+                "-GNinja",
+                "-DUSE_LTO=thin",
+                "-DUSE_COMPILER_RT=0",
+                "-DUSE_LIBCXX=1",
+                "-DCMAKE_INSTALL_PREFIX=${workspaceRoot}/build/linux64.clang/install",
+                "-DCMAKE_CROSSCOMPILING=1",
+                //"-DCMAKE_C_COMPILER=clang-15",
+                "-DLINUX_SYSROOT=${env:LINUX_SYSROOT}",
+                "-DUSE_LTO=thin",
+                "-DFT_DISABLE_BROTLI=1",
+                "-DFT_DISABLE_PNG=1",
+                "-DCMAKE_SYSTEM_PROCESSOR=amd64"
+            ],
+            "problemMatcher": []
+        },
+        {
+            "label": "build.linux64.clang",
+            "command": "cmake",
+            "args": [
+                "--build",
+                "${workspaceRoot}/build/linux64.clang"
+            ],
+            "group": "build",
+            "problemMatcher": []
+        },
+        {
+            "label": "config.linux64.clang.gnustl",
+            "args": [
+                "-DCMAKE_TOOLCHAIN_FILE=${workspaceRoot}/cmake/tools/linux.clang.cmake",
+                "-DCMAKE_BUILD_TYPE=RelWithDebInfo",
+                "-H${workspaceRoot}",
+                "-B${workspaceRoot}/build/linux64.clang.gnustl",
+                "-DLINUX_SYSROOT=${env:HOME}/dev/linux/sysroot",
+                "-GNinja",
+                "-DUSE_LTO=thin",
+                "-DUSE_COMPILER_RT=0",
+                "-DUSE_LIBCXX=OFF",
+                "-DUSE_STDCXX=8"
+            ],
+            "problemMatcher": []
+        },
+        {
+            "label": "build.linux64.clang.gnustl",
+            "command": "cmake",
+            "args": [
+                "--build",
+                "${workspaceRoot}/build/linux64.clang.gnustl"
+            ],
+            "group": "build",
+            "problemMatcher": []
+        },
+        {
+            "label": "config.centos7.clang",
+            "args": [
+                "-DCMAKE_TOOLCHAIN_FILE=${workspaceRoot}/cmake/tools/centos.clang.cmake",
+                "-DCMAKE_BUILD_TYPE=MinSizeRel",
+                "-H${workspaceRoot}",
+                "-B${workspaceRoot}/build/centos7.clang",
+                "-GNinja",
+                "-DUSE_LTO=thin",
+                "-DUSE_COMPILER_RT=0",
+                "-DUSE_LIBCXX=1",
+                "-DCMAKE_INSTALL_PREFIX=${workspaceRoot}/build/centos7.clang/install",
+                "-DCMAKE_CROSSCOMPILING=1",
+                "-DCMAKE_C_COMPILER=clang-15",
+                "-DLINUX_SYSROOT=${env:CENTOS_SYSROOT}",
+                "-DCMAKE_SYSTEM_PROCESSOR=amd64"
+            ],
+            "problemMatcher": []
+        },
+        {
+            "label": "build.centos7.clang",
+            "command": "cmake",
+            "args": [
+                "--build",
+                "${workspaceRoot}/build/centos7.clang"
+            ],
+            "group": "build",
+            "problemMatcher": []
+        },
+        {
+            "label": "config.centos7.gnu",
+            "args": [
+                "-DCMAKE_TOOLCHAIN_FILE=${workspaceRoot}/cmake/tools/centos.clang.cmake",
+                "-DCMAKE_BUILD_TYPE=MinSizeRel",
+                "-H${workspaceRoot}",
+                "-B${workspaceRoot}/build/centos7.gnu",
+                "-GNinja",
+                "-DUSE_LTO=thin",
+                "-DUSE_COMPILER_RT=0",
+                "-DUSE_LIBCXX=0",
+                "-DCMAKE_INSTALL_PREFIX=${workspaceRoot}/build/centos7.gnu/install",
+                "-DCMAKE_CROSSCOMPILING=1",
+                "-DCMAKE_C_COMPILER=clang-15",
+                "-DLINUX_SYSROOT=${env:CENTOS_SYSROOT}",
+                "-DCMAKE_SYSTEM_PROCESSOR=amd64"
+            ],
+            "problemMatcher": []
+        },
+        {
+            "label": "build.centos7.gnu",
+            "command": "cmake",
+            "args": [
+                "--build",
+                "${workspaceRoot}/build/centos7.gnu"
+            ],
+            "group": "build",
+            "problemMatcher": []
+        },
+        {
+            "label": "config.rpi.clang",
+            "args": [
+                "-DCMAKE_TOOLCHAIN_FILE=${workspaceRoot}/cmake/tools/rpi.clang.cmake",
+                "-DCMAKE_BUILD_TYPE=MinSizeRel",
+                "-H${workspaceRoot}",
+                "-B${workspaceRoot}/build/rpi.clang",
+                "-GNinja",
+                "-DUSE_LTO=thin",
+                "-DUSE_COMPILER_RT=0",
+                "-DCMAKE_INSTALL_PREFIX=${workspaceRoot}/build/rpi.clang/install",
+                "-DAVGLUE_EMBED=1",
+                "-DLINUX_SYSROOT=${env:RPI_SYSROOT}"
+            ],
+            "problemMatcher": []
+        },
+        {
+            "label": "build.rpi.clang",
+            "command": "cmake",
+            "args": [
+                "--build",
+                "${workspaceRoot}/build/rpi.clang"
+            ],
+            "group": "build",
+            "problemMatcher": []
+        },
+        {
+            "label": "config.mingw64",
+            "args": [
+                "-DCMAKE_BUILD_TYPE=MinSizeRel",
+                "-H${workspaceRoot}",
+                "-B${workspaceRoot}/build/mingw64",
+                "-GNinja",
+                "-DUSE_LTO=thin",
+                "-DCMAKE_TOOLCHAIN_FILE=${workspaceRoot}/cmake/tools/llvm-mingw.cmake",
+                "-DCMAKE_CROSSCOMPILING=1",
+                "-DCMAKE_SYSTEM_PROCESSOR=x86_64"
+            ],
+            "problemMatcher": []
+        },
+        {
+            "label": "build.mingw64",
+            "command": "cmake",
+            "args": [
+                "--build",
+                "${workspaceRoot}/build/mingw64"
+            ],
+            "group": "build"
+        },
+        {
+            "label": "config.vs2022x64",
+            "args": [
+                "-DCMAKE_BUILD_TYPE=RelWithDebInfo",
+                "-H${workspaceRoot}",
+                "-B${workspaceRoot}/build/vs2022x64",
+                "-G",
+                "Visual Studio 17 2022",
+                "-A",
+                "x64",
+                "-DCMAKE_MSVC_RUNTIME_LIBRARY=MultiThreadedDLL",
+                "-DCMAKE_VS_JUST_MY_CODE_DEBUGGING=1"
+            ],
+            "problemMatcher": []
+        },
+        {
+            "label": "build.vs2022x64",
+            "command": "cmake",
+            "args": [
+                "--build",
+                "${workspaceRoot}/build/vs2022x64",
+                "--",
+                "-m",
+                "-p:Configuration=RelWithDebInfo"
+            ],
+            "group": "build",
+            "problemMatcher": []
+        },
+        {
+            "label": "config.vs2022x86",
+            "args": [
+                "-DCMAKE_BUILD_TYPE=RelWithDebInfo",
+                "-H${workspaceRoot}",
+                "-B${workspaceRoot}/build/vs2022x86",
+                "-G",
+                "Visual Studio 17 2022",
+                "-A",
+                "Win32",
+                "-DCMAKE_MSVC_RUNTIME_LIBRARY=MultiThreadedDLL",
+                "-DCMAKE_VS_JUST_MY_CODE_DEBUGGING=1"
+            ],
+            "problemMatcher": []
+        },
+        {
+            "label": "build.vs2022x86",
+            "command": "cmake",
+            "args": [
+                "--build",
+                "${workspaceRoot}/build/vs2022x86",
+                "--",
+                "-p:Configuration=RelWithDebInfo"
+            ],
+            "group": "build",
+            "problemMatcher": []
+        },
+        {
+            "label": "config.vs2022uwp64",
+            "args": [
+                "-DCMAKE_BUILD_TYPE=RelWithDebInfo",
+                "-H${workspaceRoot}",
+                "-B${workspaceRoot}/build/vs2022uwp64",
+                "-G",
+                "Visual Studio 17 2022",
+                "-A",
+                "x64",
+                "-DCMAKE_VS_JUST_MY_CODE_DEBUGGING=1",
+                "-DCMAKE_SYSTEM_NAME=WindowsStore",
+                "-DCMAKE_SYSTEM_VERSION=10.0"
+            ],
+            "problemMatcher": []
+        },
+        {
+            "label": "build.vs2022uwp64",
+            "command": "cmake",
+            "args": [
+                "--build",
+                "${workspaceRoot}/build/vs2022uwp64",
+                "--",
+                "-p:Configuration=RelWithDebInfo"
+            ],
+            "group": "build",
+            "problemMatcher": []
+        },
+        {
+            "label": "config.vs2022uwparm",
+            "args": [
+                "-DCMAKE_BUILD_TYPE=RelWithDebInfo",
+                "-H${workspaceRoot}",
+                "-B${workspaceRoot}/build/vs2022uwparm",
+                "-G",
+                "Visual Studio 17 2022",
+                "-A",
+                "arm",
+                "-DCMAKE_VS_JUST_MY_CODE_DEBUGGING=1",
+                "-DCMAKE_SYSTEM_NAME=WindowsStore",
+                "-DCMAKE_SYSTEM_VERSION=10.0"
+            ],
+            "problemMatcher": []
+        },
+        {
+            "label": "build.vs2022uwparm",
+            "command": "cmake",
+            "args": [
+                "--build",
+                "${workspaceRoot}/build/vs2022uwparm",
+                "--",
+                "-m",
+                "-p:Configuration=RelWithDebInfo"
+            ],
+            "group": "build",
+            "problemMatcher": []
+        },
+        {
+            "label": "config.win32.clang",
+            "args": [
+                "-DCMAKE_BUILD_TYPE=RelWithDebInfo",
+                "-H${workspaceRoot}",
+                "-B${workspaceRoot}/build/win32.clang",
+                "-DCMAKE_TOOLCHAIN_FILE=${workspaceRoot}/cmake/tools/windows.clang.cmake",
+                "-DCMAKE_SYSTEM_PROCESSOR=x86",
+                "-GNinja",
+                "-DCMAKE_INSTALL_PREFIX=${workspaceRoot}/build/win32.clang/install",
+                "-DCMAKE_C_COMPILER=clang-cl",
+                "-DWINSDK_VER=10.0.19041.0",
+                "-DWINSDK_DIR=/Volumes/dev/winsdk",
+                "-DMSVC_DIR=/Volumes/dev/msvcrt-dev",
+                "-DFT_DISABLE_BROTLI=1",
+                "-DFT_DISABLE_PNG=1",
+                "-DCMAKE_MSVC_RUNTIME_LIBRARY=MultiThreadedDLL"
+            ],
+            "problemMatcher": []
+        },
+        {
+            "label": "build.win32.clang",
+            "command": "cmake",
+            "args": [
+                "--build",
+                "${workspaceRoot}/build/win32.clang"
+            ],
+            "group": "build",
+            "problemMatcher": []
+        },
+        {
+            "label": "config.win64.clang",
+            "args": [
+                "-DCMAKE_BUILD_TYPE=MinSizeRel",
+                "-H${workspaceRoot}",
+                "-B${workspaceRoot}/build/win64.clang",
+                "-DCMAKE_TOOLCHAIN_FILE=${workspaceRoot}/cmake/tools/windows.clang.cmake",
+                "-DCMAKE_SYSTEM_PROCESSOR=x64",
+                "-DCMAKE_INSTALL_PREFIX=${workspaceRoot}/build/win64.clang/install",
+                //"-DCMAKE_C_COMPILER=clang-cl",
+                "-DCMAKE_MSVC_RUNTIME_LIBRARY=MultiThreadedDLL",
+                "-DFT_DISABLE_BROTLI=1",
+                "-DFT_DISABLE_PNG=1",
+                "-GNinja"
+            ],
+            "problemMatcher": []
+        },
+        {
+            "label": "build.win64.clang",
+            "command": "cmake",
+            "args": [
+                "--build",
+                "${workspaceRoot}/build/win64.clang"
+            ],
+            "group": "build",
+            "problemMatcher": []
+        },
+        {
+            "label": "config.woa64.clang",
+            "args": [
+                "-DCMAKE_BUILD_TYPE=MinSizeRel",
+                "-H${workspaceRoot}",
+                "-B${workspaceRoot}/build/woa64.clang",
+                "-DCMAKE_TOOLCHAIN_FILE=${workspaceRoot}/cmake/tools/windows.clang.cmake",
+                "-DCMAKE_SYSTEM_PROCESSOR=arm64ec",
+                "-GNinja",
+                "-DCMAKE_INSTALL_PREFIX=${workspaceRoot}/build/woa64.clang/install"
+            ],
+            "problemMatcher": []
+        },
+        {
+            "label": "build.woa64.clang",
+            "command": "cmake",
+            "args": [
+                "--build",
+                "${workspaceRoot}/build/woa64.clang"
+            ],
+            "group": "build",
+            "problemMatcher": []
+        },
+        {
+            "label": "config.uwp_arm.clang",
+            "args": [
+                "-DCMAKE_BUILD_TYPE=MinSizeRel", // RelWithDebInfo/Debug crashes clang: target does not implement codeview register mapping
+                "-DWITH_DEB_INFO=0",
+                "-H${workspaceRoot}",
+                "-B${workspaceRoot}/build/uwp_arm.clang",
+                "-DCMAKE_TOOLCHAIN_FILE=${workspaceRoot}/cmake/tools/windows.clang.cmake",
+                "-DCMAKE_SYSTEM_PROCESSOR=arm",
+                "-GNinja",
+                "-DUWP=1"
+            ],
+            "problemMatcher": []
+        },
+        {
+            "label": "build.uwp_arm.clang",
+            "command": "cmake",
+            "args": [
+                "--build",
+                "${workspaceRoot}/build/uwp_arm.clang"
+            ],
+            "group": "build",
+            "problemMatcher": []
+        },
+        {
+            "label": "config.uwp_arm64.clang",
+            "args": [
+                "-DCMAKE_BUILD_TYPE=MinSizeRel",
+                "-H${workspaceRoot}",
+                "-B${workspaceRoot}/build/uwp_arm64.clang",
+                "-DCMAKE_TOOLCHAIN_FILE=${workspaceRoot}/cmake/tools/windows.clang.cmake",
+                "-DCMAKE_SYSTEM_PROCESSOR=arm64",
+                "-GNinja",
+                "-DUWP=1"
+            ],
+            "problemMatcher": []
+        },
+        {
+            "label": "build.uwp_arm64.clang",
+            "command": "cmake",
+            "args": [
+                "--build",
+                "${workspaceRoot}/build/uwp_arm64.clang"
+            ],
+            "group": "build",
+            "problemMatcher": []
+        },
+        {
+            "label": "config.uwp_x64.clang",
+            "args": [
+                "-DCMAKE_BUILD_TYPE=RelWithDebInfo",
+                "-H${workspaceRoot}",
+                "-B${workspaceRoot}/build/uwp_x64.clang",
+                "-DCMAKE_TOOLCHAIN_FILE=${workspaceRoot}/cmake/tools/windows.clang.cmake",
+                "-DCMAKE_SYSTEM_PROCESSOR=x64",
+                "-GNinja",
+                "-DUWP=1"
+            ],
+            "problemMatcher": []
+        },
+        {
+            "label": "build.uwp_x64.clang",
+            "command": "cmake",
+            "args": [
+                "--build",
+                "${workspaceRoot}/build/uwp_x64.clang"
+            ],
+            "group": "build"
+        },
+        {
+            "label": "config.uwp_x86.clang",
+            "args": [
+                "-DCMAKE_BUILD_TYPE=RelWithDebInfo",
+                "-H${workspaceRoot}",
+                "-B${workspaceRoot}/build/uwp_x86.clang",
+                "-DCMAKE_TOOLCHAIN_FILE=${workspaceRoot}/cmake/tools/windows.clang.cmake",
+                "-DCMAKE_SYSTEM_PROCESSOR=x86",
+                "-GNinja",
+                "-DUWP=1"
+            ],
+            "problemMatcher": []
+        },
+        {
+            "label": "build.uwp_x86.clang",
+            "command": "cmake",
+            "args": [
+                "--build",
+                "${workspaceRoot}/build/uwp_x86.clang"
+            ],
+            "group": "build",
+            "problemMatcher": []
+        }
+    ],
+}

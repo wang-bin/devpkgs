@@ -12,4 +12,5 @@
 	url = https://gitlab.freedesktop.org/freetype/freetype.git
 [submodule "src/libass"]
 	path = src/libass
-	url = https://github.com/libass/libass.git
+	url = git@github.com:wang-bin/libass.git
+	branch = wang

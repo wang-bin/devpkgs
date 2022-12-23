@@ -7,7 +7,7 @@
     //"isShellCommand": true,
     "options": {
         "env":{
-            "NINJA_STATUS": "[%f/%t %e %r %s]"
+            "NINJA_STATUS": "[%f/%t %e %r %s]",
         }
     },
     "tasks": [
@@ -21,6 +21,8 @@
                 "-DUSE_LTO=thin",
                 //"-DCMAKE_OSX_DEPLOYMENT_TARGET=10.9",
                 //"-DCMAKE_OSX_ARCHITECTURES=x86_64",
+                "-DFRIBIDI_GENTAB=1",
+                "-DHB_BUILD_SUBSET=0",
                 "-DCMAKE_INSTALL_PREFIX=${workspaceRoot}/build/host/install"
             ],
             "problemMatcher": []
@@ -39,20 +41,38 @@
             "problemMatcher": []
         },
         {
-            "label": "build.host.sanitize",
+            "label": "config.x64",
+            "args": [
+                "-DCMAKE_BUILD_TYPE=RelWithDebInfo",
+                "-H${workspaceRoot}",
+                "-B${workspaceRoot}/build/x64",
+                "-GNinja",
+                "-DUSE_LTO=thin",
+                "-DCMAKE_SYSTEM_NAME=Darwin", // explicitly set system name will enable CMAKE_CROSSCOMPILING
+                "-DCMAKE_OSX_DEPLOYMENT_TARGET=10.9",
+                "-DCMAKE_OSX_ARCHITECTURES=x86_64",
+                "-DCMAKE_INSTALL_PREFIX=${workspaceRoot}/build/x64/install"
+            ],
+            "problemMatcher": []
+        },
+        {
+            "label": "build.x64",
             "command": "cmake",
             "args": [
                 "--build",
-                "${workspaceRoot}/build/host.sanitize"
+                "${workspaceRoot}/build/x64"
             ],
-            "group": "build",
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
             "problemMatcher": []
         },
         {
             "label": "config.macCatalyst",
             "args": [
                 "-DCMAKE_TOOLCHAIN_FILE=${workspaceRoot}/cmake/tools/macCatalyst.cmake",
-                "-DCMAKE_OSX_ARCHITECTURES=x86_64;arm64",
+                "-DCMAKE_OSX_ARCHITECTURES=x86_64",
                 "-DUSE_BITCODE=0",
                 "-DCMAKE_XCODE_ATTRIBUTE_ONLY_ACTIVE_ARCH=NO",
                 "-DCMAKE_IOS_INSTALL_COMBINED=YES",
@@ -108,9 +128,13 @@
                 "-H${workspaceRoot}",
                 "-B${workspaceRoot}/build/iOS.device",
                 "-GNinja",
-                "-DCMAKE_TOOLCHAIN_FILE=${workspaceRoot}/cmake/tools/ios.cmake",
+                "-DCMAKE_SYSTEM_NAME=Darwin", // explicitly set system name will enable CMAKE_CROSSCOMPILING
+                "-DCMAKE_OSX_SYSROOT=iphoneos",
+                //"-DCMAKE_TOOLCHAIN_FILE=${workspaceRoot}/cmake/tools/ios.cmake",
                 "-DCMAKE_INSTALL_PREFIX=${workspaceRoot}/build/iOS.device/install",
+                "-DCMAKE_OSX_ARCHITECTURES=arm64",
                 "-DIOS_ARCH=arm64",
+                "-DHB_IOS=1",
                 "-DIOS_BITCODE=0"
             ],
             "problemMatcher": []
@@ -126,30 +150,29 @@
             "problemMatcher": []
         },
         {
-            "label": "config.android.armv7a",
+            "label": "config.android.x64",
             "args": [
                 "-DCMAKE_TOOLCHAIN_FILE=${env:ANDROID_NDK}/build/cmake/android.toolchain.cmake",
-                "-DCMAKE_BUILD_TYPE=RelWithDebInfo",
-                "-DANDROID_TOOLCHAIN=clang",
+                "-DCMAKE_BUILD_TYPE=MinSizeRel",
+                //"-DANDROID_TOOLCHAIN=clang",
                 "-DANDROID_STL=c++_shared",
-                "-DANDROID_ABI=armeabi-v7a",
-                "-DANDROID_PLATFORM=android-16",
+                "-DANDROID_ABI=x86_64",
+                "-DANDROID_PLATFORM=android-21",
                 "-DANDROID_PIE=ON",
-                "-DCMAKE_C_COMPILER_FRONTEND_VARIANT=GNU",
-                "-DCMAKE_CXX_COMPILER_FRONTEND_VARIANT=GNU",
                 "-H${workspaceRoot}",
-                "-B${workspaceRoot}/build/android-armv7",
-                "-DCMAKE_INSTALL_PREFIX=${workspaceRoot}/build/android-armv7/install",
-                "-GNinja"
+                "-B${workspaceRoot}/build/android-x64",
+                "-GNinja",
+                "-DCMAKE_INSTALL_PREFIX=${workspaceRoot}/build/android-x64/install",
+                "-DUSE_LTO=thin",
             ],
             "problemMatcher": []
         },
         {
-            "label": "build.android.armv7a",
+            "label": "build.android.x64",
             "command": "cmake",
             "args": [
                 "--build",
-                "${workspaceRoot}/build/android-armv7"
+                "${workspaceRoot}/build/android-x64"
             ],
             "group": "build",
             "problemMatcher": []
@@ -162,7 +185,7 @@
                 "-DANDROID_TOOLCHAIN=clang",
                 "-DANDROID_STL=c++_shared",
                 "-DANDROID_ABI=arm64-v8a",
-                "-DANDROID_PLATFORM=android-24",
+                "-DANDROID_PLATFORM=android-21",
                 "-DANDROID_PIE=ON",
                 "-DCMAKE_C_COMPILER_FRONTEND_VARIANT=GNU",
                 "-DCMAKE_CXX_COMPILER_FRONTEND_VARIANT=GNU",
@@ -171,7 +194,6 @@
                 "-GNinja",
                 "-DCMAKE_INSTALL_PREFIX=${workspaceRoot}/build/android-arm64/install",
                 "-DUSE_LTO=thin",
-                "-DANDROID_LD=lld",
             ],
             "problemMatcher": []
         },
@@ -193,6 +215,10 @@
                 "-H${workspaceRoot}",
                 "-B${workspaceRoot}/build/android-arm64-cmake",
                 "-GNinja",
+                "-DFT_DISABLE_BROTLI=1",
+                "-DFT_DISABLE_PNG=1",
+                "-DHB_BUILD_SUBSET=0",
+                "-DUSE_LTO=thin",
                 "-DCMAKE_ANDROID_NDK=${env:ANDROID_NDK}",
                 "-DCMAKE_ANDROID_NDK_TOOLCHAIN_VERSION=clang",
                 "-DCMAKE_ANDROID_STL_TYPE=c++_shared",
@@ -256,6 +282,7 @@
                 "-DUSE_LTO=thin",
                 "-DFT_DISABLE_BROTLI=1",
                 "-DFT_DISABLE_PNG=1",
+                "-DHB_BUILD_SUBSET=0",
                 "-DCMAKE_SYSTEM_PROCESSOR=armhf"
             ],
             "problemMatcher": []
@@ -288,6 +315,7 @@
                 "-DUSE_LTO=thin",
                 "-DFT_DISABLE_BROTLI=1",
                 "-DFT_DISABLE_PNG=1",
+                "-DHB_BUILD_SUBSET=0",
                 "-DCMAKE_SYSTEM_PROCESSOR=amd64"
             ],
             "problemMatcher": []
@@ -397,7 +425,6 @@
                 "-DUSE_LTO=thin",
                 "-DUSE_COMPILER_RT=0",
                 "-DCMAKE_INSTALL_PREFIX=${workspaceRoot}/build/rpi.clang/install",
-                "-DAVGLUE_EMBED=1",
                 "-DLINUX_SYSROOT=${env:RPI_SYSROOT}"
             ],
             "problemMatcher": []
@@ -563,6 +590,7 @@
                 "-DMSVC_DIR=/Volumes/dev/msvcrt-dev",
                 "-DFT_DISABLE_BROTLI=1",
                 "-DFT_DISABLE_PNG=1",
+                "-DHB_BUILD_SUBSET=0",
                 "-DCMAKE_MSVC_RUNTIME_LIBRARY=MultiThreadedDLL"
             ],
             "problemMatcher": []
@@ -590,6 +618,7 @@
                 "-DCMAKE_MSVC_RUNTIME_LIBRARY=MultiThreadedDLL",
                 "-DFT_DISABLE_BROTLI=1",
                 "-DFT_DISABLE_PNG=1",
+                "-DHB_BUILD_SUBSET=0",
                 "-GNinja"
             ],
             "problemMatcher": []

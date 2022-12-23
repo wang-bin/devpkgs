@@ -82,6 +82,7 @@ if(NOT NO_ASM AND X86MATCH GREATER "-1")
         set(BITS 32)
     endif()
 endif()
+message("ARCH:${ARCH}, ARCH_X86: ${ARCH_X86}, ARCH_AARCH64:${ARCH_AARCH64}, ARCH_X86_64:${ARCH_X86_64}")
 
 if(APPLE)
   set(ASM_PREFIX_FLAG -DPREFIX) # ass_.* => _ass_.*
@@ -172,7 +173,7 @@ set_target_properties(ass PROPERTIES
   RUNTIME_OUTPUT_NAME libass # windows
   CLEAN_DIRECT_OUTPUT 1
   #LINK_SEARCH_START_STATIC 1
-  INTERPROCEDURAL_OPTIMIZATION 1
+  #INTERPROCEDURAL_OPTIMIZATION 1 # android: cmake will force gold linker if CMAKE_ANDROID_NDK_VERSION is not set(e.g. use ndk's cmake toolchain file) or less than 22
   LINK_DEF_FILE_FLAG libass/libass.sym # win def only? no effect?
 )
 

@@ -47,6 +47,8 @@ add_custom_command(TARGET gen-brackets-type-tab
 
 add_custom_target(gen_tab
   DEPENDS gen-unicode-version gen-bidi-type-tab gen-joining-type-tab gen-arabic-shaping-tab gen-mirroring-tab
+    gen-brackets-tab
+    gen-brackets-type-tab
 )
 
 include_directories(

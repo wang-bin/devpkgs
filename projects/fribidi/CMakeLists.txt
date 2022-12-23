@@ -18,7 +18,7 @@ set(FRIBIDI_MICRO_VERSION "${VERSION_MICRO}")
 set(FRIBIDI_INTERFACE_VERSION 4)
 
 option(FRIBIDI_SHARED "build shared lib" OFF) # win: dllimport function are not allowed to have a body (fribidi_shape_arabic)
-
+option(FRIBIDI_GENTAB "build gen tab" OFF)
 include(CheckIncludeFile)
 include(CheckTypeSize)
 
@@ -33,15 +33,16 @@ CONFIGURE_FILE(
 add_definitions(-DHAVE_CONFIG_H)
 
 include(fribidi-lib.cmake)
-if(CMAKE_CROSSCOMPILING)
-  if(NOT EXISTS "${SRC_DIR}/gen.tab/fribidi-unicode-version.h")
-    MESSAGE(WARNING "Run host build to generate intermedia files first. 'make gen_tab' or 'ninja gen_tab'")
-  endif()
-else()
+message("CMAKE_CROSSCOMPILING: ${CMAKE_CROSSCOMPILING}")
+if(FRIBIDI_GENTAB)
   include(fribidi-gen.cmake)
   foreach(tgt ${FRIBIDI_TARGETS})
     add_dependencies(${tgt} gen_tab)
   endforeach()
+else()
+  if(NOT EXISTS "${SRC_DIR}/gen.tab/fribidi-unicode-version.h")
+    MESSAGE(WARNING "Run host build to generate intermedia files first. 'make gen_tab'")
+  endif()
 endif()
 
 foreach(tgt ${FRIBIDI_TARGETS})

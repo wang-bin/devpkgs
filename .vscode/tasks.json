@@ -386,35 +386,6 @@
             "problemMatcher": []
         },
         {
-            "label": "config.centos7.gnu",
-            "args": [
-                "-DCMAKE_TOOLCHAIN_FILE=${workspaceRoot}/cmake/tools/centos.clang.cmake",
-                "-DCMAKE_BUILD_TYPE=MinSizeRel",
-                "-H${workspaceRoot}",
-                "-B${workspaceRoot}/build/centos7.gnu",
-                "-GNinja",
-                "-DUSE_LTO=thin",
-                "-DUSE_COMPILER_RT=0",
-                "-DUSE_LIBCXX=0",
-                "-DCMAKE_INSTALL_PREFIX=${workspaceRoot}/build/centos7.gnu/install",
-                "-DCMAKE_CROSSCOMPILING=1",
-                "-DCMAKE_C_COMPILER=clang-15",
-                "-DLINUX_SYSROOT=${env:CENTOS_SYSROOT}",
-                "-DCMAKE_SYSTEM_PROCESSOR=amd64"
-            ],
-            "problemMatcher": []
-        },
-        {
-            "label": "build.centos7.gnu",
-            "command": "cmake",
-            "args": [
-                "--build",
-                "${workspaceRoot}/build/centos7.gnu"
-            ],
-            "group": "build",
-            "problemMatcher": []
-        },
-        {
             "label": "config.rpi.clang",
             "args": [
                 "-DCMAKE_TOOLCHAIN_FILE=${workspaceRoot}/cmake/tools/rpi.clang.cmake",
@@ -449,7 +420,10 @@
                 "-DUSE_LTO=thin",
                 "-DCMAKE_TOOLCHAIN_FILE=${workspaceRoot}/cmake/tools/llvm-mingw.cmake",
                 "-DCMAKE_CROSSCOMPILING=1",
-                "-DCMAKE_SYSTEM_PROCESSOR=x86_64"
+                "-DCMAKE_SYSTEM_PROCESSOR=x86_64",
+                "-DFT_DISABLE_BROTLI=1",
+                "-DFT_DISABLE_PNG=1",
+                "-DHB_BUILD_SUBSET=0",
             ],
             "problemMatcher": []
         },
@@ -459,6 +433,32 @@
             "args": [
                 "--build",
                 "${workspaceRoot}/build/mingw64"
+            ],
+            "group": "build"
+        },
+        {
+            "label": "config.arm64mingw",
+            "args": [
+                "-DCMAKE_BUILD_TYPE=MinSizeRel",
+                "-H${workspaceRoot}",
+                "-B${workspaceRoot}/build/arm64mingw",
+                "-GNinja",
+                "-DUSE_LTO=thin",
+                "-DCMAKE_TOOLCHAIN_FILE=${workspaceRoot}/cmake/tools/llvm-mingw.cmake",
+                "-DCMAKE_CROSSCOMPILING=1",
+                "-DCMAKE_SYSTEM_PROCESSOR=arm64",
+                "-DFT_DISABLE_BROTLI=1",
+                "-DFT_DISABLE_PNG=1",
+                "-DHB_BUILD_SUBSET=0",
+            ],
+            "problemMatcher": []
+        },
+        {
+            "label": "build.arm64mingw",
+            "command": "cmake",
+            "args": [
+                "--build",
+                "${workspaceRoot}/build/arm64mingw"
             ],
             "group": "build"
         },

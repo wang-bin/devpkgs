@@ -61,6 +61,8 @@ set(ARCH_X86_64 0)
 # System architecture detection
 if(APPLE AND CMAKE_OSX_ARCHITECTURES)
   string(TOLOWER "${CMAKE_OSX_ARCHITECTURES}" ARCH)
+elseif(CMAKE_C_COMPILER_ARCHITECTURE_ID) # msvc
+  string(TOLOWER "${CMAKE_C_COMPILER_ARCHITECTURE_ID}" ARCH)
 else()
   string(TOLOWER "${CMAKE_SYSTEM_PROCESSOR}" ARCH)
 endif()
@@ -166,11 +168,19 @@ else()
   message(WARNING "libass will not built with asm")
 endif()
 
+if(MSVC)
+  set(RUNTIME_NAME libass)
+else() # mingw
+  set(RUNTIME_NAME ass)
+endif()
+if(MINGW)
+  set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -Wl,-Bstatic -lwinpthread -Wl,-Bdynamic") # or -l:libwinpthread.a will looks up the given name regardless dynamic/static
+endif()
 set_target_properties(ass PROPERTIES
   VERSION ${PROJECT_VERSION}
   SOVERSION ${SO_VERSION}
   OUTPUT_NAME ass
-  RUNTIME_OUTPUT_NAME libass # windows
+  RUNTIME_OUTPUT_NAME ${RUNTIME_NAME} # windows msvc, mingw
   CLEAN_DIRECT_OUTPUT 1
   #LINK_SEARCH_START_STATIC 1
   #INTERPROCEDURAL_OPTIMIZATION 1 # android: cmake will force gold linker if CMAKE_ANDROID_NDK_VERSION is not set(e.g. use ndk's cmake toolchain file) or less than 22

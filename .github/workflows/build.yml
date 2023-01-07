@@ -24,7 +24,9 @@ jobs:
    #   run: sudo xcode-select -s /Applications/Xcode_12.4.app
     - name: Create Build Environment
       shell: bash
-      run: brew install ninja nasm
+      run: |
+        brew install ninja nasm
+        brew uninstall --ignore-dependencies harfbuzz
     - name: Build for x86_64 # native build first
       env:
         ARCH: x86_64

@@ -14,7 +14,7 @@
         {
             "label": "config.host",
             "args": [
-                "-DCMAKE_BUILD_TYPE=RelWithDebInfo",
+                "-DCMAKE_BUILD_TYPE=MinSizeRel",
                 "-H${workspaceRoot}",
                 "-B${workspaceRoot}/build/host",
                 "-GNinja",
@@ -128,12 +128,12 @@
                 "-H${workspaceRoot}",
                 "-B${workspaceRoot}/build/iOS.device",
                 "-GNinja",
-                "-DCMAKE_SYSTEM_NAME=Darwin", // explicitly set system name will enable CMAKE_CROSSCOMPILING
-                "-DCMAKE_OSX_SYSROOT=iphoneos",
+                "-DCMAKE_SYSTEM_NAME=iOS", // explicitly set system name will enable CMAKE_CROSSCOMPILING
+                //"-DCMAKE_OSX_SYSROOT=iphoneos",
                 //"-DCMAKE_TOOLCHAIN_FILE=${workspaceRoot}/cmake/tools/ios.cmake",
                 "-DCMAKE_INSTALL_PREFIX=${workspaceRoot}/build/iOS.device/install",
                 "-DCMAKE_OSX_ARCHITECTURES=arm64",
-                "-DIOS_ARCH=arm64",
+                //"-DIOS_ARCH=arm64",
                 "-DHB_IOS=1",
                 "-DIOS_BITCODE=0"
             ],

@@ -23,6 +23,7 @@ if(POLICY CMP0063) # visibility. since 3.3
 endif()
 if(POLICY CMP0069) # lto
   cmake_policy(SET CMP0069 NEW)
+  set(CMAKE_POLICY_DEFAULT_CMP0069 NEW)
 endif()
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 set(CMAKE_C_VISIBILITY_PRESET hidden)
@@ -56,3 +57,11 @@ add_subdirectory(projects)
 set(SNAPPY_BUILD_TESTS 0)
 set(SNAPPY_BUILD_BENCHMARKS 0)
 add_subdirectory(src/snappy)
+
+if(WIN32)
+  add_subdirectory(src/zlib)
+endif()
+
+if(WINDOWS_DESKTOP OR (APPLE AND NOT IOS AND NOT MACCATALYST))
+  add_subdirectory(src/glfw)
+endif()

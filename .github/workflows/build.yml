@@ -112,7 +112,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        config: [MinSizeRel,RelWithDebInfo]
+        config: [MinSizeRel]
     steps:
     - uses: actions/checkout@v3
       with:
@@ -180,16 +180,16 @@ jobs:
         cmake -DHB_BUILD_SUBSET=0 -DUSE_LTO=1 -DFT_DISABLE_BROTLI=1 -DFT_DISABLE_PNG=1  -DCMAKE_SYSTEM_PROCESSOR=${{ env.ARCH }} -DCMAKE_SYSTEM_VERSION="6.0" -GNinja  -Bbuild/${{ env.ARCH }} -DCMAKE_BUILD_TYPE=${{ matrix.config }} -DCMAKE_INSTALL_PREFIX=install/${{ env.ARCH }} -DCMAKE_VERBOSE_MAKEFILE=1 .
         cmake --build build/${{ env.ARCH }}
         cmake --install build/${{ env.ARCH }}
-#    - uses: ilammy/msvc-dev-cmd@v1
-#      with:
-#        arch: amd64_arm64
-#    - name: Build for win arm64 # gas-preprocessor?
-#      env:
-#        ARCH: arm64
-#      run: |
-#        cmake -DHB_BUILD_SUBSET=0 -DUSE_LTO=1 -DFT_DISABLE_BROTLI=1 -DFT_DISABLE_PNG=1 -DCMAKE_SYSTEM_NAME=Windows -DCMAKE_SYSTEM_PROCESSOR=${{ env.ARCH }} -GNinja  -Bbuild/${{ env.ARCH }} -DCMAKE_BUILD_TYPE=${{ matrix.config }} -DCMAKE_INSTALL_PREFIX=install/${{ env.ARCH }} -DCMAKE_VERBOSE_MAKEFILE=1 .
-#        cmake --build build/${{ env.ARCH }}
-#        cmake --install build/${{ env.ARCH }}
+    - uses: ilammy/msvc-dev-cmd@v1
+      with:
+        arch: amd64_arm64
+    - name: Build for win arm64
+      env:
+        ARCH: arm64
+      run: |
+        cmake -DHB_BUILD_SUBSET=0 -DUSE_LTO=1 -DFT_DISABLE_BROTLI=1 -DFT_DISABLE_PNG=1 -DCMAKE_SYSTEM_NAME=Windows -DCMAKE_SYSTEM_PROCESSOR=${{ env.ARCH }} -GNinja  -Bbuild/${{ env.ARCH }} -DCMAKE_BUILD_TYPE=${{ matrix.config }} -DCMAKE_INSTALL_PREFIX=install/${{ env.ARCH }} -DCMAKE_VERBOSE_MAKEFILE=1 .
+        cmake --build build/${{ env.ARCH }}
+        cmake --install build/${{ env.ARCH }}
     - name: Make SDK
       shell: bash
       run: 7z a devpkgs-${{ env.TARGET_OS }}-${{ matrix.config }}-vs2022.7z install
@@ -225,19 +225,19 @@ jobs:
       env:
         ARCH: x64
       run: |
-        cmake -DHB_BUILD_SUBSET=0 -DFT_DISABLE_BROTLI=1 -DFT_DISABLE_PNG=1  -DCMAKE_SYSTEM_PROCESSOR=${{ env.ARCH }} -DCMAKE_SYSTEM_NAME=WindowsStore -DCMAKE_SYSTEM_VERSION="10.0" -GNinja  -Bbuild/${{ env.ARCH }} -DCMAKE_BUILD_TYPE=${{ matrix.config }} -DCMAKE_INSTALL_PREFIX=install/${{ env.ARCH }} -DCMAKE_VERBOSE_MAKEFILE=1 .
+        cmake -DHB_BUILD_SUBSET=0 -DUSE_LTO=1 -DFT_DISABLE_BROTLI=1 -DFT_DISABLE_PNG=1  -DCMAKE_SYSTEM_PROCESSOR=${{ env.ARCH }} -DCMAKE_SYSTEM_NAME=WindowsStore -DCMAKE_SYSTEM_VERSION="10.0" -GNinja  -Bbuild/${{ env.ARCH }} -DCMAKE_BUILD_TYPE=${{ matrix.config }} -DCMAKE_INSTALL_PREFIX=install/${{ env.ARCH }} -DCMAKE_VERBOSE_MAKEFILE=1 .
         cmake --build build/${{ env.ARCH }}
         cmake --install build/${{ env.ARCH }}
-#    - uses: ilammy/msvc-dev-cmd@v1
-#      with:
-#        arch: amd64_arm64
-#    - name: Build for uwp arm64
-#      env:
-#        ARCH: arm64
-#      run: |
-#        cmake -DHB_BUILD_SUBSET=0 -DUSE_LTO=1 -DFT_DISABLE_BROTLI=1 -DFT_DISABLE_PNG=1  -DCMAKE_SYSTEM_PROCESSOR=${{ env.ARCH }} -DCMAKE_SYSTEM_NAME=WindowsStore -DCMAKE_SYSTEM_VERSION="10.0" -GNinja  -Bbuild/${{ env.ARCH }} -DCMAKE_BUILD_TYPE=${{ matrix.config }} -DCMAKE_INSTALL_PREFIX=install/${{ env.ARCH }} -DCMAKE_VERBOSE_MAKEFILE=1 .
-#        cmake --build build/${{ env.ARCH }}
-#        cmake --install build/${{ env.ARCH }}
+    - uses: ilammy/msvc-dev-cmd@v1
+      with:
+        arch: amd64_arm64
+    - name: Build for uwp arm64
+      env:
+        ARCH: arm64
+      run: |
+        cmake -DHB_BUILD_SUBSET=0 -DUSE_LTO=1 -DFT_DISABLE_BROTLI=1 -DFT_DISABLE_PNG=1  -DCMAKE_SYSTEM_PROCESSOR=${{ env.ARCH }} -DCMAKE_SYSTEM_NAME=WindowsStore -DCMAKE_SYSTEM_VERSION="10.0" -GNinja  -Bbuild/${{ env.ARCH }} -DCMAKE_BUILD_TYPE=${{ matrix.config }} -DCMAKE_INSTALL_PREFIX=install/${{ env.ARCH }} -DCMAKE_VERBOSE_MAKEFILE=1 .
+        cmake --build build/${{ env.ARCH }}
+        cmake --install build/${{ env.ARCH }}
     - name: Make SDK
       shell: bash
       run: 7z a devpkgs-${{ env.TARGET_OS }}-${{ matrix.config }}-vs2022.7z install

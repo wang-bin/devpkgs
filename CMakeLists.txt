@@ -49,3 +49,7 @@ add_subdirectory(src/freetype)
 add_subdirectory(src/harfbuzz)
 
 add_subdirectory(projects)
+
+#set(SNAPPY_BUILD_TESTS 0)
+#set(SNAPPY_BUILD_BENCHMARKS 0)
+add_subdirectory(src/snappy)

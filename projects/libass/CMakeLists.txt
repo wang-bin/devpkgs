@@ -187,8 +187,6 @@ set_target_properties(ass PROPERTIES
 include_directories(
   ${SRC_DIR}/libass
   ${PROJECT_BINARY_DIR}
-  ${CMAKE_INSTALL_PREFIX}/include
-  ${CMAKE_INSTALL_PREFIX}/include/fribidi
 )
 
 check_include_file(dirent.h HAVE_DIRENT_H)
@@ -199,45 +197,20 @@ endif()
 if(TARGET fribidi_static)
     list(APPEND EXTRA_LIBS fribidi_static)
 else()
-    find_file(FRIBIDI_CMAKE fribidi.cmake HINTS ${CMAKE_INSTALL_PREFIX}/lib/cmake)
-    message("FRIBIDI_CMAKE: ${FRIBIDI_CMAKE}")
-    find_path(FRIBIDI_INCLUDE_DIR
-              NAMES fribidi.h
-              HINTS ${CMAKE_INSTALL_PREFIX}
-              PATH_SUFFIXES fribidi)
-    include_directories(${FRIBIDI_INCLUDE_DIR})
-    if(EXISTS ${FRIBIDI_CMAKE})
-      include(${FRIBIDI_CMAKE})
-      set(FRIBIDI_LIB fribidi_static)
-    endif()
-    list(APPEND EXTRA_LIBS "${FRIBIDI_LIB}")
+    find_package(fribidi REQUIRED)
+    target_link_libraries(ass PRIVATE fribidi_static)
 endif()
 if(TARGET freetype)
     list(APPEND EXTRA_LIBS freetype)
 else()
-    find_library(FREETYPE_LIBRARIES freetype HINTS "${CMAKE_INSTALL_PREFIX}/lib")
-    if(FREETYPE_LIBRARIES)
-      include_directories(${CMAKE_INSTALL_PREFIX}/include/freetype2)
-    else()
-      find_package(freetype)
-      message(STATUS "freetype: ${FREETYPE_LIBRARIES}")
-      include_directories(${FREETYPE_INCLUDE_DIRS})
-    endif()
-    list(APPEND EXTRA_LIBS "${FREETYPE_LIBRARIES}")
+    find_package(Freetype REQUIRED)
+    target_link_libraries(ass PRIVATE Freetype::Freetype)
 endif()
 if(TARGET harfbuzz)
     list(APPEND EXTRA_LIBS harfbuzz)
 else()
-    find_library(HARFBUZZ_LIBRARIES harfbuzz HINTS "${CMAKE_INSTALL_PREFIX}/lib")
-    find_path(HARFBUZZ_INCLUDE_DIR
-            NAMES hb.h
-            HINTS ${CMAKE_INSTALL_PREFIX}
-            PATHS ${CMAKE_INSTALL_PREFIX}
-            PATH_SUFFIXES harfbuzz)
-    if(HARFBUZZ_LIBRARIES)
-        include_directories(${HARFBUZZ_INCLUDE_DIR} ${CMAKE_INSTALL_PREFIX}/include/harfbuzz)
-    endif()
-    list(APPEND EXTRA_LIBS "${HARFBUZZ_LIBRARIES}")
+    find_package(harfbuzz REQUIRED)
+    target_link_libraries(ass PRIVATE harfbuzz::harfbuzz)
 endif()
 
 if(WIN32)
@@ -269,14 +242,13 @@ if(WIN32)
   install(FILES ${PROJECT_BINARY_DIR}/${PROJECT_NAME}.def DESTINATION lib)
 endif()
 
-link_directories("${CMAKE_INSTALL_PREFIX}/lib")
 target_link_libraries(ass LINK_PRIVATE "${EXTRA_LIBS}")
 file(GLOB HEADERS "libass/ass.h" "libass/ass_types.h")
 install(FILES ${HEADERS} DESTINATION include/ass)
 install(TARGETS ass EXPORT ${PROJECT_NAME}
-  RUNTIME DESTINATION bin # *.dll
-  LIBRARY DESTINATION lib
-  ARCHIVE DESTINATION lib)
+  RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR} # *.dll
+  LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+  ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR})
 install(EXPORT ${PROJECT_NAME} DESTINATION lib/cmake)
 
 set(prefix ${CMAKE_INSTALL_PREFIX})

@@ -19,7 +19,6 @@ if(FRIBIDI_SHARED)
         OUTPUT_NAME "fribidi"
         CLEAN_DIRECT_OUTPUT 1
         PUBLIC_HEADER "${HEADERS}"
-        INTERPROCEDURAL_OPTIMIZATION 1 # TODO: option
         #LINK_DEF_FILE_FLAG ${SRC_DIR}/lib/fribidi.def # TODO:
         )
     list(APPEND FRIBIDI_TARGETS fribidi_shared)

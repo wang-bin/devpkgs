@@ -12,8 +12,8 @@
 	url = https://gitlab.freedesktop.org/freetype/freetype.git
 [submodule "src/libass"]
 	path = src/libass
-	url = ../libass
-	branch = wang
+	url = https://github.com/libass/libass.git
+	branch = master
 [submodule "src/snappy"]
 	path = src/snappy
 	url = https://github.com/google/snappy.git

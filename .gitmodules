@@ -16,10 +16,13 @@
 	branch = master
 [submodule "src/snappy"]
 	path = src/snappy
-	url = https://github.com/google/snappy.git
+	url = ../snappy
 [submodule "src/zlib"]
 	path = src/zlib
 	url = https://github.com/madler/zlib.git
 [submodule "src/glfw"]
 	path = src/glfw
 	url = https://github.com/glfw/glfw.git
+[submodule "src/mfx_dispatch"]
+	path = src/mfx_dispatch
+	url = ../mfx_dispatch

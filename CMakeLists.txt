@@ -58,6 +58,9 @@ set(FT_DISABLE_PNG 1)
 add_subdirectory(src/freetype)
 
 set(HB_BUILD_SUBSET 0)
+if(IOS)
+  set(HB_IOS 1)
+endif()
 add_subdirectory(src/harfbuzz)
 
 add_subdirectory(projects)
@@ -73,6 +76,11 @@ endif()
 if(WINDOWS_DESKTOP OR (APPLE AND NOT IOS AND NOT MACCATALYST))
   add_subdirectory(src/glfw)
 endif()
+
+if((WINDOWS_DESKTOP OR LINUX) AND (ARCH MATCHES "[aA][mM][dD]64" OR ARCH MATCHES "[xX].*64" OR ARCH MATCHES 86))
+  add_subdirectory(src/mfx_dispatch)
+endif()
+
 
 # android INTERPROCEDURAL_OPTIMIZATION: cmake will force gold linker if CMAKE_ANDROID_NDK_VERSION is not set(e.g. use ndk's cmake toolchain file) or less than 22
 foreach(tgt freetype harfbuzz fribidi_shared fribidi_static ass snappy zlib zlibstatic glfw)

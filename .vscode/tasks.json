@@ -21,6 +21,7 @@
                 //"-DCMAKE_OSX_DEPLOYMENT_TARGET=10.9",
                 //"-DCMAKE_OSX_ARCHITECTURES=x86_64",
                 "-DFRIBIDI_GENTAB=1",
+                "-DMIN_SIZE=0",
                 "-DCMAKE_INSTALL_PREFIX=${workspaceRoot}/build/host/install"
             ],
             "problemMatcher": []
@@ -295,7 +296,7 @@
             "label": "config.linux64.clang",
             "args": [
                 "-DCMAKE_TOOLCHAIN_FILE=${workspaceRoot}/cmake/tools/linux.clang.cmake",
-                "-DCMAKE_BUILD_TYPE=Release",
+                "-DCMAKE_BUILD_TYPE=MinSizeRel",
                 "-H${workspaceRoot}",
                 "-B${workspaceRoot}/build/linux64.clang",
                 "-GNinja",
@@ -305,9 +306,6 @@
                 "-DCMAKE_CROSSCOMPILING=1",
                 //"-DCMAKE_C_COMPILER=clang-15",
                 "-DLINUX_SYSROOT=${env:LINUX_SYSROOT}",
-                "-DFT_DISABLE_BROTLI=1",
-                "-DFT_DISABLE_PNG=1",
-                "-DHB_BUILD_SUBSET=0",
                 "-DCMAKE_SYSTEM_PROCESSOR=amd64"
             ],
             "problemMatcher": []
@@ -326,14 +324,17 @@
             "label": "config.linux64.clang.gnustl",
             "args": [
                 "-DCMAKE_TOOLCHAIN_FILE=${workspaceRoot}/cmake/tools/linux.clang.cmake",
-                "-DCMAKE_BUILD_TYPE=RelWithDebInfo",
+                "-DCMAKE_SYSTEM_PROCESSOR=x64",
+                "-DCMAKE_BUILD_TYPE=MinSizeRel",
                 "-H${workspaceRoot}",
                 "-B${workspaceRoot}/build/linux64.clang.gnustl",
-                "-DLINUX_SYSROOT=${env:HOME}/dev/linux/sysroot",
+                "-DLINUX_SYSROOT=${env:LINUX_SYSROOT}",
                 "-GNinja",
+                "-DCMAKE_INSTALL_PREFIX=${workspaceRoot}/build/linux64.clang.gnustl/install",
                 "-DUSE_COMPILER_RT=0",
                 "-DUSE_LIBCXX=OFF",
-                "-DUSE_STDCXX=8"
+                "-DBUILD_LIBASS=0",
+                //"-DUSE_STDCXX=8"
             ],
             "problemMatcher": []
         },

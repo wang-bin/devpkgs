@@ -270,6 +270,59 @@ jobs:
         name: devpkgs-${{ env.TARGET_OS }}-${{ matrix.config }}
         path: devpkgs-${{ env.TARGET_OS }}-${{ matrix.config }}.7z
 
+  Linux_gnustl:
+    runs-on: ubuntu-latest
+    env:
+      TARGET_OS: linux
+    strategy:
+      fail-fast: false
+      matrix:
+        config: [MinSizeRel]
+    steps:
+    - uses: actions/checkout@v3
+      with:
+        submodules: 'recursive'
+    - name: 'Restore sysroot cache'
+      id: sysroot-cache
+      uses: actions/cache@v3
+      with:
+        path: ./sysroot
+        key: sysroot-${{ env.TARGET_OS }}-${{ secrets.LINUX_SYSROOT_ID }}
+    - name: Create Build Environment
+      shell: bash
+      env:
+         SYSROOT_CACHE_HIT: ${{ steps.sysroot-cache.outputs.cache-hit }}
+      run: |
+        if [[ "$SYSROOT_CACHE_HIT" != "true" ]]; then
+          wget https://sourceforge.net/projects/avbuild/files/${TARGET_OS}/${TARGET_OS/r*pi/rpi}-sysroot.tar.xz/download -O sysroot.tar.xz
+          tar Jxf sysroot.tar.xz
+        fi
+        wget https://apt.llvm.org/llvm.sh
+        chmod +x llvm.sh
+        sudo ./llvm.sh ${LLVM_VER}
+        #bash -c "$(wget -O - https://apt.llvm.org/llvm.sh)"
+        sudo apt install -y cmake ninja-build nasm
+    - name: Build host gen_tab # native build first
+      shell: bash
+      run: |
+        cmake -DFRIBIDI_GENTAB=1 -Bbuild/host -DCMAKE_VERBOSE_MAKEFILE=1 -DCMAKE_BUILD_TYPE=${{ matrix.config }}
+        cmake --build build/host -t gen_tab
+    - name: Build for x64
+      env:
+        ARCH: amd64
+      shell: bash
+      run: |
+        cmake -DBUILD_LIBASS=0 -DUSE_LIBCXX=0 -DCMAKE_SYSTEM_PROCESSOR=${ARCH} -DCMAKE_TOOLCHAIN_FILE=$PWD/cmake/tools/linux.clang.cmake -DLINUX_SYSROOT=$PWD/sysroot -GNinja -H$PWD -Bbuild/${ARCH} -DCMAKE_BUILD_TYPE=${{ matrix.config }} -DCMAKE_INSTALL_PREFIX=install/${ARCH} -DCMAKE_VERBOSE_MAKEFILE=1
+        cmake --build build/${{ env.ARCH }}
+        cmake --install build/${{ env.ARCH }}
+    - name: Make SDK
+      shell: bash
+      run: 7z a devpkgs-${{ env.TARGET_OS }}-${{ matrix.config }}-gnustl.7z install
+    - name: Archieve SDK
+      uses: actions/upload-artifact@v3
+      with:
+        name: devpkgs-${{ env.TARGET_OS }}-${{ matrix.config }}-gnustl
+        path: devpkgs-${{ env.TARGET_OS }}-${{ matrix.config }}-gnustl.7z
 
   Android:
     runs-on: ubuntu-latest

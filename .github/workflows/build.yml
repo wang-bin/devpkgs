@@ -5,6 +5,7 @@ on:
 
 env:
   NINJA_STATUS: '[%f/%t %e %r]'
+  LLVM_VER: 16
 
 jobs:
   macOS:
@@ -54,55 +55,6 @@ jobs:
       with:
         name: devpkgs-${{ env.TARGET_OS }}-${{ matrix.config }}
         path: devpkgs-${{ env.TARGET_OS }}-${{ matrix.config }}.tar.xz
-
-
-#  macCatalyst:
-#    runs-on: macos-12
-#    env:
-#      TARGET_OS: 'macCatalyst'
-#    strategy:
-#      fail-fast: false
-#      matrix:
-#        config: [MinSizeRel]
-#    steps:
-#    - uses: actions/checkout@v3
-#      with:
-#        submodules: 'recursive'
-#   # - name: Setup Xcode
-#   #   run: sudo xcode-select -s /Applications/Xcode_12.4.app
-#    - name: Create Build Environment
-#      shell: bash
-#      run: brew install ninja nasm
-#    - name: Build host gen_tab # native build first
-#      shell: bash
-#      run: |
-#        cmake -DFRIBIDI_GENTAB=1 -Bbuild/host -DCMAKE_VERBOSE_MAKEFILE=1 -DCMAKE_BUILD_TYPE=${{ matrix.config }} # no dSYM for lto, dsymutil: no debug symbols in executable (-arch x86_64)
-#        cmake --build build/host -t gen_tab
-#    - name: Build for x86_64
-#      env:
-#        ARCH: x86_64
-#      shell: bash
-#      run: |
-#        cmake -DCMAKE_TOOLCHAIN_FILE=$PWD/cmake/tools/macCatalyst.cmake -DUSE_BITCODE=0 -GNinja -DCMAKE_OSX_ARCHITECTURES=${{ env.ARCH }} -Bbuild/${{ env.ARCH }} -DCMAKE_VERBOSE_MAKEFILE=1 -DCMAKE_BUILD_TYPE=${{ matrix.config }} -DCMAKE_INSTALL_PREFIX=install/${{ env.ARCH }} # no dSYM for lto, dsymutil: no debug symbols in executable (-arch x86_64)
-#        cmake --build build/${{ env.ARCH }}
-#        cmake --install build/${{ env.ARCH }}
-#    - name: Build for arm64
-#      env:
-#        ARCH: arm64
-#      shell: bash
-#      run: |
-#        cmake -DCMAKE_TOOLCHAIN_FILE=$PWD/cmake/tools/macCatalyst.cmake -DUSE_BITCODE=0 -GNinja -DCMAKE_OSX_ARCHITECTURES=${{ env.ARCH }} -Bbuild/${{ env.ARCH }} -DCMAKE_VERBOSE_MAKEFILE=1 -DCMAKE_BUILD_TYPE=${{ matrix.config }} -DCMAKE_INSTALL_PREFIX=install/${{ env.ARCH }} # no dSYM for lto, dsymutil: no debug symbols in executable (-arch x86_64)
-#        cmake --build build/${{ env.ARCH }}
-#        cmake --install build/${{ env.ARCH }}
-#    - name: Make SDK
-#      shell: bash
-#      run: |
-#        tar Jcvf devpkgs-${{ env.TARGET_OS }}-${{ matrix.config }}.tar.xz install
-#    - name: Archieve SDK
-#      uses: actions/upload-artifact@v3
-#      with:
-#        name: devpkgs-${{ env.TARGET_OS }}-${{ matrix.config }}
-#        path: devpkgs-${{ env.TARGET_OS }}-${{ matrix.config }}.tar.xz
 
 
   iOS:
@@ -246,6 +198,77 @@ jobs:
       with:
         name: devpkgs-vs2022-${{ env.TARGET_OS }}-${{ matrix.config }}
         path: devpkgs-${{ env.TARGET_OS }}-${{ matrix.config }}-vs2022.7z
+
+
+  Linux_libcxx:
+    runs-on: ubuntu-latest
+    env:
+      TARGET_OS: linux
+    strategy:
+      fail-fast: false
+      matrix:
+        config: [MinSizeRel]
+    steps:
+    - uses: actions/checkout@v3
+      with:
+        submodules: 'recursive'
+    - name: 'Restore sysroot cache'
+      id: sysroot-cache
+      uses: actions/cache@v3
+      with:
+        path: ./sysroot
+        key: sysroot-${{ env.TARGET_OS }}-${{ secrets.LINUX_SYSROOT_ID }}
+    - name: Create Build Environment
+      shell: bash
+      env:
+         SYSROOT_CACHE_HIT: ${{ steps.sysroot-cache.outputs.cache-hit }}
+      run: |
+        if [[ "$SYSROOT_CACHE_HIT" != "true" ]]; then
+          wget https://sourceforge.net/projects/avbuild/files/${TARGET_OS}/${TARGET_OS/r*pi/rpi}-sysroot.tar.xz/download -O sysroot.tar.xz
+          tar Jxf sysroot.tar.xz
+        fi
+        wget https://apt.llvm.org/llvm.sh
+        chmod +x llvm.sh
+        sudo ./llvm.sh ${LLVM_VER}
+        #bash -c "$(wget -O - https://apt.llvm.org/llvm.sh)"
+        sudo apt install -y cmake ninja-build nasm libc++-${LLVM_VER}-dev libc++abi-${LLVM_VER}-dev
+    - name: Build host gen_tab # native build first
+      shell: bash
+      run: |
+        cmake -DFRIBIDI_GENTAB=1 -Bbuild/host -DCMAKE_VERBOSE_MAKEFILE=1 -DCMAKE_BUILD_TYPE=${{ matrix.config }}
+        cmake --build build/host -t gen_tab
+    - name: Build for x64
+      env:
+        ARCH: amd64
+      shell: bash
+      run: |
+        cmake -DBUILD_LIBASS=0 -DUSE_LIBCXX=1 -DCMAKE_SYSTEM_PROCESSOR=${ARCH} -DCMAKE_TOOLCHAIN_FILE=$PWD/cmake/tools/linux.clang.cmake -DLINUX_SYSROOT=$PWD/sysroot -GNinja -H$PWD -Bbuild/${ARCH} -DCMAKE_BUILD_TYPE=${{ matrix.config }} -DCMAKE_INSTALL_PREFIX=install/${ARCH} -DCMAKE_VERBOSE_MAKEFILE=1
+        cmake --build build/${{ env.ARCH }}
+        cmake --install build/${{ env.ARCH }}
+    - name: Build for arm64
+      env:
+        ARCH: arm64
+      shell: bash
+      run: |
+        cmake -DBUILD_LIBASS=0 -DUSE_LIBCXX=1 -DCMAKE_SYSTEM_PROCESSOR=${ARCH} -DCMAKE_TOOLCHAIN_FILE=$PWD/cmake/tools/linux.clang.cmake -DLINUX_SYSROOT=$PWD/sysroot -GNinja -H$PWD -Bbuild/${ARCH} -DCMAKE_BUILD_TYPE=${{ matrix.config }} -DCMAKE_INSTALL_PREFIX=install/${ARCH} -DCMAKE_VERBOSE_MAKEFILE=1
+        cmake --build build/${{ env.ARCH }}
+        cmake --install build/${{ env.ARCH }}
+    - name: Build for armhf
+      env:
+        ARCH: armhf
+      shell: bash
+      run: |
+        cmake -DBUILD_LIBASS=0 -DUSE_LIBCXX=1 -DCMAKE_SYSTEM_PROCESSOR=${ARCH} -DCMAKE_TOOLCHAIN_FILE=$PWD/cmake/tools/linux.clang.cmake -DLINUX_SYSROOT=$PWD/sysroot -GNinja -H$PWD -Bbuild/${ARCH} -DCMAKE_BUILD_TYPE=${{ matrix.config }} -DCMAKE_INSTALL_PREFIX=install/${ARCH} -DCMAKE_VERBOSE_MAKEFILE=1
+        cmake --build build/${{ env.ARCH }}
+        cmake --install build/${{ env.ARCH }}
+    - name: Make SDK
+      shell: bash
+      run: 7z a devpkgs-${{ env.TARGET_OS }}-${{ matrix.config }}.7z install
+    - name: Archieve SDK
+      uses: actions/upload-artifact@v3
+      with:
+        name: devpkgs-${{ env.TARGET_OS }}-${{ matrix.config }}
+        path: devpkgs-${{ env.TARGET_OS }}-${{ matrix.config }}.7z
 
 
   Android:

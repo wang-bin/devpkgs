@@ -4,6 +4,7 @@ project(devpkgs C CXX ASM)
 
 option(WITH_LTO "Build with LTO" ON)
 option(WITH_LTO_STATIC "Build static lib with LTO. Worse compiler compatibility" OFF)
+option(BUILD_LIBASS "Build libass" ON)
 
 set(CMAKE_C_STANDARD 11)
 set(CMAKE_CXX_STANDARD 17)
@@ -38,7 +39,9 @@ set(CMAKE_C_VISIBILITY_PRESET hidden)
 set(CMAKE_CXX_VISIBILITY_PRESET hidden)
 set(CMAKE_VISIBILITY_INLINES_HIDDEN ON)
 
-
+# ignore homebrew. affect find_...()
+set(CMAKE_SYSTEM_IGNORE_PREFIX_PATH "/opt/homebrew;/usr/local")
+#set(CMAKE_FIND_USE_INSTALL_PREFIX 1) # find_...()
     # Always add debug flags
 if(CMAKE_BUILD_TYPE MATCHES MinSizeRel AND WITH_DEB_INFO)
   if(MSVC)
@@ -55,14 +58,16 @@ endif()
 
 set(FT_DISABLE_BROTLI 1)
 set(FT_DISABLE_PNG 1)
-add_subdirectory(src/freetype)
-
+if(BUILD_LIBASS)
+  add_subdirectory(src/freetype)
+endif()
 set(HB_BUILD_SUBSET 0)
 if(IOS)
   set(HB_IOS 1)
 endif()
-add_subdirectory(src/harfbuzz)
-
+if(BUILD_LIBASS)
+  add_subdirectory(src/harfbuzz)
+endif()
 add_subdirectory(projects)
 
 set(SNAPPY_BUILD_TESTS 0)
@@ -79,6 +84,7 @@ endif()
 
 if((WINDOWS_DESKTOP OR LINUX) AND (ARCH MATCHES "[aA][mM][dD]64" OR ARCH MATCHES "[xX].*64" OR ARCH MATCHES 86))
   add_subdirectory(src/mfx_dispatch)
+  # TODO: libmfx.pc
 endif()
 
 

@@ -1,5 +1,8 @@
 set(SRC_DIR ${CMAKE_SOURCE_DIR}/src/fribidi)
-add_subdirectory(fribidi)
-
+if(BUILD_LIBASS)
+  add_subdirectory(fribidi)
+endif()
 set(SRC_DIR ${CMAKE_SOURCE_DIR}/src/libass)
-add_subdirectory(libass)
+if(BUILD_LIBASS)
+  add_subdirectory(libass)
+endif()

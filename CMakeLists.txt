@@ -85,6 +85,11 @@ endif()
 if((WINDOWS_DESKTOP OR LINUX) AND (ARCH MATCHES "[aA][mM][dD]64" OR ARCH MATCHES "[xX].*64" OR ARCH MATCHES 86))
   add_subdirectory(src/mfx_dispatch)
   # TODO: libmfx.pc
+  set(BUILD_SHARED_LIBS OFF)
+  #if(CMAKE_CROSSCOMPILING) # onevpl tools does not support c++17, and requires rtti
+    set(BUILD_DEV_ONLY ON)
+  #endif()
+  add_subdirectory(src/oneVPL)
 endif()
 
 

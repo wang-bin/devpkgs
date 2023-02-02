@@ -26,3 +26,6 @@
 [submodule "src/mfx_dispatch"]
 	path = src/mfx_dispatch
 	url = ../mfx_dispatch
+[submodule "src/oneVPL"]
+	path = src/oneVPL
+	url = ../oneVPL

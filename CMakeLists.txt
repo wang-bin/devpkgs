@@ -5,6 +5,8 @@ project(devpkgs C CXX ASM)
 option(WITH_LTO "Build with LTO" ON)
 option(WITH_LTO_STATIC "Build static lib with LTO. Worse compiler compatibility" OFF)
 option(BUILD_LIBASS "Build libass" ON)
+option(WITH_VC_LTL "Build with VC-LTL crt for windows. Recommend to use with -DCMAKE_MSVC_RUNTIME_LIBRARY=MultiThreaded" OFF)
+set(VC_LTL_DIR "${CMAKE_CURRENT_SOURCE_DIR}/VC-LTL" CACHE STRING "VC-LTL dir")
 
 set(CMAKE_C_STANDARD 11)
 set(CMAKE_CXX_STANDARD 17)
@@ -53,6 +55,10 @@ if(CMAKE_BUILD_TYPE MATCHES MinSizeRel AND WITH_DEB_INFO)
   else()
     add_compile_options(-g)
   endif()
+endif()
+
+if(WITH_VC_LTL AND EXISTS "${VC_LTL_DIR}")
+  include("${VC_LTL_DIR}/VC-LTL helper for cmake.cmake")
 endif()
 
 

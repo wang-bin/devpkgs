@@ -6,6 +6,7 @@ on:
 env:
   NINJA_STATUS: '[%f/%t %e %r]'
   LLVM_VER: 16
+  VC_LTL_VER: 5.0.5
 
 jobs:
   macOS:
@@ -150,6 +151,62 @@ jobs:
       with:
         name: devpkgs-vs2022-${{ env.TARGET_OS }}-${{ matrix.config }}
         path: devpkgs-${{ env.TARGET_OS }}-${{ matrix.config }}-vs2022.7z
+
+
+  Windows_VS2022_LTL:
+    runs-on: windows-2022
+    env:
+      TARGET_OS: windows-desktop
+    strategy:
+      fail-fast: false
+      matrix:
+        config: [MinSizeRel]
+    steps:
+    - uses: actions/checkout@v3
+      with:
+        submodules: 'recursive'
+    - name: 'Restore dep cache'
+      id: dep-cache
+      uses: actions/cache@v3
+      with:
+        path: VC-LTL
+        key: dep-${{ env.VC_LTL_VER }}
+    - if: ${{ steps.dep-cache.outputs.cache-hit != 'true' }}
+      name: Get VC-LTL
+      shell: bash
+      run: |
+        curl -kL -o ltl.7z https://github.com/Chuyu-Team/VC-LTL5/releases/download/v${VC_LTL_VER}/VC-LTL-${VC_LTL_VER}-Binary.7z
+        7z x ltl.7z -oVC-LTL
+    - uses: seanmiddleditch/gha-setup-ninja@master
+    - uses: ilammy/setup-nasm@v1
+    - uses: ilammy/msvc-dev-cmd@v1
+      with:
+        arch: x64
+    - name: Build for win x64
+      env:
+        ARCH: x64
+      run: |
+        cmake -DFRIBIDI_GENTAB=1 -DCMAKE_MSVC_RUNTIME_LIBRARY=MultiThreaded -DWITH_VC_LTL=1 -DCMAKE_SYSTEM_PROCESSOR=${{ env.ARCH }} -DCMAKE_SYSTEM_VERSION="6.0" -GNinja  -Bbuild/${{ env.ARCH }} -DCMAKE_BUILD_TYPE=${{ matrix.config }} -DCMAKE_INSTALL_PREFIX=install/${{ env.ARCH }} -DCMAKE_VERBOSE_MAKEFILE=1 .
+        cmake --build build/${{ env.ARCH }}
+        cmake --install build/${{ env.ARCH }}
+    - uses: ilammy/msvc-dev-cmd@v1
+      with:
+        arch: amd64_x86
+    - name: Build for win x86
+      env:
+        ARCH: x86
+      run: |
+        cmake -DCMAKE_MSVC_RUNTIME_LIBRARY=MultiThreaded -DWITH_VC_LTL=1 -DCMAKE_SYSTEM_PROCESSOR=${{ env.ARCH }} -DCMAKE_SYSTEM_VERSION="6.0" -GNinja  -Bbuild/${{ env.ARCH }} -DCMAKE_BUILD_TYPE=${{ matrix.config }} -DCMAKE_INSTALL_PREFIX=install/${{ env.ARCH }} -DCMAKE_VERBOSE_MAKEFILE=1 .
+        cmake --build build/${{ env.ARCH }}
+        cmake --install build/${{ env.ARCH }}
+    - name: Make SDK
+      shell: bash
+      run: 7z a devpkgs-${{ env.TARGET_OS }}-${{ matrix.config }}-vs2022-ltl.7z install
+    - name: Archieve SDK
+      uses: actions/upload-artifact@v3
+      with:
+        name: devpkgs-vs2022-ltl-${{ env.TARGET_OS }}-${{ matrix.config }}
+        path: devpkgs-${{ env.TARGET_OS }}-${{ matrix.config }}-vs2022-ltl.7z
 
 
   UWP_VS2022:

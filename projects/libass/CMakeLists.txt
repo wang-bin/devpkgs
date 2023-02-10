@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.0)
+cmake_minimum_required(VERSION 3.15)
 
 # https://github.com/hozuki/libass-cmake/blob/master/cmake/libass.cmake
 
@@ -116,7 +116,28 @@ if(NOT NO_ASM)
 #        list(APPEND ASM_NAMES be_blur.asm) # TODO:
       endif()
   endif()
-  if(ARCH_AARCH64 AND NOT MSVC) # TODO: msvc CMAKE_ASM_COMPILER preprocess + armasm64? llvm-mingw works
+  set(HAS_ASM_COMPILER TRUE)
+  if(ARCH_AARCH64 AND CMAKE_C_COMPILER_ID MATCHES "MSVC")
+    execute_process(
+        COMMAND clang-cl --version
+        ERROR_VARIABLE CLANG_ERROR
+        OUTPUT_QUIET
+    )
+    if(NOT CLANG_ERROR)
+      set(CMAKE_ASM_COMPILER clang-cl)
+      set(CMAKE_ASM_FLAGS "--target=aarch64-pc-windows-msvc ${CMAKE_ASM_FLAGS}")
+      message("using clang-cl as arm64 asm compiler... CMAKE_ASM_FLAGS:${CMAKE_ASM_FLAGS}")
+      add_link_options(-ALIGN:8192) # blend_bitmaps.S.obj : fatal error LNK1164: section 0x4 alignment (8192) greater than /ALIGN value
+# Fix:  MSVC_RUNTIME_LIBRARY value 'MultiThreadedDLL' not known for this ASM
+      set(CMAKE_ASM_COMPILE_OPTIONS_MSVC_RUNTIME_LIBRARY_MultiThreaded         "-MT"  CACHE STRING "clang-cl arm64 asm MSVC_RUNTIME_LIBRARY flags")
+      set(CMAKE_ASM_COMPILE_OPTIONS_MSVC_RUNTIME_LIBRARY_MultiThreadedDLL      "-MD"  CACHE STRING "clang-cl arm64 asm MSVC_RUNTIME_LIBRARY flags")
+      set(CMAKE_ASM_COMPILE_OPTIONS_MSVC_RUNTIME_LIBRARY_MultiThreadedDebug    "-MTd" CACHE STRING "clang-cl arm64 asm MSVC_RUNTIME_LIBRARY flags")
+      set(CMAKE_ASM_COMPILE_OPTIONS_MSVC_RUNTIME_LIBRARY_MultiThreadedDebugDLL "-MDd" CACHE STRING "clang-cl arm64 asm MSVC_RUNTIME_LIBRARY flags")
+    else()
+      set(HAS_ASM_COMPILER FALSE)
+    endif()
+  endif()
+  if(ARCH_AARCH64 AND HAS_ASM_COMPILER)
     set(CONFIG_ASM 1)
     file(GLOB SRC_LIST_ASM "${SRC_DIR}/libass/aarch64/*.S")
     add_compile_options(${ASM_PREFIX_FLAG})

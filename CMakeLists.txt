@@ -59,6 +59,7 @@ endif()
 
 if(WITH_VC_LTL AND EXISTS "${VC_LTL_DIR}")
   include("${VC_LTL_DIR}/VC-LTL helper for cmake.cmake")
+  link_directories(BEFORE ${VC_LTL_Library})
 endif()
 
 

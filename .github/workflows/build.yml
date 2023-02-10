@@ -113,17 +113,31 @@ jobs:
         submodules: 'recursive'
     - uses: seanmiddleditch/gha-setup-ninja@master
     - uses: ilammy/setup-nasm@v1
-    - uses: ilammy/msvc-dev-cmd@v1
+    - name: Use MSVC x64
+      uses: ilammy/msvc-dev-cmd@v1
       with:
         arch: x64
     - name: Build for win x64
       env:
         ARCH: x64
       run: |
+        clang-cl --version
         cmake -DFRIBIDI_GENTAB=1  -DCMAKE_SYSTEM_PROCESSOR=${{ env.ARCH }} -DCMAKE_SYSTEM_VERSION="6.0" -GNinja  -Bbuild/${{ env.ARCH }} -DCMAKE_BUILD_TYPE=${{ matrix.config }} -DCMAKE_INSTALL_PREFIX=install/${{ env.ARCH }} -DCMAKE_VERBOSE_MAKEFILE=1 .
         cmake --build build/${{ env.ARCH }}
         cmake --install build/${{ env.ARCH }}
-    - uses: ilammy/msvc-dev-cmd@v1
+    - name: Use MSVC arm64
+      uses: ilammy/msvc-dev-cmd@v1
+      with:
+        arch: amd64_arm64
+    - name: Build for win arm64
+      env:
+        ARCH: arm64
+      run: |
+        cmake -DCMAKE_SYSTEM_NAME=Windows -DCMAKE_SYSTEM_VERSION="10.0" -DCMAKE_SYSTEM_PROCESSOR=${{ env.ARCH }} -GNinja  -Bbuild/${{ env.ARCH }} -DCMAKE_BUILD_TYPE=${{ matrix.config }} -DCMAKE_INSTALL_PREFIX=install/${{ env.ARCH }} -DCMAKE_VERBOSE_MAKEFILE=1 .
+        cmake --build build/${{ env.ARCH }}
+        cmake --install build/${{ env.ARCH }}
+    - name: Use MSVC x86
+      uses: ilammy/msvc-dev-cmd@v1
       with:
         arch: amd64_x86
     - name: Build for win x86
@@ -131,16 +145,6 @@ jobs:
         ARCH: x86
       run: |
         cmake  -DCMAKE_SYSTEM_PROCESSOR=${{ env.ARCH }} -DCMAKE_SYSTEM_VERSION="6.0" -GNinja  -Bbuild/${{ env.ARCH }} -DCMAKE_BUILD_TYPE=${{ matrix.config }} -DCMAKE_INSTALL_PREFIX=install/${{ env.ARCH }} -DCMAKE_VERBOSE_MAKEFILE=1 .
-        cmake --build build/${{ env.ARCH }}
-        cmake --install build/${{ env.ARCH }}
-    - uses: ilammy/msvc-dev-cmd@v1
-      with:
-        arch: amd64_arm64
-    - name: Build for win arm64
-      env:
-        ARCH: arm64
-      run: |
-        cmake -DCMAKE_SYSTEM_NAME=Windows -DCMAKE_SYSTEM_PROCESSOR=${{ env.ARCH }} -GNinja  -Bbuild/${{ env.ARCH }} -DCMAKE_BUILD_TYPE=${{ matrix.config }} -DCMAKE_INSTALL_PREFIX=install/${{ env.ARCH }} -DCMAKE_VERBOSE_MAKEFILE=1 .
         cmake --build build/${{ env.ARCH }}
         cmake --install build/${{ env.ARCH }}
     - name: Make SDK
@@ -179,7 +183,8 @@ jobs:
         7z x ltl.7z -oVC-LTL
     - uses: seanmiddleditch/gha-setup-ninja@master
     - uses: ilammy/setup-nasm@v1
-    - uses: ilammy/msvc-dev-cmd@v1
+    - name: Use NSVC x64
+      uses: ilammy/msvc-dev-cmd@v1
       with:
         arch: x64
     - name: Build for win x64
@@ -189,7 +194,8 @@ jobs:
         cmake -DFRIBIDI_GENTAB=1 -DCMAKE_MSVC_RUNTIME_LIBRARY=MultiThreaded -DWITH_VC_LTL=1 -DCMAKE_SYSTEM_PROCESSOR=${{ env.ARCH }} -DCMAKE_SYSTEM_VERSION="6.0" -GNinja  -Bbuild/${{ env.ARCH }} -DCMAKE_BUILD_TYPE=${{ matrix.config }} -DCMAKE_INSTALL_PREFIX=install/${{ env.ARCH }} -DCMAKE_VERBOSE_MAKEFILE=1 .
         cmake --build build/${{ env.ARCH }}
         cmake --install build/${{ env.ARCH }}
-    - uses: ilammy/msvc-dev-cmd@v1
+    - name: Use MSVC x86
+      uses: ilammy/msvc-dev-cmd@v1
       with:
         arch: amd64_x86
     - name: Build for win x86
@@ -223,7 +229,8 @@ jobs:
         submodules: 'recursive'
     - uses: seanmiddleditch/gha-setup-ninja@master
     - uses: ilammy/setup-nasm@v1
-    - uses: ilammy/msvc-dev-cmd@v1
+    - name: Use MSVC x64
+      uses: ilammy/msvc-dev-cmd@v1
       with:
         arch: x64
     - name: Build for host gen_tab
@@ -237,7 +244,8 @@ jobs:
         cmake  -DCMAKE_SYSTEM_PROCESSOR=${{ env.ARCH }} -DCMAKE_SYSTEM_NAME=WindowsStore -DCMAKE_SYSTEM_VERSION="10.0" -GNinja  -Bbuild/${{ env.ARCH }} -DCMAKE_BUILD_TYPE=${{ matrix.config }} -DCMAKE_INSTALL_PREFIX=install/${{ env.ARCH }} -DCMAKE_VERBOSE_MAKEFILE=1 .
         cmake --build build/${{ env.ARCH }}
         cmake --install build/${{ env.ARCH }}
-    - uses: ilammy/msvc-dev-cmd@v1
+    - name: Use MSVC arm64
+      uses: ilammy/msvc-dev-cmd@v1
       with:
         arch: amd64_arm64
     - name: Build for uwp arm64

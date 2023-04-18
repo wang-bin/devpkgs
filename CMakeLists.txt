@@ -17,6 +17,9 @@ set(CMAKE_MODULE_PATH
     ${CMAKE_SOURCE_DIR}/cmake/tools
     #${CMAKE_INSTALL_PREFIX}/lib
     )
+
+include(CheckIncludeFile)
+
 include(tools)
 
 if(POLICY CMP0077) # hardcoded option set
@@ -62,6 +65,8 @@ if(WITH_VC_LTL AND EXISTS "${VC_LTL_DIR}")
   link_directories(BEFORE ${VC_LTL_Library})
 endif()
 
+include_directories(dep/include)
+set(CMAKE_REQUIRED_INCLUDES ${CMAKE_SOURCE_DIR}/dep/include)
 
 set(FT_DISABLE_BROTLI 1)
 set(FT_DISABLE_PNG 1)
@@ -100,6 +105,14 @@ if((WINDOWS_DESKTOP OR LINUX) AND (ARCH MATCHES "[aA][mM][dD]64" OR ARCH MATCHES
 endif()
 
 
+if(LINUX OR WINDOWS_DESKTOP)
+  check_include_file(va/va.h HAVE_VA_H)
+  if(HAVE_VA_H)
+    add_subdirectory(src/libva_loader)
+  endif()
+endif()
+
+
 # android INTERPROCEDURAL_OPTIMIZATION: cmake will force gold linker if CMAKE_ANDROID_NDK_VERSION is not set(e.g. use ndk's cmake toolchain file) or less than 22
 foreach(tgt freetype harfbuzz fribidi_shared fribidi_static ass snappy zlib zlibstatic glfw)
   if(TARGET ${tgt})
@@ -108,7 +121,9 @@ foreach(tgt freetype harfbuzz fribidi_shared fribidi_static ass snappy zlib zlib
   endif()
 endforeach()
 
-foreach(tgt snappy zlibstatic glfw)
+foreach(tgt snappy zlibstatic glfw
+    va va_win32 va-drm va-x11 vdpau
+    )
   if(TARGET ${tgt})
     set_target_properties(${tgt} PROPERTIES
         INTERPROCEDURAL_OPTIMIZATION ${WITH_LTO_STATIC})

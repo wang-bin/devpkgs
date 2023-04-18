@@ -117,6 +117,12 @@ jobs:
     - uses: actions/checkout@v3
       with:
         submodules: 'recursive'
+    - name: Get libva
+      shell: bash
+      run: |
+        curl -kL -o va.nupkg https://www.nuget.org/api/v2/package/Microsoft.Direct3D.VideoAccelerationCompatibilityPack
+        7z x va.nupkg -odep
+        mv dep/build/native/x64/include dep
     - uses: seanmiddleditch/gha-setup-ninja@master
     - uses: ilammy/setup-nasm@v1
     - name: Use MSVC x64
@@ -187,6 +193,12 @@ jobs:
       run: |
         curl -kL -o ltl.7z https://github.com/Chuyu-Team/VC-LTL5/releases/download/v${VC_LTL_VER}/VC-LTL-${VC_LTL_VER}-Binary.7z
         7z x ltl.7z -oVC-LTL
+    - name: Get libva
+      shell: bash
+      run: |
+        curl -kL -o va.nupkg https://www.nuget.org/api/v2/package/Microsoft.Direct3D.VideoAccelerationCompatibilityPack
+        7z x va.nupkg -odep
+        mv dep/build/native/x64/include dep
     - uses: seanmiddleditch/gha-setup-ninja@master
     - uses: ilammy/setup-nasm@v1
     - name: Use NSVC x64
@@ -302,7 +314,7 @@ jobs:
         chmod +x llvm.sh
         sudo ./llvm.sh ${LLVM_VER}
         #bash -c "$(wget -O - https://apt.llvm.org/llvm.sh)"
-        sudo apt install -y cmake ninja-build nasm libc++-${LLVM_VER}-dev libc++abi-${LLVM_VER}-dev
+        sudo apt install -y cmake ninja-build nasm libc++-${LLVM_VER}-dev libc++abi-${LLVM_VER}-dev libva-dev libvdpau-dev
     - name: Build host gen_tab # native build first
       shell: bash
       run: |
@@ -372,7 +384,7 @@ jobs:
         chmod +x llvm.sh
         sudo ./llvm.sh ${LLVM_VER}
         #bash -c "$(wget -O - https://apt.llvm.org/llvm.sh)"
-        sudo apt install -y cmake ninja-build nasm
+        sudo apt install -y cmake ninja-build nasm libva-dev libvdpau-dev
     - name: Build host gen_tab # native build first
       shell: bash
       run: |

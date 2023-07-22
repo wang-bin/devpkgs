@@ -5,8 +5,8 @@ on:
 
 env:
   NINJA_STATUS: '[%f/%t %e %r]'
-  LLVM_VER: 16
-  VC_LTL_VER: 5.0.5
+  LLVM_VER: ${{ vars.LLVM_VER }}
+  VC_LTL_VER: ${{ vars.VC_LTL_VER }}
 
 jobs:
   macOS:
@@ -186,7 +186,7 @@ jobs:
       uses: actions/cache@v3
       with:
         path: VC-LTL
-        key: dep-${{ env.VC_LTL_VER }}
+        key: dep-${{ vars.VC_LTL_VER }}
     - if: ${{ steps.dep-cache.outputs.cache-hit != 'true' }}
       name: Get VC-LTL
       shell: bash
@@ -312,9 +312,9 @@ jobs:
         fi
         wget https://apt.llvm.org/llvm.sh
         chmod +x llvm.sh
-        sudo ./llvm.sh ${LLVM_VER}
+        sudo ./llvm.sh ${LLVM_VER} all
         #bash -c "$(wget -O - https://apt.llvm.org/llvm.sh)"
-        sudo apt install -y cmake ninja-build nasm libc++-${LLVM_VER}-dev libc++abi-${LLVM_VER}-dev libva-dev libvdpau-dev
+        sudo apt install -y cmake ninja-build nasm libva-dev libvdpau-dev
     - name: Build host gen_tab # native build first
       shell: bash
       run: |
@@ -382,7 +382,7 @@ jobs:
         fi
         wget https://apt.llvm.org/llvm.sh
         chmod +x llvm.sh
-        sudo ./llvm.sh ${LLVM_VER}
+        sudo ./llvm.sh ${LLVM_VER} all
         #bash -c "$(wget -O - https://apt.llvm.org/llvm.sh)"
         sudo apt install -y cmake ninja-build nasm libva-dev libvdpau-dev
     - name: Build host gen_tab # native build first

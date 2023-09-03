@@ -32,3 +32,6 @@
 [submodule "src/libva_loader"]
 	path = src/libva_loader
 	url = ../libva_loader
+[submodule "src/dav1d"]
+	path = src/dav1d
+	url = https://github.com/videolan/dav1d.git

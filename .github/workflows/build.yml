@@ -17,7 +17,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        config: [MinSizeRel,RelWithDebInfo]
+        config: [MinSizeRel]
     steps:
     - uses: actions/checkout@v3
       with:
@@ -36,7 +36,7 @@ jobs:
       # access regardless of the host operating system
       shell: bash
       run: |
-        cmake -DFRIBIDI_GENTAB=1 -DCMAKE_OSX_DEPLOYMENT_TARGET=10.9 -GNinja -DCMAKE_OSX_ARCHITECTURES=${{ env.ARCH }} -Bbuild/${{ env.ARCH }} -DCMAKE_VERBOSE_MAKEFILE=1 -DCMAKE_BUILD_TYPE=${{ matrix.config }} -DCMAKE_INSTALL_PREFIX=install/x64 # no dSYM for lto, dsymutil: no debug symbols in executable (-arch x86_64)
+        cmake -DMIN_SIZE=1 -DFRIBIDI_GENTAB=1 -DCMAKE_OSX_DEPLOYMENT_TARGET=10.9 -GNinja -DCMAKE_OSX_ARCHITECTURES=${{ env.ARCH }} -Bbuild/${{ env.ARCH }} -DCMAKE_VERBOSE_MAKEFILE=1 -DCMAKE_BUILD_TYPE=${{ matrix.config }} -DCMAKE_INSTALL_PREFIX=install/x64
         cmake --build build/${{ env.ARCH }}
         cmake --install build/${{ env.ARCH }}
     - name: Build for arm64
@@ -44,18 +44,24 @@ jobs:
         ARCH: arm64
       shell: bash
       run: |
-        cmake -DCMAKE_OSX_DEPLOYMENT_TARGET=11.0 -GNinja -DCMAKE_OSX_ARCHITECTURES=${{ env.ARCH }} -Bbuild/${{ env.ARCH }} -DCMAKE_VERBOSE_MAKEFILE=1 -DCMAKE_BUILD_TYPE=${{ matrix.config }} -DCMAKE_INSTALL_PREFIX=install/arm64 # no dSYM for lto, dsymutil: no debug symbols in executable (-arch x86_64)
+        cmake -DMIN_SIZE=1 -DCMAKE_OSX_DEPLOYMENT_TARGET=11.0 -GNinja -DCMAKE_OSX_ARCHITECTURES=${{ env.ARCH }} -Bbuild/${{ env.ARCH }} -DCMAKE_VERBOSE_MAKEFILE=1 -DCMAKE_BUILD_TYPE=${{ matrix.config }} -DCMAKE_INSTALL_PREFIX=install/arm64
         cmake --build build/${{ env.ARCH }}
         cmake --install build/${{ env.ARCH }}
     - name: Make SDK
       shell: bash
       run: |
+        mkdir -p install/lib
+        lipo -create install/{arm64,x64}/lib/libass.dylib -o install/lib/libass.dylib
+        lipo -create install/{arm64,x64}/lib/libsnappy.a -o install/lib/libsnappy.a
+        lipo -create install/{arm64,x64}/lib/libglfw3.a -o install/lib/libglfw3.a
+        ln -sf libglfw3.a install/lib/libglfw.a
+        rm -rf install/lib/{x64,arm64}
         tar Jcvf devpkgs-${{ env.TARGET_OS }}-${{ matrix.config }}.tar.xz install
     - name: Archieve SDK
       uses: actions/upload-artifact@v3
       with:
         name: devpkgs-${{ env.TARGET_OS }}-${{ matrix.config }}
-        path: devpkgs-${{ env.TARGET_OS }}-${{ matrix.config }}.tar.xz
+        path: devpkgs-${{ env.TARGET_OS }}-${{ matrix.config }}*.tar.xz
 
 
   iOS:
@@ -78,14 +84,14 @@ jobs:
     - name: Build host gen_tab # native build first
       shell: bash
       run: |
-        cmake -DFRIBIDI_GENTAB=1 -Bbuild/host -DCMAKE_VERBOSE_MAKEFILE=1 -DCMAKE_BUILD_TYPE=${{ matrix.config }} # no dSYM for lto, dsymutil: no debug symbols in executable (-arch x86_64)
+        cmake -DFRIBIDI_GENTAB=1 -Bbuild/host -DCMAKE_VERBOSE_MAKEFILE=1 -DCMAKE_BUILD_TYPE=${{ matrix.config }}
         cmake --build build/host -t gen_tab
     - name: Build for arm64
       env:
         ARCH: arm64
       shell: bash
       run: |
-        cmake -DHB_IOS=1 -DCMAKE_IOS_INSTALL_COMBINED=YES -DCMAKE_SYSTEM_NAME=iOS -DIOS_DEPLOYMENT_TARGET=8.0 -GNinja -DCMAKE_OSX_ARCHITECTURES=${{ env.ARCH }} -Bbuild/${{ env.ARCH }} -DCMAKE_VERBOSE_MAKEFILE=1 -DCMAKE_BUILD_TYPE=${{ matrix.config }} -DCMAKE_INSTALL_PREFIX=install/${{ env.ARCH }} # no dSYM for lto, dsymutil: no debug symbols in executable (-arch x86_64)
+        cmake -DMIN_SIZE=1 -DHB_IOS=1 -DCMAKE_IOS_INSTALL_COMBINED=YES -DCMAKE_SYSTEM_NAME=iOS -DIOS_DEPLOYMENT_TARGET=8.0 -GNinja -DCMAKE_OSX_ARCHITECTURES=${{ env.ARCH }} -Bbuild/${{ env.ARCH }} -DCMAKE_VERBOSE_MAKEFILE=1 -DCMAKE_BUILD_TYPE=${{ matrix.config }} -DCMAKE_INSTALL_PREFIX=install/${{ env.ARCH }}
         cmake --build build/${{ env.ARCH }}
         cmake --install build/${{ env.ARCH }}
     - name: Make SDK
@@ -106,10 +112,10 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        config: [MinSizeRel,Debug] # FIXME: build blocked if with debug info
-        libass: [1,0]
+        config: [Release,Debug] # FIXME: build blocked if with debug info
+        libass: [1,0] # for debug static libs
         exclude:
-          - config: MinSizeRel
+          - config: Release
             libass: 0
           - config: Debug
             libass: 1
@@ -134,7 +140,7 @@ jobs:
         ARCH: x64
       run: |
         clang-cl --version
-        cmake -DBUILD_LIBASS=${{ matrix.libass }} -DFRIBIDI_GENTAB=1  -DCMAKE_SYSTEM_PROCESSOR=${{ env.ARCH }} -DCMAKE_SYSTEM_VERSION="6.0" -GNinja  -Bbuild/${{ env.ARCH }} -DCMAKE_BUILD_TYPE=${{ matrix.config }} -DCMAKE_INSTALL_PREFIX=install/${{ env.ARCH }} -DCMAKE_VERBOSE_MAKEFILE=1 .
+        cmake -DMIN_SIZE=1 -DBUILD_LIBASS=${{ matrix.libass }} -DFRIBIDI_GENTAB=1  -DCMAKE_SYSTEM_PROCESSOR=${{ env.ARCH }} -DCMAKE_SYSTEM_VERSION="6.0" -GNinja  -Bbuild/${{ env.ARCH }} -DCMAKE_BUILD_TYPE=${{ matrix.config }} -DCMAKE_INSTALL_PREFIX=install/${{ env.ARCH }} -DCMAKE_VERBOSE_MAKEFILE=1 .
         cmake --build build/${{ env.ARCH }}
         cmake --install build/${{ env.ARCH }}
     - name: Use MSVC arm64
@@ -145,7 +151,7 @@ jobs:
       env:
         ARCH: arm64
       run: |
-        cmake -DBUILD_LIBASS=${{ matrix.libass }} -DCMAKE_SYSTEM_NAME=Windows -DCMAKE_SYSTEM_VERSION="10.0" -DCMAKE_SYSTEM_PROCESSOR=${{ env.ARCH }} -GNinja  -Bbuild/${{ env.ARCH }} -DCMAKE_BUILD_TYPE=${{ matrix.config }} -DCMAKE_INSTALL_PREFIX=install/${{ env.ARCH }} -DCMAKE_VERBOSE_MAKEFILE=1 .
+        cmake -DMIN_SIZE=1 -DBUILD_LIBASS=${{ matrix.libass }} -DCMAKE_SYSTEM_NAME=Windows -DCMAKE_SYSTEM_VERSION="10.0" -DCMAKE_SYSTEM_PROCESSOR=${{ env.ARCH }} -GNinja  -Bbuild/${{ env.ARCH }} -DCMAKE_BUILD_TYPE=${{ matrix.config }} -DCMAKE_INSTALL_PREFIX=install/${{ env.ARCH }} -DCMAKE_VERBOSE_MAKEFILE=1 .
         cmake --build build/${{ env.ARCH }}
         cmake --install build/${{ env.ARCH }}
     - name: Use MSVC x86
@@ -156,17 +162,20 @@ jobs:
       env:
         ARCH: x86
       run: |
-        cmake  -DBUILD_LIBASS=${{ matrix.libass }} -DCMAKE_SYSTEM_PROCESSOR=${{ env.ARCH }} -DCMAKE_SYSTEM_VERSION="6.0" -GNinja  -Bbuild/${{ env.ARCH }} -DCMAKE_BUILD_TYPE=${{ matrix.config }} -DCMAKE_INSTALL_PREFIX=install/${{ env.ARCH }} -DCMAKE_VERBOSE_MAKEFILE=1 .
+        cmake -DMIN_SIZE=1  -DBUILD_LIBASS=${{ matrix.libass }} -DCMAKE_SYSTEM_PROCESSOR=${{ env.ARCH }} -DCMAKE_SYSTEM_VERSION="6.0" -GNinja  -Bbuild/${{ env.ARCH }} -DCMAKE_BUILD_TYPE=${{ matrix.config }} -DCMAKE_INSTALL_PREFIX=install/${{ env.ARCH }} -DCMAKE_VERBOSE_MAKEFILE=1 .
         cmake --build build/${{ env.ARCH }}
         cmake --install build/${{ env.ARCH }}
     - name: Make SDK
       shell: bash
-      run: 7z a devpkgs-${{ env.TARGET_OS }}-${{ matrix.config }}-vs2022.7z install
+      run: |
+        mkdir -p install/include
+        cp -avf dep/include/va install/include/
+        7z a  -ssc -m0=lzma2 -mx=9 -ms=on -mf=off devpkgs-${{ env.TARGET_OS }}-${{ matrix.config }}-vs2022.7z install
     - name: Archieve SDK
       uses: actions/upload-artifact@v3
       with:
         name: devpkgs-vs2022-${{ env.TARGET_OS }}-${{ matrix.config }}
-        path: devpkgs-${{ env.TARGET_OS }}-${{ matrix.config }}-vs2022.7z
+        path: devpkgs-${{ env.TARGET_OS }}-${{ matrix.config }}-vs2022*.7z
 
 
   Windows_VS2022_LTL:
@@ -176,7 +185,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        config: [MinSizeRel]
+        config: [Release]
     steps:
     - uses: actions/checkout@v3
       with:
@@ -209,7 +218,7 @@ jobs:
       env:
         ARCH: x64
       run: |
-        cmake -DFRIBIDI_GENTAB=1 -DCMAKE_MSVC_RUNTIME_LIBRARY=MultiThreaded -DWITH_VC_LTL=1 -DCMAKE_SYSTEM_PROCESSOR=${{ env.ARCH }} -DCMAKE_SYSTEM_VERSION="6.0" -GNinja  -Bbuild/${{ env.ARCH }} -DCMAKE_BUILD_TYPE=${{ matrix.config }} -DCMAKE_INSTALL_PREFIX=install/${{ env.ARCH }} -DCMAKE_VERBOSE_MAKEFILE=1 .
+        cmake -DMIN_SIZE=1 -DFRIBIDI_GENTAB=1 -DCMAKE_MSVC_RUNTIME_LIBRARY=MultiThreaded -DWITH_VC_LTL=1 -DCMAKE_SYSTEM_PROCESSOR=${{ env.ARCH }} -DCMAKE_SYSTEM_VERSION="6.0" -GNinja  -Bbuild/${{ env.ARCH }} -DCMAKE_BUILD_TYPE=${{ matrix.config }} -DCMAKE_INSTALL_PREFIX=install/${{ env.ARCH }} -DCMAKE_VERBOSE_MAKEFILE=1 .
         cmake --build build/${{ env.ARCH }}
         cmake --install build/${{ env.ARCH }}
     - name: Use MSVC x86
@@ -220,17 +229,17 @@ jobs:
       env:
         ARCH: x86
       run: |
-        cmake -DCMAKE_MSVC_RUNTIME_LIBRARY=MultiThreaded -DWITH_VC_LTL=1 -DCMAKE_SYSTEM_PROCESSOR=${{ env.ARCH }} -DCMAKE_SYSTEM_VERSION="6.0" -GNinja  -Bbuild/${{ env.ARCH }} -DCMAKE_BUILD_TYPE=${{ matrix.config }} -DCMAKE_INSTALL_PREFIX=install/${{ env.ARCH }} -DCMAKE_VERBOSE_MAKEFILE=1 .
+        cmake -DMIN_SIZE=1 -DCMAKE_MSVC_RUNTIME_LIBRARY=MultiThreaded -DWITH_VC_LTL=1 -DCMAKE_SYSTEM_PROCESSOR=${{ env.ARCH }} -DCMAKE_SYSTEM_VERSION="6.0" -GNinja  -Bbuild/${{ env.ARCH }} -DCMAKE_BUILD_TYPE=${{ matrix.config }} -DCMAKE_INSTALL_PREFIX=install/${{ env.ARCH }} -DCMAKE_VERBOSE_MAKEFILE=1 .
         cmake --build build/${{ env.ARCH }}
         cmake --install build/${{ env.ARCH }}
     - name: Make SDK
       shell: bash
-      run: 7z a devpkgs-${{ env.TARGET_OS }}-${{ matrix.config }}-vs2022-ltl.7z install
+      run: 7z a  -ssc -m0=lzma2 -mx=9 -ms=on -mf=off devpkgs-${{ env.TARGET_OS }}-${{ matrix.config }}-vs2022-ltl.7z install
     - name: Archieve SDK
       uses: actions/upload-artifact@v3
       with:
         name: devpkgs-vs2022-ltl-${{ env.TARGET_OS }}-${{ matrix.config }}
-        path: devpkgs-${{ env.TARGET_OS }}-${{ matrix.config }}-vs2022-ltl.7z
+        path: devpkgs-${{ env.TARGET_OS }}-${{ matrix.config }}-vs2022-ltl*.7z
 
 
   UWP_VS2022:
@@ -240,7 +249,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        config: [MinSizeRel]
+        config: [Release]
     steps:
     - uses: actions/checkout@v3
       with:
@@ -259,7 +268,7 @@ jobs:
       env:
         ARCH: x64
       run: |
-        cmake  -DCMAKE_SYSTEM_PROCESSOR=${{ env.ARCH }} -DCMAKE_SYSTEM_NAME=WindowsStore -DCMAKE_SYSTEM_VERSION="10.0" -GNinja  -Bbuild/${{ env.ARCH }} -DCMAKE_BUILD_TYPE=${{ matrix.config }} -DCMAKE_INSTALL_PREFIX=install/${{ env.ARCH }} -DCMAKE_VERBOSE_MAKEFILE=1 .
+        cmake  -DMIN_SIZE=1 -DCMAKE_SYSTEM_PROCESSOR=${{ env.ARCH }} -DCMAKE_SYSTEM_NAME=WindowsStore -DCMAKE_SYSTEM_VERSION="10.0" -GNinja  -Bbuild/${{ env.ARCH }} -DCMAKE_BUILD_TYPE=${{ matrix.config }} -DCMAKE_INSTALL_PREFIX=install/${{ env.ARCH }} -DCMAKE_VERBOSE_MAKEFILE=1 .
         cmake --build build/${{ env.ARCH }}
         cmake --install build/${{ env.ARCH }}
     - name: Use MSVC arm64
@@ -270,12 +279,12 @@ jobs:
       env:
         ARCH: arm64
       run: |
-        cmake  -DCMAKE_SYSTEM_PROCESSOR=${{ env.ARCH }} -DCMAKE_SYSTEM_NAME=WindowsStore -DCMAKE_SYSTEM_VERSION="10.0" -GNinja  -Bbuild/${{ env.ARCH }} -DCMAKE_BUILD_TYPE=${{ matrix.config }} -DCMAKE_INSTALL_PREFIX=install/${{ env.ARCH }} -DCMAKE_VERBOSE_MAKEFILE=1 .
+        cmake  -DMIN_SIZE=1 -DCMAKE_SYSTEM_PROCESSOR=${{ env.ARCH }} -DCMAKE_SYSTEM_NAME=WindowsStore -DCMAKE_SYSTEM_VERSION="10.0" -GNinja  -Bbuild/${{ env.ARCH }} -DCMAKE_BUILD_TYPE=${{ matrix.config }} -DCMAKE_INSTALL_PREFIX=install/${{ env.ARCH }} -DCMAKE_VERBOSE_MAKEFILE=1 .
         cmake --build build/${{ env.ARCH }}
         cmake --install build/${{ env.ARCH }}
     - name: Make SDK
       shell: bash
-      run: 7z a devpkgs-${{ env.TARGET_OS }}-${{ matrix.config }}-vs2022.7z install
+      run: 7z a  -ssc -m0=lzma2 -mx=9 -ms=on -mf=off devpkgs-${{ env.TARGET_OS }}-${{ matrix.config }}-vs2022.7z install
     - name: Archieve SDK
       uses: actions/upload-artifact@v3
       with:
@@ -325,7 +334,7 @@ jobs:
         ARCH: amd64
       shell: bash
       run: |
-        cmake -DBUILD_LIBASS=0 -DUSE_LIBCXX=1 -DCMAKE_SYSTEM_PROCESSOR=${ARCH} -DCMAKE_TOOLCHAIN_FILE=$PWD/cmake/tools/linux.clang.cmake -DLINUX_SYSROOT=$PWD/sysroot -GNinja -H$PWD -Bbuild/${ARCH} -DCMAKE_BUILD_TYPE=${{ matrix.config }} -DCMAKE_INSTALL_PREFIX=install/${ARCH} -DCMAKE_VERBOSE_MAKEFILE=1
+        cmake -DMIN_SIZE=1 -DBUILD_LIBASS=0 -DUSE_LIBCXX=1 -DCMAKE_SYSTEM_PROCESSOR=${ARCH} -DCMAKE_TOOLCHAIN_FILE=$PWD/cmake/tools/linux.clang.cmake -DLINUX_SYSROOT=$PWD/sysroot -GNinja -H$PWD -Bbuild/${ARCH} -DCMAKE_BUILD_TYPE=${{ matrix.config }} -DCMAKE_INSTALL_PREFIX=install/${ARCH} -DCMAKE_VERBOSE_MAKEFILE=1
         cmake --build build/${{ env.ARCH }}
         cmake --install build/${{ env.ARCH }}
     - name: Build for arm64
@@ -333,7 +342,7 @@ jobs:
         ARCH: arm64
       shell: bash
       run: |
-        cmake -DBUILD_LIBASS=0 -DUSE_LIBCXX=1 -DCMAKE_SYSTEM_PROCESSOR=${ARCH} -DCMAKE_TOOLCHAIN_FILE=$PWD/cmake/tools/linux.clang.cmake -DLINUX_SYSROOT=$PWD/sysroot -GNinja -H$PWD -Bbuild/${ARCH} -DCMAKE_BUILD_TYPE=${{ matrix.config }} -DCMAKE_INSTALL_PREFIX=install/${ARCH} -DCMAKE_VERBOSE_MAKEFILE=1
+        cmake -DMIN_SIZE=1 -DBUILD_LIBASS=0 -DUSE_LIBCXX=1 -DCMAKE_SYSTEM_PROCESSOR=${ARCH} -DCMAKE_TOOLCHAIN_FILE=$PWD/cmake/tools/linux.clang.cmake -DLINUX_SYSROOT=$PWD/sysroot -GNinja -H$PWD -Bbuild/${ARCH} -DCMAKE_BUILD_TYPE=${{ matrix.config }} -DCMAKE_INSTALL_PREFIX=install/${ARCH} -DCMAKE_VERBOSE_MAKEFILE=1
         cmake --build build/${{ env.ARCH }}
         cmake --install build/${{ env.ARCH }}
     - name: Build for armhf
@@ -341,17 +350,17 @@ jobs:
         ARCH: armhf
       shell: bash
       run: |
-        cmake -DBUILD_LIBASS=0 -DUSE_LIBCXX=1 -DCMAKE_SYSTEM_PROCESSOR=${ARCH} -DCMAKE_TOOLCHAIN_FILE=$PWD/cmake/tools/linux.clang.cmake -DLINUX_SYSROOT=$PWD/sysroot -GNinja -H$PWD -Bbuild/${ARCH} -DCMAKE_BUILD_TYPE=${{ matrix.config }} -DCMAKE_INSTALL_PREFIX=install/${ARCH} -DCMAKE_VERBOSE_MAKEFILE=1
+        cmake -DMIN_SIZE=1 -DBUILD_LIBASS=0 -DUSE_LIBCXX=1 -DCMAKE_SYSTEM_PROCESSOR=${ARCH} -DCMAKE_TOOLCHAIN_FILE=$PWD/cmake/tools/linux.clang.cmake -DLINUX_SYSROOT=$PWD/sysroot -GNinja -H$PWD -Bbuild/${ARCH} -DCMAKE_BUILD_TYPE=${{ matrix.config }} -DCMAKE_INSTALL_PREFIX=install/${ARCH} -DCMAKE_VERBOSE_MAKEFILE=1
         cmake --build build/${{ env.ARCH }}
         cmake --install build/${{ env.ARCH }}
     - name: Make SDK
       shell: bash
-      run: 7z a devpkgs-${{ env.TARGET_OS }}-${{ matrix.config }}.7z install
+      run: 7z a  -ssc -m0=lzma2 -mx=9 -ms=on -mf=off devpkgs-${{ env.TARGET_OS }}-${{ matrix.config }}.7z install
     - name: Archieve SDK
       uses: actions/upload-artifact@v3
       with:
         name: devpkgs-${{ env.TARGET_OS }}-${{ matrix.config }}
-        path: devpkgs-${{ env.TARGET_OS }}-${{ matrix.config }}.7z
+        path: devpkgs-${{ env.TARGET_OS }}-${{ matrix.config }}*.7z
 
   Linux_gnustl:
     runs-on: ubuntu-latest
@@ -395,12 +404,12 @@ jobs:
         ARCH: amd64
       shell: bash
       run: |
-        cmake -DBUILD_LIBASS=0 -DUSE_LIBCXX=0 -DCMAKE_SYSTEM_PROCESSOR=${ARCH} -DCMAKE_TOOLCHAIN_FILE=$PWD/cmake/tools/linux.clang.cmake -DLINUX_SYSROOT=$PWD/sysroot -GNinja -H$PWD -Bbuild/${ARCH} -DCMAKE_BUILD_TYPE=${{ matrix.config }} -DCMAKE_INSTALL_PREFIX=install/${ARCH} -DCMAKE_VERBOSE_MAKEFILE=1
+        cmake -DMIN_SIZE=1 -DBUILD_LIBASS=0 -DUSE_LIBCXX=0 -DCMAKE_SYSTEM_PROCESSOR=${ARCH} -DCMAKE_TOOLCHAIN_FILE=$PWD/cmake/tools/linux.clang.cmake -DLINUX_SYSROOT=$PWD/sysroot -GNinja -H$PWD -Bbuild/${ARCH} -DCMAKE_BUILD_TYPE=${{ matrix.config }} -DCMAKE_INSTALL_PREFIX=install/${ARCH} -DCMAKE_VERBOSE_MAKEFILE=1
         cmake --build build/${{ env.ARCH }}
         cmake --install build/${{ env.ARCH }}
     - name: Make SDK
       shell: bash
-      run: 7z a devpkgs-${{ env.TARGET_OS }}-${{ matrix.config }}-gnustl.7z install
+      run: 7z a -ssc -m0=lzma2 -mx=9 -ms=on -mf=off devpkgs-${{ env.TARGET_OS }}-${{ matrix.config }}-gnustl.7z install
     - name: Archieve SDK
       uses: actions/upload-artifact@v3
       with:
@@ -435,7 +444,7 @@ jobs:
       run: |
         MIN_API_64=21
         [ $MIN_API -gt 21 ] && MIN_API_64=$MIN_API
-        cmake -DCMAKE_ANDROID_NDK_VERSION=25.1 -DANDROID_LD=lld -DANDROID_ABI=${ARCH} -DANDROID_PLATFORM=android-${MIN_API_64} -DANDROID_TOOLCHAIN=clang -DANDROID_STL=c++_shared -DANDROID_PIE=ON -DCMAKE_TOOLCHAIN_FILE=$ANDROID_NDK_LATEST_HOME/build/cmake/android.toolchain.cmake -GNinja -H$PWD -Bbuild/${ARCH} -DCMAKE_BUILD_TYPE=${{ matrix.config }} -DCMAKE_INSTALL_PREFIX=install/${ARCH} -DCMAKE_VERBOSE_MAKEFILE=1
+        cmake -DMIN_SIZE=1 -DCMAKE_ANDROID_NDK_VERSION=25.1 -DANDROID_LD=lld -DANDROID_ABI=${ARCH} -DANDROID_PLATFORM=android-${MIN_API_64} -DANDROID_TOOLCHAIN=clang -DANDROID_STL=c++_shared -DANDROID_PIE=ON -DCMAKE_TOOLCHAIN_FILE=$ANDROID_NDK_LATEST_HOME/build/cmake/android.toolchain.cmake -GNinja -H$PWD -Bbuild/${ARCH} -DCMAKE_BUILD_TYPE=${{ matrix.config }} -DCMAKE_INSTALL_PREFIX=install/${ARCH} -DCMAKE_VERBOSE_MAKEFILE=1
         cmake --build build/${{ env.ARCH }}
         cmake --install build/${{ env.ARCH }}
 #    - name: Build for x86_64 # yasm error
@@ -443,14 +452,58 @@ jobs:
 #        ARCH: x86_64
 #      shell: bash
 #      run: |
-#        cmake -DCMAKE_ANDROID_NDK_VERSION=25.1 -DANDROID_LD=lld -DANDROID_ABI=${ARCH} -DANDROID_PLATFORM=android-${MIN_API} -DANDROID_TOOLCHAIN=clang -DANDROID_STL=c++_shared -DANDROID_PIE=ON -DCMAKE_TOOLCHAIN_FILE=$ANDROID_NDK_LATEST_HOME/build/cmake/android.toolchain.cmake -GNinja -H$PWD -Bbuild/${ARCH} -DCMAKE_BUILD_TYPE=${{ matrix.config }} -DCMAKE_INSTALL_PREFIX=install/${ARCH} -DCMAKE_VERBOSE_MAKEFILE=1
+#        cmake -DMIN_SIZE=1 -DCMAKE_ANDROID_NDK_VERSION=25.1 -DANDROID_LD=lld -DANDROID_ABI=${ARCH} -DANDROID_PLATFORM=android-${MIN_API} -DANDROID_TOOLCHAIN=clang -DANDROID_STL=c++_shared -DANDROID_PIE=ON -DCMAKE_TOOLCHAIN_FILE=$ANDROID_NDK_LATEST_HOME/build/cmake/android.toolchain.cmake -GNinja -H$PWD -Bbuild/${ARCH} -DCMAKE_BUILD_TYPE=${{ matrix.config }} -DCMAKE_INSTALL_PREFIX=install/${ARCH} -DCMAKE_VERBOSE_MAKEFILE=1
 #        cmake --build build/${{ env.ARCH }}
 #        cmake --install build/${{ env.ARCH }}
     - name: Make SDK
       shell: bash
-      run: 7z a devpkgs-${{ env.TARGET_OS }}-${{ matrix.config }}.7z install
+      run: 7z a  -ssc -m0=lzma2 -mx=9 -ms=on -mf=off devpkgs-${{ env.TARGET_OS }}-${{ matrix.config }}.7z install
     - name: Archieve SDK
       uses: actions/upload-artifact@v3
       with:
         name: devpkgs-${{ env.TARGET_OS }}-${{ matrix.config }}
-        path: devpkgs-${{ env.TARGET_OS }}-${{ matrix.config }}.7z
+        path: devpkgs-${{ env.TARGET_OS }}-${{ matrix.config }}*.7z
+
+
+  pkg:
+    runs-on: ubuntu-latest
+    needs: [macOS, Windows_VS2022, Windows_VS2022_LTL, UWP_VS2022, Linux_libcxx, Linux_gnustl]
+    steps:
+    - uses: actions/checkout@v3
+    - name: Download macOS libs
+      uses: actions/download-artifact@v3
+      with:
+        name: devpkgs-macOS-MinSizeRel
+    - name: Download win32 MD release libs
+      uses: actions/download-artifact@v3
+      with:
+        name: devpkgs-vs2022-windows-desktop-Release
+    - name: Download win32 MD debug libs
+      uses: actions/download-artifact@v3
+      with:
+        name: devpkgs-vs2022-windows-desktop-Debug
+    - name: Download win32 ltl MT release libs
+      uses: actions/download-artifact@v3
+      with:
+        name: devpkgs-vs2022-ltl-windows-desktop-Release
+    - name: Download uwp MD release libs
+      uses: actions/download-artifact@v3
+      with:
+        name: devpkgs-vs2022-uwp-Release
+    - name: Download linux libcxx libs      # for libmdk
+      uses: actions/download-artifact@v3
+      with:
+        name: devpkgs-linux-MinSizeRel
+    - name: Download linux gnustl libs      # for avbuild
+      uses: actions/download-artifact@v3
+      with:
+        name: devpkgs-linux-MinSizeRel-gnustl
+    - name: Make libmdk dep
+      run: |
+        chmod +x mkpkg.sh
+        ./mkpkg.sh
+    - name: Archieve SDK
+      uses: actions/upload-artifact@v3
+      with:
+        name: libmdk-dep
+        path: dep.7z

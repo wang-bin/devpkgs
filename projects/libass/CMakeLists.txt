@@ -3,7 +3,7 @@ cmake_minimum_required(VERSION 3.15)
 # https://github.com/hozuki/libass-cmake/blob/master/cmake/libass.cmake
 
 PROJECT(libass)
-set(CMAKE_C_VISIBILITY_PRESET default) # hidden symbols can not be exported
+set(CMAKE_C_VISIBILITY_PRESET default) # hidden symbols can not be exported #?
 include(CheckCCompilerFlag)
 include(CheckIncludeFile)
 include(CheckTypeSize)
@@ -117,7 +117,8 @@ if(NOT NO_ASM)
       endif()
   endif()
   set(HAS_ASM_COMPILER TRUE)
-  if(ARCH_AARCH64 AND CMAKE_C_COMPILER_ID MATCHES "MSVC")
+  if(ARCH_AARCH64 AND CMAKE_C_COMPILER_ID MATCHES "MSVC") # TODO: ASM_MARMASM cmake3.26
+#    enable_language(ASM_MARMASM)
     execute_process(
         COMMAND clang-cl --version
         ERROR_VARIABLE CLANG_ERROR
@@ -264,8 +265,10 @@ if(WIN32)
 endif()
 
 target_link_libraries(ass LINK_PRIVATE "${EXTRA_LIBS}")
-file(GLOB HEADERS "libass/ass.h" "libass/ass_types.h")
-install(FILES ${HEADERS} DESTINATION include/ass)
+install(FILES
+    ${SRC_DIR}/libass/ass.h
+    ${SRC_DIR}/libass/ass_types.h
+    DESTINATION include/ass)
 install(TARGETS ass EXPORT ${PROJECT_NAME}
   RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR} # *.dll
   LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}

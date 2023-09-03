@@ -114,7 +114,8 @@ endif()
 
 
 # android INTERPROCEDURAL_OPTIMIZATION: cmake will force gold linker if CMAKE_ANDROID_NDK_VERSION is not set(e.g. use ndk's cmake toolchain file) or less than 22
-foreach(tgt freetype harfbuzz fribidi_shared fribidi_static ass snappy zlib zlibstatic glfw)
+# TODO: INTERPROCEDURAL_OPTIMIZATION is thin lto, how to enable full lto?
+foreach(tgt freetype harfbuzz fribidi_shared fribidi_static ass zlib)
   if(TARGET ${tgt})
     set_target_properties(${tgt} PROPERTIES
         INTERPROCEDURAL_OPTIMIZATION ${WITH_LTO})

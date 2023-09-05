@@ -11,7 +11,7 @@ include(CheckTypeSize)
 
 set(VERSION_MAJOR 0)
 set(VERSION_MINOR 17)
-set(VERSION_MICRO 0)
+set(VERSION_MICRO 1)
 set(PROJECT_VERSION ${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_MICRO})
 set(SO_VERSION 9) #FIXME:
 
@@ -165,7 +165,6 @@ endif()
 if(CONFIG_CORETEXT)
   list(APPEND EXTRA_LIBS "-framework CoreText" "-framework CoreFoundation" "-framework CoreGraphics")
 else()
-  list(REMOVE_ITEM SRC_LIST "libass/ass_coretext.c")
   list(FILTER SRC_LIST EXCLUDE REGEX ".*ass_coretext.c$")
 endif()
 if(NOT CONFIG_DIRECTWRITE)

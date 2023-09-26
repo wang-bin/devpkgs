@@ -6,6 +6,7 @@ option(WITH_LTO "Build with LTO" ON)
 option(WITH_LTO_STATIC "Build static lib with LTO. Worse compiler compatibility" OFF)
 option(BUILD_LIBASS "Build libass" ON)
 option(BUILD_DAV1D "Build dav1d" ON)
+option(BUILD_VALD "Build libva loader" ON)
 option(WITH_VC_LTL "Build with VC-LTL crt for windows. Recommend to use with -DCMAKE_MSVC_RUNTIME_LIBRARY=MultiThreaded" OFF)
 set(VC_LTL_DIR "${CMAKE_CURRENT_SOURCE_DIR}/VC-LTL" CACHE STRING "VC-LTL dir")
 
@@ -106,7 +107,7 @@ if((WINDOWS_DESKTOP OR LINUX) AND (ARCH MATCHES "[aA][mM][dD]64" OR ARCH MATCHES
 endif()
 
 
-if(LINUX OR WINDOWS_DESKTOP)
+if(BUILD_VALD AND (LINUX OR WINDOWS_DESKTOP))
   check_include_file(va/va.h HAVE_VA_H)
   if(HAVE_VA_H)
     add_subdirectory(src/libva_loader)

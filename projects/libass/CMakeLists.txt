@@ -2,16 +2,13 @@ cmake_minimum_required(VERSION 3.15)
 
 # https://github.com/hozuki/libass-cmake/blob/master/cmake/libass.cmake
 
-PROJECT(libass)
+PROJECT(libass VERSION 0.17.1)
 set(CMAKE_C_VISIBILITY_PRESET default) # hidden symbols can not be exported #?
 include(CheckCCompilerFlag)
 include(CheckIncludeFile)
 include(CheckTypeSize)
 
 
-set(VERSION_MAJOR 0)
-set(VERSION_MINOR 17)
-set(VERSION_MICRO 1)
 set(PROJECT_VERSION ${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_MICRO})
 set(SO_VERSION 9) #FIXME:
 
@@ -57,6 +54,7 @@ set(CONFIG_ICONV 0)
 set(ARCH_AARCH64 0)
 set(ARCH_X86 0) # x86 32/64 bit
 set(ARCH_X86_64 0)
+math(EXPR BITS "8 * ${CMAKE_SIZEOF_VOID_P}")
 
 # System architecture detection
 if(APPLE AND CMAKE_OSX_ARCHITECTURES)
@@ -77,7 +75,6 @@ list(FIND X86_ALIASES "${ARCH}" X86MATCH)
 if(NOT NO_ASM AND X86MATCH GREATER "-1")
     enable_language(ASM_NASM)
     set(ARCH_X86 1)
-    math(EXPR BITS "8 * ${CMAKE_SIZEOF_VOID_P}")
     if(BITS EQUAL 64)
         set(ARCH_X86_64 1)
     endif()

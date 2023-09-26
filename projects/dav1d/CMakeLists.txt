@@ -7,6 +7,7 @@ include(CheckCCompilerFlag)
 include(CheckCSourceCompiles)
 include(CheckIncludeFile)
 include(CheckTypeSize)
+include(CheckSymbolExists)
 
 # rc
 set(API_VERSION_MAJOR 7)
@@ -37,7 +38,7 @@ if(POLICY CMP0069) # lto
 endif()
 set(EXTRA_LIBS "")
 
-option(DAV1D_NO_ASM "Disable use of assembly coded primitives (default: auto detect)" ON)
+option(DAV1D_NO_ASM "Disable use of assembly coded primitives (default: auto detect)" OFF)
 option(STACK_ALIGNMENT "stack alignment" 0)
 option(DAV1D_8BIT "enable 8bit. 0 or 1" 1)
 option(DAV1D_16BIT "enable 16bit. 0 or 1" 1)
@@ -64,6 +65,7 @@ set(ARCH_AARCH64 0)
 set(ARCH_X86 0) # x86 32/64 bit
 set(ARCH_X86_64 0)
 set(ARCH_X86_32 0)
+math(EXPR BITS "8 * ${CMAKE_SIZEOF_VOID_P}")
 
 # System architecture detection
 if(APPLE AND CMAKE_OSX_ARCHITECTURES)
@@ -82,17 +84,18 @@ endif()
 
 set(X86_ALIASES x86 i386 i686 x86_64 amd64 x64)
 list(FIND X86_ALIASES "${ARCH}" X86MATCH)
-if(NOT DAV1D_NO_ASM AND X86MATCH GREATER "-1")
+if(X86MATCH GREATER "-1")
+  if(NOT DAV1D_NO_ASM)
     enable_language(ASM_NASM)
-    set(ARCH_X86 1)
-    math(EXPR BITS "8 * ${CMAKE_SIZEOF_VOID_P}")
-    if(BITS EQUAL 64)
-        set(ARCH_X86_64 1)
-    else()
-        set(ARCH_X86_32 1)
-    endif()
+  endif()
+  set(ARCH_X86 1)
+  if(BITS EQUAL 64)
+    set(ARCH_X86_64 1)
+  else()
+    set(ARCH_X86_32 1)
+  endif()
 endif()
-message("ARCH:${ARCH}, ARCH_X86: ${ARCH_X86}, ARCH_AARCH64:${ARCH_AARCH64}, ARCH_ARM:${ARCH_ARM}, ARCH_X86_64:${ARCH_X86_64}")
+message("BITS:${BITS} ARCH:${ARCH}, ARCH_X86: ${ARCH_X86}, ARCH_AARCH64:${ARCH_AARCH64}, ARCH_ARM:${ARCH_ARM}, ARCH_X86_64:${ARCH_X86_64}. X86MATCH:${X86MATCH}")
 
 if(APPLE)
   set(ASM_PREFIX_FLAG -DPREFIX) # func_.* => _func_.*
@@ -126,32 +129,97 @@ if(ARCH_X86)
     set(STACK_ALIGNMENT 4)
   endif()
   set(ASM_FLAGS "${ASM_FLAGS} -DSTACK_ALIGNMENT=${STACK_ALIGNMENT}")
+  check_symbol_exists(__AVX__ "" FORCE_VEX_ENCODING)
+  if(FORCE_VEX_ENCODING)
+    set(FORCE_VEX_ENCODING 1)
+  else()
+    set(FORCE_VEX_ENCODING 0)
+  endif()
 endif()
 set(CMAKE_ASM_NASM_FLAGS ${ASM_FLAGS})
 
 if(NOT DAV1D_NO_ASM)
   if(ARCH_X86)
-      set(HAVE_ASM 1)
-      file(GLOB SRC_LIST_ASM "${SRC_DIR}/src/x86/*.asm")
-      if(NOT ARCH_X86_64)
-      endif()
+    set(HAVE_ASM 1)
+    set(SRC_LIST_C
+      ${SRC_DIR}/src/x86/cpu.c
+      )
+    set(SRC_LIST_ASM
+      ${SRC_DIR}/src/x86/cpuid.asm
+      ${SRC_DIR}/src/x86/msac.asm
+      ${SRC_DIR}/src/x86/refmvs.asm
+      ${SRC_DIR}/src/x86/itx_avx512.asm
+      ${SRC_DIR}/src/x86/cdef_avx2.asm
+      ${SRC_DIR}/src/x86/itx_avx2.asm
+      ${SRC_DIR}/src/x86/looprestoration_avx2.asm
+      ${SRC_DIR}/src/x86/cdef_sse.asm
+      ${SRC_DIR}/src/x86/itx_sse.asm
+    )
+    if(EXISTS ${SRC_DIR}/src/x86/pal.asm)
+      list(APPEND SRC_LIST_ASM
+        ${SRC_DIR}/src/x86/pal.asm
+      )
+    endif()
+    if(DAV1D_8BIT)
+      list(APPEND SRC_LIST_ASM
+        ${SRC_DIR}/src/x86/cdef_avx512.asm
+        ${SRC_DIR}/src/x86/filmgrain_avx512.asm
+        ${SRC_DIR}/src/x86/ipred_avx512.asm
+        ${SRC_DIR}/src/x86/loopfilter_avx512.asm
+        ${SRC_DIR}/src/x86/looprestoration_avx512.asm
+        ${SRC_DIR}/src/x86/mc_avx512.asm
+        ${SRC_DIR}/src/x86/filmgrain_avx2.asm
+        ${SRC_DIR}/src/x86/ipred_avx2.asm
+        ${SRC_DIR}/src/x86/loopfilter_avx2.asm
+        ${SRC_DIR}/src/x86/mc_avx2.asm
+        ${SRC_DIR}/src/x86/filmgrain_sse.asm
+        ${SRC_DIR}/src/x86/ipred_sse.asm
+        ${SRC_DIR}/src/x86/loopfilter_sse.asm
+        ${SRC_DIR}/src/x86/looprestoration_sse.asm
+        ${SRC_DIR}/src/x86/mc_sse.asm
+      )
+    endif()
+    if(DAV1D_16BIT)
+      list(APPEND SRC_LIST_ASM
+        ${SRC_DIR}/src/x86/cdef16_avx512.asm
+        ${SRC_DIR}/src/x86/filmgrain16_avx512.asm
+        ${SRC_DIR}/src/x86/ipred16_avx512.asm
+        ${SRC_DIR}/src/x86/itx16_avx512.asm
+        ${SRC_DIR}/src/x86/loopfilter16_avx512.asm
+        ${SRC_DIR}/src/x86/looprestoration16_avx512.asm
+        ${SRC_DIR}/src/x86/mc16_avx512.asm
+        ${SRC_DIR}/src/x86/cdef16_avx2.asm
+        ${SRC_DIR}/src/x86/filmgrain16_avx2.asm
+        ${SRC_DIR}/src/x86/ipred16_avx2.asm
+        ${SRC_DIR}/src/x86/itx16_avx2.asm
+        ${SRC_DIR}/src/x86/loopfilter16_avx2.asm
+        ${SRC_DIR}/src/x86/looprestoration16_avx2.asm
+        ${SRC_DIR}/src/x86/mc16_avx2.asm
+        ${SRC_DIR}/src/x86/cdef16_sse.asm
+        ${SRC_DIR}/src/x86/filmgrain16_sse.asm
+        ${SRC_DIR}/src/x86/ipred16_sse.asm
+        ${SRC_DIR}/src/x86/itx16_sse.asm
+        ${SRC_DIR}/src/x86/loopfilter16_sse.asm
+        ${SRC_DIR}/src/x86/looprestoration16_sse.asm
+        ${SRC_DIR}/src/x86/mc16_sse.asm
+        )
+    endif()
   endif()
   set(HAS_ASM_COMPILER TRUE)
   if(ARCH_AARCH64 AND CMAKE_C_COMPILER_ID MATCHES "MSVC")
-    if(CMAKE_VERSION VERSION_GREATER_EQUAL 3.26.0)
+    if(0)#CMAKE_VERSION VERSION_GREATER_EQUAL 3.26.0)
         enable_language(ASM_MARMASM)
 # TODO: armasm requires gaspp
-# Fix:  MSVC_RUNTIME_LIBRARY value 'MultiThreadedDLL' not known for this ASM
-set(CMAKE_ASM_COMPILE_OPTIONS_MSVC_RUNTIME_LIBRARY_MultiThreaded         "-MT"  CACHE STRING "armasm64 MSVC_RUNTIME_LIBRARY flags")
-set(CMAKE_ASM_COMPILE_OPTIONS_MSVC_RUNTIME_LIBRARY_MultiThreadedDLL      "-MD"  CACHE STRING "armasm64 MSVC_RUNTIME_LIBRARY flags")
-set(CMAKE_ASM_COMPILE_OPTIONS_MSVC_RUNTIME_LIBRARY_MultiThreadedDebug    "-MTd" CACHE STRING "armasm64 MSVC_RUNTIME_LIBRARY flags")
-set(CMAKE_ASM_COMPILE_OPTIONS_MSVC_RUNTIME_LIBRARY_MultiThreadedDebugDLL "-MDd" CACHE STRING "armasm64 MSVC_RUNTIME_LIBRARY flags")
     else()
         set(ARM64ASM_CLANG_CL 1)
     endif()
+# Fix:  MSVC_RUNTIME_LIBRARY value 'MultiThreadedDLL' not known for this ASM
+    set(CMAKE_ASM_COMPILE_OPTIONS_MSVC_RUNTIME_LIBRARY_MultiThreaded         "-MT"  CACHE STRING "armasm64/clang-cl MSVC_RUNTIME_LIBRARY flags")
+    set(CMAKE_ASM_COMPILE_OPTIONS_MSVC_RUNTIME_LIBRARY_MultiThreadedDLL      "-MD"  CACHE STRING "armasm64/clang-cl MSVC_RUNTIME_LIBRARY flags")
+    set(CMAKE_ASM_COMPILE_OPTIONS_MSVC_RUNTIME_LIBRARY_MultiThreadedDebug    "-MTd" CACHE STRING "armasm64/clang-cl MSVC_RUNTIME_LIBRARY flags")
+    set(CMAKE_ASM_COMPILE_OPTIONS_MSVC_RUNTIME_LIBRARY_MultiThreadedDebugDLL "-MDd" CACHE STRING "armasm64/clang-cl MSVC_RUNTIME_LIBRARY flags")
   endif()
   if(ARM64ASM_CLANG_CL)
-    message("ARM64ASM_CLANG_CL")
     execute_process(
         COMMAND clang-cl --version
         ERROR_VARIABLE CLANG_ERROR
@@ -162,19 +230,43 @@ set(CMAKE_ASM_COMPILE_OPTIONS_MSVC_RUNTIME_LIBRARY_MultiThreadedDebugDLL "-MDd" 
       set(CMAKE_ASM_FLAGS "--target=aarch64-pc-windows-msvc ${CMAKE_ASM_FLAGS}")
       message("using clang-cl as arm64 asm compiler... CMAKE_ASM_FLAGS:${CMAKE_ASM_FLAGS}")
       add_link_options(-ALIGN:8192) # blend_bitmaps.S.obj : fatal error LNK1164: section 0x4 alignment (8192) greater than /ALIGN value
-# Fix:  MSVC_RUNTIME_LIBRARY value 'MultiThreadedDLL' not known for this ASM
-      set(CMAKE_ASM_COMPILE_OPTIONS_MSVC_RUNTIME_LIBRARY_MultiThreaded         "-MT"  CACHE STRING "clang-cl arm64 asm MSVC_RUNTIME_LIBRARY flags")
-      set(CMAKE_ASM_COMPILE_OPTIONS_MSVC_RUNTIME_LIBRARY_MultiThreadedDLL      "-MD"  CACHE STRING "clang-cl arm64 asm MSVC_RUNTIME_LIBRARY flags")
-      set(CMAKE_ASM_COMPILE_OPTIONS_MSVC_RUNTIME_LIBRARY_MultiThreadedDebug    "-MTd" CACHE STRING "clang-cl arm64 asm MSVC_RUNTIME_LIBRARY flags")
-      set(CMAKE_ASM_COMPILE_OPTIONS_MSVC_RUNTIME_LIBRARY_MultiThreadedDebugDLL "-MDd" CACHE STRING "clang-cl arm64 asm MSVC_RUNTIME_LIBRARY flags")
     else()
       set(HAS_ASM_COMPILER FALSE)
     endif()
   endif()
-  if(ARCH_AARCH64 AND HAS_ASM_COMPILER)
+  if((ARCH_ARM OR ARCH_AARCH64) AND HAS_ASM_COMPILER)
     set(HAVE_ASM 1)
-    file(GLOB SRC_LIST_ASM "${SRC_DIR}/libass/aarch64/*.S")
     add_compile_options(${ASM_PREFIX_FLAG})
+    set(SRC_LIST_C
+      ${SRC_DIR}/src/arm/cpu.c
+      )
+    set(SRC_LIST_ASM
+      ${SRC_DIR}/src/arm/${BITS}/itx.S
+      ${SRC_DIR}/src/arm/${BITS}/looprestoration_common.S
+      ${SRC_DIR}/src/arm/${BITS}/msac.S
+      ${SRC_DIR}/src/arm/${BITS}/refmvs.S
+    )
+    if(DAV1D_8BIT)
+      list(APPEND SRC_LIST_ASM
+        ${SRC_DIR}/src/arm/${BITS}/cdef.S
+        ${SRC_DIR}/src/arm/${BITS}/filmgrain.S
+        ${SRC_DIR}/src/arm/${BITS}/ipred.S
+        ${SRC_DIR}/src/arm/${BITS}/loopfilter.S
+        ${SRC_DIR}/src/arm/${BITS}/looprestoration.S
+        ${SRC_DIR}/src/arm/${BITS}/mc.S
+        )
+    endif()
+    if(DAV1D_16BIT)
+      list(APPEND SRC_LIST_ASM
+        ${SRC_DIR}/src/arm/${BITS}/cdef16.S
+        ${SRC_DIR}/src/arm/${BITS}/filmgrain16.S
+        ${SRC_DIR}/src/arm/${BITS}/ipred16.S
+        ${SRC_DIR}/src/arm/${BITS}/itx16.S
+        ${SRC_DIR}/src/arm/${BITS}/loopfilter16.S
+        ${SRC_DIR}/src/arm/${BITS}/looprestoration16.S
+        ${SRC_DIR}/src/arm/${BITS}/mc16.S
+        )
+    endif()
   endif()
   if(ARCH_ARM OR ARCH_AARCH64)
     check_c_source_compiles("
@@ -197,7 +289,10 @@ list(FILTER SRC_LIST_TMPL INCLUDE REGEX "_tmpl")
 
 list(APPEND SRC_LIST ${SRC_LIST_C})
 
-if(WIN32 AND NOT CMAKE_C_SIMULATE_ID MATCHES MSVC) #  Non-ASCII 8-bit codepoint (169) can't occur in a non-Unicode string. "Copyright => L"Copyright
+if(WIN32)
+  if(CMAKE_C_SIMULATE_ID MATCHES MSVC)
+    set(CMAKE_RC_FLAGS "-C 1252") # llvm-rc:  Non-ASCII 8-bit codepoint (169) can't occur in a non-Unicode string. "Copyright => L"Copyright
+  endif()
   configure_file(${SRC_DIR}/src/dav1d.rc.in ${PROJECT_BINARY_DIR}/dav1d.rc)
   list(APPEND SRC_LIST
     ${SRC_DIR}/src/win32/thread.c
@@ -224,13 +319,16 @@ if(WIN32)
   endif()
 endif()
 find_package(Threads)
-link_libraries(Threads::Threads) # link_libraries() affect targets ONLY add later
+#link_libraries(Threads::Threads) # will add -pthread in nasm flags. link_libraries() affect targets ONLY add later
 
 if(NOT WIN32)
   add_compile_options(-DHAVE_DLSYM=1 -DHAVE_CLOCK_GETTIME=1 -DHAVE_POSIX_MEMALIGN=1)
   add_compile_options(-DHAVE_GETAUXVAL=1) # arm, android 18+
   add_compile_options($<$<COMPILE_LANGUAGE:C>:-D_GNU_SOURCE>)
   link_libraries(dl)
+  if(NOT ANDROID)
+    link_libraries(pthread)
+  endif()
   check_c_source_compiles("int main() { int v = 0; return __atomic_fetch_add(&v, 1, __ATOMIC_SEQ_CST); }"
     HAS_ATOMIC)
   if(${HAS_ATOMIC})
@@ -295,7 +393,7 @@ configure_file(
     "${SRC_DIR}/include/dav1d/version.h.in"
     "${PROJECT_BINARY_DIR}/version.h"
     @ONLY)
-file(GLOB HEADERS "${SRC_DIR}/include/*.h")
+file(GLOB HEADERS "${SRC_DIR}/include/dav1d/*.h")
 list(APPEND HEADERS "${PROJECT_BINARY_DIR}/version.h")
 install(FILES ${HEADERS} DESTINATION include/${PROJECT_NAME})
 install(TARGETS ${PROJECT_NAME} EXPORT ${PROJECT_NAME}
@@ -334,15 +432,15 @@ file(WRITE "${PROJECT_BINARY_DIR}/config.h" "${CONF}")
 
 # private_prefix, PIC, PREFIX
 foreach(VAR STACK_ALIGNMENT ARCH_X86_64 ARCH_X86_32 FORCE_VEX_ENCODING)
-  set(CONF_ASM "${CONF_ASM}\n#define ${VAR} ${${VAR}}")
+  set(CONF_ASM "${CONF_ASM}\n%define ${VAR} ${${VAR}}")
 endforeach()
 file(WRITE "${PROJECT_BINARY_DIR}/config.asm" "${CONF_ASM}")
 
 find_package(Git QUIET)
 if(GIT_FOUND)
   execute_process(
-      COMMAND "${GIT_EXECUTABLE}" --git-dir ${SRC_DIR} describe --long --always
-      WORKING_DIRECTORY "${PROJECT_BINARY_DIR}"
+      COMMAND "${GIT_EXECUTABLE}" describe --long --always
+      WORKING_DIRECTORY "${SRC_DIR}"
       RESULT_VARIABLE RET
       OUTPUT_VARIABLE VCS_TAG
       ERROR_QUIET

@@ -5,6 +5,7 @@ project(devpkgs C CXX ASM)
 option(WITH_LTO "Build with LTO" ON)
 option(WITH_LTO_STATIC "Build static lib with LTO. Worse compiler compatibility" OFF)
 option(BUILD_LIBASS "Build libass" ON)
+option(BUILD_DAV1D "Build dav1d" ON)
 option(WITH_VC_LTL "Build with VC-LTL crt for windows. Recommend to use with -DCMAKE_MSVC_RUNTIME_LIBRARY=MultiThreaded" OFF)
 set(VC_LTL_DIR "${CMAKE_CURRENT_SOURCE_DIR}/VC-LTL" CACHE STRING "VC-LTL dir")
 

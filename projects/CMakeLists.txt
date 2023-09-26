@@ -6,3 +6,8 @@ set(SRC_DIR ${CMAKE_SOURCE_DIR}/src/libass)
 if(BUILD_LIBASS)
   add_subdirectory(libass)
 endif()
+
+set(SRC_DIR ${CMAKE_SOURCE_DIR}/src/dav1d)
+if(BUILD_DAV1D)
+  add_subdirectory(dav1d)
+endif()

@@ -54,6 +54,7 @@ jobs:
       run: |
         mkdir -p install/lib
         lipo -create install/{arm64,x86_64}/lib/libass.dylib -o install/lib/libass.dylib
+        lipo -create install/{arm64,x86_64}/lib/libdav1d.dylib -o install/lib/libdav1d.dylib
         lipo -create install/{arm64,x86_64}/lib/libsnappy.a -o install/lib/libsnappy.a
         lipo -create install/{arm64,x86_64}/lib/libglfw3.a -o install/lib/libglfw3.a
         ln -sf libglfw3.a install/lib/libglfw.a
@@ -146,7 +147,7 @@ jobs:
         ARCH: x64
       run: |
         clang-cl --version
-        cmake -DMIN_SIZE=1 -DBUILD_VALD=0 -DBUILD_LIBASS=${{ matrix.dll }} -DBUILD_DAV1D=${{ matrix.dll }} -DFRIBIDI_GENTAB=1  -DCMAKE_SYSTEM_PROCESSOR=${{ env.ARCH }} -DCMAKE_SYSTEM_VERSION="6.0" -GNinja  -Bbuild/${{ env.ARCH }} -DCMAKE_BUILD_TYPE=${{ matrix.config }} -DCMAKE_INSTALL_PREFIX=install/${{ env.ARCH }} -DCMAKE_VERBOSE_MAKEFILE=1 .
+        cmake -DMIN_SIZE=1 -DBUILD_VALD=${{ matrix.dll }} -DBUILD_LIBASS=${{ matrix.dll }} -DBUILD_DAV1D=${{ matrix.dll }} -DFRIBIDI_GENTAB=1  -DCMAKE_SYSTEM_PROCESSOR=${{ env.ARCH }} -DCMAKE_SYSTEM_VERSION="6.0" -GNinja  -Bbuild/${{ env.ARCH }} -DCMAKE_BUILD_TYPE=${{ matrix.config }} -DCMAKE_INSTALL_PREFIX=install/${{ env.ARCH }} -DCMAKE_VERBOSE_MAKEFILE=1 .
         cmake --build build/${{ env.ARCH }}
         cmake --install build/${{ env.ARCH }}
     - name: Use MSVC arm64
@@ -157,7 +158,7 @@ jobs:
       env:
         ARCH: arm64
       run: |
-        cmake -DMIN_SIZE=1 -DBUILD_VALD=0 -DBUILD_LIBASS=${{ matrix.dll }} -DBUILD_DAV1D=${{ matrix.dll }} -DCMAKE_SYSTEM_NAME=Windows -DCMAKE_SYSTEM_VERSION="10.0" -DCMAKE_SYSTEM_PROCESSOR=${{ env.ARCH }} -GNinja  -Bbuild/${{ env.ARCH }} -DCMAKE_BUILD_TYPE=${{ matrix.config }} -DCMAKE_INSTALL_PREFIX=install/${{ env.ARCH }} -DCMAKE_VERBOSE_MAKEFILE=1 .
+        cmake -DMIN_SIZE=1 -DBUILD_VALD=${{ matrix.dll }} -DBUILD_LIBASS=${{ matrix.dll }} -DBUILD_DAV1D=${{ matrix.dll }} -DCMAKE_SYSTEM_NAME=Windows -DCMAKE_SYSTEM_VERSION="10.0" -DCMAKE_SYSTEM_PROCESSOR=${{ env.ARCH }} -GNinja  -Bbuild/${{ env.ARCH }} -DCMAKE_BUILD_TYPE=${{ matrix.config }} -DCMAKE_INSTALL_PREFIX=install/${{ env.ARCH }} -DCMAKE_VERBOSE_MAKEFILE=1 .
         cmake --build build/${{ env.ARCH }}
         cmake --install build/${{ env.ARCH }}
     - name: Use MSVC x86
@@ -169,7 +170,7 @@ jobs:
         ARCH: x86
       # dav1d: win7 required(atomic, GetThreadGroupAffinity)
       run: |
-        cmake -DMIN_SIZE=1 -DBUILD_VALD=0 -DBUILD_LIBASS=${{ matrix.dll }} -DBUILD_DAV1D=${{ matrix.dll }} -DCMAKE_SYSTEM_PROCESSOR=${{ env.ARCH }} -DCMAKE_SYSTEM_VERSION="6.1" -GNinja  -Bbuild/${{ env.ARCH }} -DCMAKE_BUILD_TYPE=${{ matrix.config }} -DCMAKE_INSTALL_PREFIX=install/${{ env.ARCH }} -DCMAKE_VERBOSE_MAKEFILE=1 .
+        cmake -DMIN_SIZE=1 -DBUILD_VALD=${{ matrix.dll }} -DBUILD_LIBASS=${{ matrix.dll }} -DBUILD_DAV1D=${{ matrix.dll }} -DCMAKE_SYSTEM_PROCESSOR=${{ env.ARCH }} -DCMAKE_SYSTEM_VERSION="6.1" -GNinja  -Bbuild/${{ env.ARCH }} -DCMAKE_BUILD_TYPE=${{ matrix.config }} -DCMAKE_INSTALL_PREFIX=install/${{ env.ARCH }} -DCMAKE_VERBOSE_MAKEFILE=1 .
         cmake --build build/${{ env.ARCH }}
         cmake --install build/${{ env.ARCH }}
     - name: Make SDK

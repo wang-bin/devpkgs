@@ -23,6 +23,7 @@ jobs:
       with:
         submodules: 'recursive'
         fetch-tags: true
+        fetch-depth: 0
    # - name: Setup Xcode
    #   run: sudo xcode-select -s /Applications/Xcode_12.4.app
     - name: Create Build Environment
@@ -78,6 +79,7 @@ jobs:
       with:
         submodules: 'recursive'
         fetch-tags: true
+        fetch-depth: 0
    # - name: Setup Xcode
    #   run: sudo xcode-select -s /Applications/Xcode_12.4.app
     - name: Create Build Environment
@@ -126,6 +128,7 @@ jobs:
       with:
         submodules: 'recursive'
         fetch-tags: true
+        fetch-depth: 0
     - name: Get libva
       shell: bash
       run: |
@@ -195,6 +198,7 @@ jobs:
       with:
         submodules: 'recursive'
         fetch-tags: true
+        fetch-depth: 0
     - name: 'Restore dep cache'
       id: dep-cache
       uses: actions/cache@v3
@@ -260,6 +264,7 @@ jobs:
       with:
         submodules: 'recursive'
         fetch-tags: true
+        fetch-depth: 0
     - uses: seanmiddleditch/gha-setup-ninja@master
     - uses: ilammy/setup-nasm@v1
     - name: Use MSVC x64
@@ -312,6 +317,7 @@ jobs:
       with:
         submodules: 'recursive'
         fetch-tags: true
+        fetch-depth: 0
     - name: 'Restore sysroot cache'
       id: sysroot-cache
       uses: actions/cache@v3
@@ -384,6 +390,7 @@ jobs:
       with:
         submodules: 'recursive'
         fetch-tags: true
+        fetch-depth: 0
     - name: 'Restore sysroot cache'
       id: sysroot-cache
       uses: actions/cache@v3
@@ -440,6 +447,7 @@ jobs:
       with:
         submodules: 'recursive'
         fetch-tags: true
+        fetch-depth: 0
     - name: Create Build Environment
       shell: bash
       run: sudo apt install -y cmake ninja-build nasm

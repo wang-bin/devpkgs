@@ -3,7 +3,7 @@ cmake_minimum_required(VERSION 3.15)
 # https://github.com/hozuki/libass-cmake/blob/master/cmake/libass.cmake
 
 PROJECT(libass VERSION 0.17.1)
-set(CMAKE_C_VISIBILITY_PRESET default) # hidden symbols can not be exported #?
+set(CMAKE_C_VISIBILITY_PRESET default) # hidden symbols can not be exported via libass.sym
 include(CheckCCompilerFlag)
 include(CheckIncludeFile)
 include(CheckTypeSize)

@@ -1,7 +1,6 @@
 cmake_minimum_required(VERSION 3.15)
 
 project(dav1d VERSION 1.2.1)
-set(CMAKE_C_VISIBILITY_PRESET default) # hidden symbols can not be exported
 include(CheckLibraryExists)
 include(CheckCCompilerFlag)
 include(CheckCSourceCompiles)
@@ -439,7 +438,7 @@ file(WRITE "${PROJECT_BINARY_DIR}/config.asm" "${CONF_ASM}")
 find_package(Git QUIET)
 if(GIT_FOUND)
   execute_process(
-      COMMAND "${GIT_EXECUTABLE}" describe --long --always
+      COMMAND "${GIT_EXECUTABLE}" describe --long --always # requires git clone depth > 1
       WORKING_DIRECTORY "${SRC_DIR}"
       RESULT_VARIABLE RET
       OUTPUT_VARIABLE VCS_TAG

@@ -35,3 +35,6 @@
 [submodule "src/dav1d"]
 	path = src/dav1d
 	url = https://github.com/videolan/dav1d.git
+[submodule "src/wolfssl"]
+	path = src/wolfssl
+	url = https://github.com/wolfSSL/wolfssl.git

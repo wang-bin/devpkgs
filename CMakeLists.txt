@@ -7,6 +7,7 @@ option(WITH_LTO_STATIC "Build static lib with LTO. Worse compiler compatibility"
 option(BUILD_LIBASS "Build libass" ON)
 option(BUILD_DAV1D "Build dav1d" ON)
 option(BUILD_VALD "Build libva loader" ON)
+option(BUILD_WOLFSSL "Build wolfssl" ON)
 option(WITH_VC_LTL "Build with VC-LTL crt for windows. Recommend to use with -DCMAKE_MSVC_RUNTIME_LIBRARY=MultiThreaded" OFF)
 set(VC_LTL_DIR "${CMAKE_CURRENT_SOURCE_DIR}/VC-LTL" CACHE STRING "VC-LTL dir")
 
@@ -46,6 +47,8 @@ set(CMAKE_C_VISIBILITY_PRESET hidden)
 set(CMAKE_CXX_VISIBILITY_PRESET hidden)
 set(CMAKE_VISIBILITY_INLINES_HIDDEN ON)
 
+message("CMAKE_SYSTEM_PROCESSOR: ${CMAKE_SYSTEM_PROCESSOR}")
+
 # ignore homebrew. affect find_...()
 set(CMAKE_SYSTEM_IGNORE_PREFIX_PATH "/opt/homebrew;/usr/local")
 #set(CMAKE_FIND_USE_INSTALL_PREFIX 1) # find_...()
@@ -73,6 +76,7 @@ set(CMAKE_REQUIRED_INCLUDES ${CMAKE_SOURCE_DIR}/dep/include)
 set(FT_DISABLE_BROTLI 1)
 set(FT_DISABLE_PNG 1)
 if(BUILD_LIBASS)
+  message("Configuring freetype...")
   add_subdirectory(src/freetype)
 endif()
 set(HB_BUILD_SUBSET 0)
@@ -80,29 +84,35 @@ if(IOS)
   set(HB_IOS 1)
 endif()
 if(BUILD_LIBASS)
+  message("Configuring harfbuzz...")
   add_subdirectory(src/harfbuzz)
 endif()
 add_subdirectory(projects)
 
 set(SNAPPY_BUILD_TESTS 0)
 set(SNAPPY_BUILD_BENCHMARKS 0)
+message("Configuring snappy...")
 add_subdirectory(src/snappy)
 
 if(WIN32)
+  message("Configuring zlib...")
   add_subdirectory(src/zlib)
 endif()
 
 if(WINDOWS_DESKTOP OR (APPLE AND NOT IOS AND NOT MACCATALYST))
+  message("Configuring glfw...")
   add_subdirectory(src/glfw)
 endif()
 
 if((WINDOWS_DESKTOP OR LINUX) AND (ARCH MATCHES "[aA][mM][dD]64" OR ARCH MATCHES "[xX].*64" OR ARCH MATCHES 86))
+  message("Configuring mfx_dispatch...")
   add_subdirectory(src/mfx_dispatch)
   # TODO: libmfx.pc
   set(BUILD_SHARED_LIBS OFF)
   #if(CMAKE_CROSSCOMPILING) # onevpl tools does not support c++17, and requires rtti
     set(BUILD_DEV_ONLY ON)
   #endif()
+  message("Configuring oneVPL...")
   add_subdirectory(src/oneVPL)
 endif()
 
@@ -110,10 +120,22 @@ endif()
 if(BUILD_VALD AND (LINUX OR WINDOWS_DESKTOP))
   check_include_file(va/va.h HAVE_VA_H)
   if(HAVE_VA_H)
+    message("Configuring libva_loader...")
     add_subdirectory(src/libva_loader)
   endif()
 endif()
 
+if(BUILD_WOLFSSL)
+  message("Configuring wolfssl...")
+  set(WOLFSSL_FILESYSTEM no)
+  # sni test: https://www.rmp-streaming.com/media/big-buck-bunny-360p.mp4  https://omc3i.codesandbox.io/ts/playlist.m3u8
+  set(WOLFSSL_SNI yes)
+  add_compile_definitions(NO_WOLFSSL_SERVER=1)
+  set(BUILD_SHARED_LIBS 0)
+  set(WOLFSSL_CRYPT_TESTS no)
+# macOS x64 build arm64: CMAKE_SYSTEM_PROCESSOR is x86_64 used CMAKE_SYSTEM_PROCESSOR by wolfssl is wrong
+  add_subdirectory(src/wolfssl)
+endif()
 
 # android INTERPROCEDURAL_OPTIMIZATION: cmake will force gold linker if CMAKE_ANDROID_NDK_VERSION is not set(e.g. use ndk's cmake toolchain file) or less than 22
 # TODO: INTERPROCEDURAL_OPTIMIZATION is thin lto, how to enable full lto?

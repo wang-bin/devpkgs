@@ -89,10 +89,12 @@ if(BUILD_LIBASS)
 endif()
 add_subdirectory(projects)
 
-set(SNAPPY_BUILD_TESTS 0)
-set(SNAPPY_BUILD_BENCHMARKS 0)
-message("Configuring snappy...")
-add_subdirectory(src/snappy)
+if(NOT CMAKE_SYSTEM_PROCESSOR MATCHES arm OR CMAKE_SYSTEM_PROCESSOR MATCHES 64) # arm64
+  set(SNAPPY_BUILD_TESTS 0)
+  set(SNAPPY_BUILD_BENCHMARKS 0)
+  message("Configuring snappy...")
+  add_subdirectory(src/snappy)
+endif()
 
 if(WIN32)
   message("Configuring zlib...")
@@ -148,6 +150,7 @@ endforeach()
 
 foreach(tgt snappy zlibstatic glfw
     va va_win32 va-drm va-x11 vdpau
+    wolfssl
     )
   if(TARGET ${tgt})
     set_target_properties(${tgt} PROPERTIES

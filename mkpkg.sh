@@ -47,6 +47,7 @@ mkdir -p dep/lib/Linux/{amd64,arm64,armhf}
 for A in amd64 arm64 armhf; do
     mv install/$A/lib/* dep/lib/Linux/$A/
 done
+find dep/lib/Linux -name libwolfssl.a -delete
 rm -rf install
 
 mkdir -p dep/lib/LinuxGnuStl/amd64

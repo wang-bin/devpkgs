@@ -322,6 +322,8 @@ find_package(Threads)
 
 if(NOT WIN32)
   add_compile_options(-DHAVE_DLSYM=1 -DHAVE_CLOCK_GETTIME=1 -DHAVE_POSIX_MEMALIGN=1)
+  #check_symbol_exists(elf_aux_info "sys/auxv.h" HAVE_ELF_AUX_INFO) #arm, ppc
+  #check_symbol_exists(getauxval "sys/auxv.h" HAVE_GETAUXVAL) #arm, ppc
   add_compile_options(-DHAVE_GETAUXVAL=1) # arm, android 18+
   add_compile_options($<$<COMPILE_LANGUAGE:C>:-D_GNU_SOURCE>)
   link_libraries(dl)
@@ -345,7 +347,7 @@ if(MSVC)
 
   add_compile_options_if_supported(-experimental:c11atomics)
 else()
-  add_compile_options("$<$<COMPILE_LANGUAGE:C>:-ffast-math;-Wundef;-Werror=vla;-Wno-uninitialized;-Wno-missing-field-initializers;-Wno-unused-parameter;-Wstrict-prototypes;-Werror=missing-prototypes;-Wshorten-64-to-32>")
+  add_compile_options("$<$<COMPILE_LANGUAGE:C>:-ffast-math;-Wundef;-Werror=vla;-Wno-uninitialized;-Wno-missing-field-initializers;-Wno-unused-parameter;-Wstrict-prototypes;-Werror=missing-prototypes>")
   if(ARCH_X86)
     add_compile_options("$<$<COMPILE_LANGUAGE:C>:-msse2;-mfpmath=sse>")
   endif()

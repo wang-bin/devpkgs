@@ -96,7 +96,7 @@ jobs:
         ARCH: arm64
       shell: bash
       run: |
-        cmake -DMIN_SIZE=1 -DHB_IOS=1 -DCMAKE_IOS_INSTALL_COMBINED=YES -DCMAKE_SYSTEM_NAME=iOS -DIOS_DEPLOYMENT_TARGET=8.0 -GNinja -DCMAKE_OSX_ARCHITECTURES=${{ env.ARCH }} -Bbuild/${{ env.ARCH }} -DCMAKE_VERBOSE_MAKEFILE=1 -DCMAKE_BUILD_TYPE=${{ matrix.config }} -DCMAKE_INSTALL_PREFIX=install/${{ env.ARCH }}
+        cmake -DMIN_SIZE=1 -DBUILD_WOLFSSL=1 -DHB_IOS=1 -DCMAKE_IOS_INSTALL_COMBINED=YES -DCMAKE_SYSTEM_NAME=iOS -DIOS_DEPLOYMENT_TARGET=8.0 -GNinja -DCMAKE_OSX_ARCHITECTURES=${{ env.ARCH }} -Bbuild/${{ env.ARCH }} -DCMAKE_VERBOSE_MAKEFILE=1 -DCMAKE_BUILD_TYPE=${{ matrix.config }} -DCMAKE_INSTALL_PREFIX=install/${{ env.ARCH }}
         cmake --build build/${{ env.ARCH }}
         cmake --install build/${{ env.ARCH }}
     - name: Make SDK
@@ -303,6 +303,58 @@ jobs:
         name: devpkgs-vs2022-${{ env.TARGET_OS }}-${{ matrix.config }}
         path: devpkgs-${{ env.TARGET_OS }}-${{ matrix.config }}-vs2022.7z
 
+  MinGW_GCC:
+    runs-on: ubuntu-latest
+    env:
+      TARGET_OS: mingw
+      ASM_NASM: /usr/bin/nasm
+    strategy:
+      fail-fast: false
+      matrix:
+        config: [MinSizeRel]
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        submodules: 'recursive'
+        fetch-tags: true
+        fetch-depth: 0
+    - name: Create Build Environment
+      shell: bash
+      run: |
+        wget https://apt.llvm.org/llvm.sh
+        chmod +x llvm.sh
+        sudo ./llvm.sh ${LLVM_VER} all
+        #bash -c "$(wget -O - https://apt.llvm.org/llvm.sh)"
+        sudo apt install -y cmake ninja-build nasm g++-mingw-w64
+    - name: Build host gen_tab # native build first
+      shell: bash
+      run: |
+        cmake -DFRIBIDI_GENTAB=1 -Bbuild/host -DCMAKE_VERBOSE_MAKEFILE=1 -DCMAKE_BUILD_TYPE=${{ matrix.config }}
+        cmake --build build/host -t gen_tab
+    - name: Build for x64
+      env:
+        ARCH: x64
+      shell: bash
+      run: |
+        cmake -DWITH_LTO=0 -DMIN_SIZE=1 -DBUILD_WOLFSSL=0 -DBUILD_LIBASS=1 -DUSE_LIBCXX=0 -DCMAKE_SYSTEM_PROCESSOR=${ARCH} -DCMAKE_TOOLCHAIN_FILE=$PWD/cmake/tools/llvm-mingw.cmake -GNinja -H$PWD -Bbuild/${ARCH} -DCMAKE_BUILD_TYPE=${{ matrix.config }} -DCMAKE_INSTALL_PREFIX=install/${ARCH} -DCMAKE_VERBOSE_MAKEFILE=1
+        cmake --build build/${{ env.ARCH }}
+        cmake --install build/${{ env.ARCH }}
+    - name: Build for x86
+      env:
+        ARCH: x86
+      shell: bash
+      run: |
+        cmake -DWITH_LTO=0 -DBUILD_DAV1D=0 -DMIN_SIZE=1 -DBUILD_WOLFSSL=0 -DBUILD_LIBASS=1 -DUSE_LIBCXX=0 -DCMAKE_SYSTEM_PROCESSOR=${ARCH} -DCMAKE_TOOLCHAIN_FILE=$PWD/cmake/tools/llvm-mingw.cmake -GNinja -H$PWD -Bbuild/${ARCH} -DCMAKE_BUILD_TYPE=${{ matrix.config }} -DCMAKE_INSTALL_PREFIX=install/${ARCH} -DCMAKE_VERBOSE_MAKEFILE=1
+        cmake --build build/${{ env.ARCH }}
+        cmake --install build/${{ env.ARCH }}
+    - name: Make SDK
+      shell: bash
+      run: 7z a -ssc -m0=lzma2 -mx=9 -ms=on -mf=off devpkgs-${{ env.TARGET_OS }}-${{ matrix.config }}.7z install
+    - name: Archieve SDK
+      uses: actions/upload-artifact@v3
+      with:
+        name: devpkgs-${{ env.TARGET_OS }}-${{ matrix.config }}
+        path: devpkgs-${{ env.TARGET_OS }}-${{ matrix.config }}.7z
 
   Linux_libcxx:
     runs-on: ubuntu-latest
@@ -349,7 +401,7 @@ jobs:
         ARCH: amd64
       shell: bash
       run: |
-        cmake -DMIN_SIZE=1 -DBUILD_LIBASS=0 -DUSE_LIBCXX=1 -DCMAKE_SYSTEM_PROCESSOR=${ARCH} -DCMAKE_TOOLCHAIN_FILE=$PWD/cmake/tools/linux.clang.cmake -DLINUX_SYSROOT=$PWD/sysroot -GNinja -H$PWD -Bbuild/${ARCH} -DCMAKE_BUILD_TYPE=${{ matrix.config }} -DCMAKE_INSTALL_PREFIX=install/${ARCH} -DCMAKE_VERBOSE_MAKEFILE=1
+        cmake -DMIN_SIZE=1 -DBUILD_WOLFSSL=1 -DBUILD_LIBASS=0 -DUSE_LIBCXX=1 -DCMAKE_SYSTEM_PROCESSOR=${ARCH} -DCMAKE_TOOLCHAIN_FILE=$PWD/cmake/tools/linux.clang.cmake -DLINUX_SYSROOT=$PWD/sysroot -GNinja -H$PWD -Bbuild/${ARCH} -DCMAKE_BUILD_TYPE=${{ matrix.config }} -DCMAKE_INSTALL_PREFIX=install/${ARCH} -DCMAKE_VERBOSE_MAKEFILE=1
         cmake --build build/${{ env.ARCH }}
         cmake --install build/${{ env.ARCH }}
     - name: Build for arm64
@@ -357,7 +409,7 @@ jobs:
         ARCH: arm64
       shell: bash
       run: |
-        cmake -DMIN_SIZE=1 -DBUILD_LIBASS=0 -DUSE_LIBCXX=1 -DCMAKE_SYSTEM_PROCESSOR=${ARCH} -DCMAKE_TOOLCHAIN_FILE=$PWD/cmake/tools/linux.clang.cmake -DLINUX_SYSROOT=$PWD/sysroot -GNinja -H$PWD -Bbuild/${ARCH} -DCMAKE_BUILD_TYPE=${{ matrix.config }} -DCMAKE_INSTALL_PREFIX=install/${ARCH} -DCMAKE_VERBOSE_MAKEFILE=1
+        cmake -DMIN_SIZE=1 -DBUILD_WOLFSSL=1 -DBUILD_LIBASS=0 -DUSE_LIBCXX=1 -DCMAKE_SYSTEM_PROCESSOR=${ARCH} -DCMAKE_TOOLCHAIN_FILE=$PWD/cmake/tools/linux.clang.cmake -DLINUX_SYSROOT=$PWD/sysroot -GNinja -H$PWD -Bbuild/${ARCH} -DCMAKE_BUILD_TYPE=${{ matrix.config }} -DCMAKE_INSTALL_PREFIX=install/${ARCH} -DCMAKE_VERBOSE_MAKEFILE=1
         cmake --build build/${{ env.ARCH }}
         cmake --install build/${{ env.ARCH }}
     - name: Build for armhf
@@ -365,7 +417,7 @@ jobs:
         ARCH: armhf
       shell: bash
       run: |
-        cmake -DMIN_SIZE=1 -DBUILD_LIBASS=0 -DUSE_LIBCXX=1 -DCMAKE_SYSTEM_PROCESSOR=${ARCH} -DCMAKE_TOOLCHAIN_FILE=$PWD/cmake/tools/linux.clang.cmake -DLINUX_SYSROOT=$PWD/sysroot -GNinja -H$PWD -Bbuild/${ARCH} -DCMAKE_BUILD_TYPE=${{ matrix.config }} -DCMAKE_INSTALL_PREFIX=install/${ARCH} -DCMAKE_VERBOSE_MAKEFILE=1
+        cmake -DMIN_SIZE=1 -DBUILD_WOLFSSL=1 -DBUILD_LIBASS=0 -DUSE_LIBCXX=1 -DCMAKE_SYSTEM_PROCESSOR=${ARCH} -DCMAKE_TOOLCHAIN_FILE=$PWD/cmake/tools/linux.clang.cmake -DLINUX_SYSROOT=$PWD/sysroot -GNinja -H$PWD -Bbuild/${ARCH} -DCMAKE_BUILD_TYPE=${{ matrix.config }} -DCMAKE_INSTALL_PREFIX=install/${ARCH} -DCMAKE_VERBOSE_MAKEFILE=1
         cmake --build build/${{ env.ARCH }}
         cmake --install build/${{ env.ARCH }}
     - name: Make SDK
@@ -422,7 +474,7 @@ jobs:
         ARCH: amd64
       shell: bash
       run: |
-        cmake -DMIN_SIZE=1 -DBUILD_LIBASS=0 -DUSE_LIBCXX=0 -DCMAKE_SYSTEM_PROCESSOR=${ARCH} -DCMAKE_TOOLCHAIN_FILE=$PWD/cmake/tools/linux.clang.cmake -DLINUX_SYSROOT=$PWD/sysroot -GNinja -H$PWD -Bbuild/${ARCH} -DCMAKE_BUILD_TYPE=${{ matrix.config }} -DCMAKE_INSTALL_PREFIX=install/${ARCH} -DCMAKE_VERBOSE_MAKEFILE=1
+        cmake -DMIN_SIZE=1 -DBUILD_WOLFSSL=1 -DBUILD_LIBASS=0 -DUSE_LIBCXX=0 -DCMAKE_SYSTEM_PROCESSOR=${ARCH} -DCMAKE_TOOLCHAIN_FILE=$PWD/cmake/tools/linux.clang.cmake -DLINUX_SYSROOT=$PWD/sysroot -GNinja -H$PWD -Bbuild/${ARCH} -DCMAKE_BUILD_TYPE=${{ matrix.config }} -DCMAKE_INSTALL_PREFIX=install/${ARCH} -DCMAKE_VERBOSE_MAKEFILE=1
         cmake --build build/${{ env.ARCH }}
         cmake --install build/${{ env.ARCH }}
     - name: Make SDK
@@ -464,7 +516,7 @@ jobs:
       run: |
         MIN_API_64=21
         [ $MIN_API -gt 21 ] && MIN_API_64=$MIN_API
-        cmake -DMIN_SIZE=1 -DANDROID_LD=lld -DANDROID_ABI=${ARCH} -DANDROID_PLATFORM=android-${MIN_API_64} -DANDROID_TOOLCHAIN=clang -DANDROID_STL=c++_shared -DANDROID_PIE=ON -DCMAKE_TOOLCHAIN_FILE=$ANDROID_NDK_LATEST_HOME/build/cmake/android.toolchain.cmake -GNinja -H$PWD -Bbuild/${ARCH} -DCMAKE_BUILD_TYPE=${{ matrix.config }} -DCMAKE_INSTALL_PREFIX=install/${ARCH} -DCMAKE_VERBOSE_MAKEFILE=1
+        cmake -DMIN_SIZE=1 -DBUILD_WOLFSSL=1 -DANDROID_LD=lld -DANDROID_ABI=${ARCH} -DANDROID_PLATFORM=android-${MIN_API_64} -DANDROID_TOOLCHAIN=clang -DANDROID_STL=c++_shared -DANDROID_PIE=ON -DCMAKE_TOOLCHAIN_FILE=$ANDROID_NDK_LATEST_HOME/build/cmake/android.toolchain.cmake -GNinja -H$PWD -Bbuild/${ARCH} -DCMAKE_BUILD_TYPE=${{ matrix.config }} -DCMAKE_INSTALL_PREFIX=install/${ARCH} -DCMAKE_VERBOSE_MAKEFILE=1
         cmake --build build/${{ env.ARCH }}
         cmake --install build/${{ env.ARCH }}
     - name: Build for armeabi-v7a
@@ -473,7 +525,7 @@ jobs:
         MIN_API: 19
       shell: bash
       run: |
-        cmake -DMIN_SIZE=1 -DANDROID_LD=lld -DANDROID_ABI=${ARCH} -DANDROID_PLATFORM=android-${MIN_API} -DANDROID_TOOLCHAIN=clang -DANDROID_STL=c++_shared -DANDROID_PIE=ON -DCMAKE_TOOLCHAIN_FILE=$ANDROID_NDK_LATEST_HOME/build/cmake/android.toolchain.cmake -GNinja -H$PWD -Bbuild/${ARCH} -DCMAKE_BUILD_TYPE=${{ matrix.config }} -DCMAKE_INSTALL_PREFIX=install/${ARCH} -DCMAKE_VERBOSE_MAKEFILE=1
+        cmake -DMIN_SIZE=1 -DBUILD_WOLFSSL=1 -DANDROID_LD=lld -DANDROID_ABI=${ARCH} -DANDROID_PLATFORM=android-${MIN_API} -DANDROID_TOOLCHAIN=clang -DANDROID_STL=c++_shared -DANDROID_PIE=ON -DCMAKE_TOOLCHAIN_FILE=$ANDROID_NDK_LATEST_HOME/build/cmake/android.toolchain.cmake -GNinja -H$PWD -Bbuild/${ARCH} -DCMAKE_BUILD_TYPE=${{ matrix.config }} -DCMAKE_INSTALL_PREFIX=install/${ARCH} -DCMAKE_VERBOSE_MAKEFILE=1
         cmake --build build/${{ env.ARCH }}
         cmake --install build/${{ env.ARCH }}
 #    - name: Build for x86_64 # yasm error

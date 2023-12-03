@@ -14,14 +14,17 @@
         {
             "label": "config.host",
             "args": [
+                "-DWITH_LTO_STATIC=0",
                 "-DCMAKE_BUILD_TYPE=MinSizeRel",
                 "-H${workspaceRoot}",
                 "-B${workspaceRoot}/build/host",
                 "-GNinja",
                 //"-DCMAKE_OSX_DEPLOYMENT_TARGET=10.9",
-                //"-DCMAKE_OSX_ARCHITECTURES=x86_64",
+                //"-DCMAKE_OSX_ARCHITECTURES=arm64",
                 "-DFRIBIDI_GENTAB=1",
-                "-DMIN_SIZE=0",
+                //"-DBUILD_SHARED_LIBS=0",
+                //"-DDAV1D_NO_ASM=1",
+                "-DMIN_SIZE=1",
                 "-DCMAKE_INSTALL_PREFIX=${workspaceRoot}/build/host/install"
             ],
             "problemMatcher": []
@@ -32,6 +35,35 @@
             "args": [
                 "--build",
                 "${workspaceRoot}/build/host"
+            ],
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "problemMatcher": []
+        },
+        {
+            "label": "config.macosx64",
+            "args": [
+                "-DCMAKE_BUILD_TYPE=MinSizeRel",
+                "-H${workspaceRoot}",
+                "-B${workspaceRoot}/build/macosx64",
+                "-GNinja",
+                "-DCMAKE_OSX_DEPLOYMENT_TARGET=10.9",
+                "-DCMAKE_OSX_ARCHITECTURES=x86_64",
+                "-DFRIBIDI_GENTAB=1",
+                "-DBUILD_SHARED_LIBS=0",
+                "-DMIN_SIZE=1",
+                "-DCMAKE_INSTALL_PREFIX=${workspaceRoot}/build/macosx64/install"
+            ],
+            "problemMatcher": []
+        },
+        {
+            "label": "build.macosx64",
+            "command": "cmake",
+            "args": [
+                "--build",
+                "${workspaceRoot}/build/macosx64"
             ],
             "group": {
                 "kind": "build",
@@ -161,7 +193,7 @@
                 "-B${workspaceRoot}/build/android-x64",
                 "-GNinja",
                 "-DCMAKE_INSTALL_PREFIX=${workspaceRoot}/build/android-x64/install",
-                "-DCMAKE_ANDROID_NDK_VERSION=25.1", //INTERPROCEDURAL_OPTIMIZATION: cmake will force gold linker if CMAKE_ANDROID_NDK_VERSION is not set(e.g. use ndk's cmake toolchain file) or less than 22
+                //"-DCMAKE_ANDROID_NDK_VERSION=25.1", //INTERPROCEDURAL_OPTIMIZATION: cmake will force gold linker if CMAKE_ANDROID_NDK_VERSION is not set(e.g. use ndk's cmake toolchain file) or less than 22
             ],
             "problemMatcher": []
         },
@@ -191,7 +223,7 @@
                 "-B${workspaceRoot}/build/android-arm64",
                 "-GNinja",
                 "-DCMAKE_INSTALL_PREFIX=${workspaceRoot}/build/android-arm64/install",
-                "-DCMAKE_ANDROID_NDK_VERSION=25.1", //INTERPROCEDURAL_OPTIMIZATION: cmake will force gold linker if CMAKE_ANDROID_NDK_VERSION is not set(e.g. use ndk's cmake toolchain file) or less than 22
+                //"-DCMAKE_ANDROID_NDK_VERSION=25.1", //INTERPROCEDURAL_OPTIMIZATION: cmake will force gold linker if CMAKE_ANDROID_NDK_VERSION is not set(e.g. use ndk's cmake toolchain file) or less than 22
             ],
             "problemMatcher": []
         },
@@ -201,6 +233,36 @@
             "args": [
                 "--build",
                 "${workspaceRoot}/build/android-arm64"
+            ],
+            "group": "build",
+            "problemMatcher": []
+        },
+        {
+            "label": "config.android.armv7",
+            "args": [
+                "-DCMAKE_TOOLCHAIN_FILE=${env:ANDROID_NDK}/build/cmake/android.toolchain.cmake",
+                "-DCMAKE_BUILD_TYPE=MinSizeRel",
+                "-DANDROID_TOOLCHAIN=clang",
+                "-DANDROID_STL=c++_shared",
+                "-DANDROID_ABI=armeabi-v7a",
+                "-DANDROID_PLATFORM=android-21",
+                "-DANDROID_PIE=ON",
+                "-DCMAKE_C_COMPILER_FRONTEND_VARIANT=GNU",
+                "-DCMAKE_CXX_COMPILER_FRONTEND_VARIANT=GNU",
+                "-H${workspaceRoot}",
+                "-B${workspaceRoot}/build/android-armv7",
+                "-GNinja",
+                "-DCMAKE_INSTALL_PREFIX=${workspaceRoot}/build/android-armv7/install",
+                //"-DCMAKE_ANDROID_NDK_VERSION=25.1", //INTERPROCEDURAL_OPTIMIZATION: cmake will force gold linker if CMAKE_ANDROID_NDK_VERSION is not set(e.g. use ndk's cmake toolchain file) or less than 22
+            ],
+            "problemMatcher": []
+        },
+        {
+            "label": "build.android.armv7",
+            "command": "cmake",
+            "args": [
+                "--build",
+                "${workspaceRoot}/build/android-armv7"
             ],
             "group": "build",
             "problemMatcher": []
@@ -295,6 +357,7 @@
         {
             "label": "config.linux64.clang",
             "args": [
+                //"-DWITH_LTO=0",
                 "-DCMAKE_TOOLCHAIN_FILE=${workspaceRoot}/cmake/tools/linux.clang.cmake",
                 "-DCMAKE_BUILD_TYPE=MinSizeRel",
                 "-H${workspaceRoot}",
@@ -406,6 +469,7 @@
                 "-DCMAKE_BUILD_TYPE=MinSizeRel",
                 "-H${workspaceRoot}",
                 "-B${workspaceRoot}/build/mingw64",
+                "-DCMAKE_INSTALL_PREFIX=${workspaceRoot}/build/mingw64/install",
                 "-GNinja",
                 "-DCMAKE_TOOLCHAIN_FILE=${workspaceRoot}/cmake/tools/llvm-mingw.cmake",
                 "-DCMAKE_CROSSCOMPILING=1",
@@ -413,6 +477,7 @@
                 "-DFT_DISABLE_BROTLI=1",
                 "-DFT_DISABLE_PNG=1",
                 "-DHB_BUILD_SUBSET=0",
+                "-DBUILD_WOLFSSL=0"
             ],
             "problemMatcher": []
         },
@@ -422,6 +487,33 @@
             "args": [
                 "--build",
                 "${workspaceRoot}/build/mingw64"
+            ],
+            "group": "build"
+        },
+        {
+            "label": "config.mingw32",
+            "args": [
+                "-DCMAKE_BUILD_TYPE=MinSizeRel",
+                "-H${workspaceRoot}",
+                "-B${workspaceRoot}/build/mingw32",
+                "-DCMAKE_INSTALL_PREFIX=${workspaceRoot}/build/mingw32/install",
+                "-GNinja",
+                "-DCMAKE_TOOLCHAIN_FILE=${workspaceRoot}/cmake/tools/llvm-mingw.cmake",
+                "-DCMAKE_CROSSCOMPILING=1",
+                "-DCMAKE_SYSTEM_PROCESSOR=x86",
+                "-DFT_DISABLE_BROTLI=1",
+                "-DFT_DISABLE_PNG=1",
+                "-DHB_BUILD_SUBSET=0",
+                "-DBUILD_WOLFSSL=0"
+            ],
+            "problemMatcher": []
+        },
+        {
+            "label": "build.mingw32",
+            "command": "cmake",
+            "args": [
+                "--build",
+                "${workspaceRoot}/build/mingw32"
             ],
             "group": "build"
         },
@@ -596,7 +688,8 @@
         {
             "label": "config.win64.clang",
             "args": [
-                "-DCMAKE_BUILD_TYPE=MinSizeRel",
+                //"-DDAV1D_NO_ASM=0",
+                "-DCMAKE_BUILD_TYPE=Release",
                 "-H${workspaceRoot}",
                 "-B${workspaceRoot}/build/win64.clang",
                 "-DCMAKE_TOOLCHAIN_FILE=${workspaceRoot}/cmake/tools/windows.clang.cmake",
@@ -604,9 +697,7 @@
                 "-DCMAKE_INSTALL_PREFIX=${workspaceRoot}/build/win64.clang/install",
                 //"-DCMAKE_C_COMPILER=clang-cl",
                 "-DCMAKE_MSVC_RUNTIME_LIBRARY=MultiThreadedDLL",
-                "-DFT_DISABLE_BROTLI=1",
-                "-DFT_DISABLE_PNG=1",
-                "-DHB_BUILD_SUBSET=0",
+                //"-DWITH_VC_LTL=0",
                 "-GNinja"
             ],
             "problemMatcher": []
@@ -617,6 +708,32 @@
             "args": [
                 "--build",
                 "${workspaceRoot}/build/win64.clang"
+            ],
+            "group": "build",
+            "problemMatcher": []
+        },
+        {
+            "label": "config.win64ltl.clang",
+            "args": [
+                "-DCMAKE_BUILD_TYPE=MinSizeRel",
+                "-H${workspaceRoot}",
+                "-B${workspaceRoot}/build/win64ltl.clang",
+                "-DCMAKE_TOOLCHAIN_FILE=${workspaceRoot}/cmake/tools/windows.clang.cmake",
+                "-DCMAKE_SYSTEM_PROCESSOR=x64",
+                "-DCMAKE_INSTALL_PREFIX=${workspaceRoot}/build/win64ltl.clang/install",
+                //"-DCMAKE_C_COMPILER=clang-cl",
+                "-DCMAKE_MSVC_RUNTIME_LIBRARY=MultiThreaded",
+                "-DWITH_VC_LTL=1",
+                "-GNinja"
+            ],
+            "problemMatcher": []
+        },
+        {
+            "label": "build.win64ltl.clang",
+            "command": "cmake",
+            "args": [
+                "--build",
+                "${workspaceRoot}/build/win64ltl.clang"
             ],
             "group": "build",
             "problemMatcher": []

@@ -96,7 +96,7 @@ jobs:
         ARCH: arm64
       shell: bash
       run: |
-        cmake -DMIN_SIZE=1 -DBUILD_WOLFSSL=1 -DHB_IOS=1 -DCMAKE_IOS_INSTALL_COMBINED=YES -DCMAKE_SYSTEM_NAME=iOS -DIOS_DEPLOYMENT_TARGET=8.0 -GNinja -DCMAKE_OSX_ARCHITECTURES=${{ env.ARCH }} -Bbuild/${{ env.ARCH }} -DCMAKE_VERBOSE_MAKEFILE=1 -DCMAKE_BUILD_TYPE=${{ matrix.config }} -DCMAKE_INSTALL_PREFIX=install/${{ env.ARCH }}
+        cmake -DMIN_SIZE=1 -DBUILD_WOLFSSL=1 -DHB_IOS=1 -DCMAKE_IOS_INSTALL_COMBINED=YES -DCMAKE_SYSTEM_NAME=iOS -DCMAKE_OSX_DEPLOYMENT_TARGET=8.0 -GNinja -DCMAKE_OSX_ARCHITECTURES=${{ env.ARCH }} -Bbuild/${{ env.ARCH }} -DCMAKE_VERBOSE_MAKEFILE=1 -DCMAKE_BUILD_TYPE=${{ matrix.config }} -DCMAKE_INSTALL_PREFIX=install/${{ env.ARCH }}
         cmake --build build/${{ env.ARCH }}
         cmake --install build/${{ env.ARCH }}
     - name: Make SDK

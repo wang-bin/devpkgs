@@ -9,7 +9,6 @@ include(CheckIncludeFile)
 include(CheckTypeSize)
 
 
-set(PROJECT_VERSION ${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_MICRO})
 set(SO_VERSION 9) #FIXME:
 
 set(CMAKE_FIND_ROOT_PATH_MODE_PROGRAM ONLY)
@@ -184,6 +183,10 @@ else()
   message(WARNING "libass will not built with asm")
 endif()
 
+set(PUBLIC_HEADERS
+  ${SRC_DIR}/libass/ass.h
+  ${SRC_DIR}/libass/ass_types.h
+  )
 if(MSVC)
   set(RUNTIME_NAME libass)
 else() # mingw
@@ -201,6 +204,20 @@ set_target_properties(ass PROPERTIES
   #LINK_SEARCH_START_STATIC 1
   LINK_DEF_FILE_FLAG libass/libass.sym # win def only? no effect?
 )
+
+if(IOS OR TVOS OR MACCATALYST)
+  set_target_properties(ass PROPERTIES
+    MACOSX_RPATH ON
+    FRAMEWORK ON
+    MACOSX_FRAMEWORK_IDENTIFIER com.mediadevkit.${PROJECT_NAME}
+    MACOSX_FRAMEWORK_BUNDLE_VERSION ${PROJECT_VERSION}
+    MACOSX_FRAMEWORK_SHORT_VERSION_STRING ${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}
+    #MACOSX_FRAMEWORK_INFO_PLIST
+    #XCODE_ATTRIBUTE_CODE_SIGN_IDENTITY
+    FRAMEWORK_VERSION A # codesign assumes framework version is A
+    PUBLIC_HEADER "${PUBLIC_HEADERS}"
+  )
+endif()
 
 include_directories(
   ${SRC_DIR}/libass
@@ -269,7 +286,9 @@ install(FILES
 install(TARGETS ass EXPORT ${PROJECT_NAME}
   RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR} # *.dll
   LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
-  ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR})
+  ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+  FRAMEWORK DESTINATION ${CMAKE_INSTALL_LIBDIR}
+  )
 install(EXPORT ${PROJECT_NAME} DESTINATION lib/cmake)
 
 set(prefix ${CMAKE_INSTALL_PREFIX})

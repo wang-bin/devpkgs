@@ -548,9 +548,13 @@ jobs:
 
   pkg:
     runs-on: ubuntu-latest
-    needs: [macOS, Windows_VS2022, Windows_VS2022_LTL, UWP_VS2022, Linux_libcxx, Linux_gnustl]
+    needs: [iOS, macOS, Windows_VS2022, Windows_VS2022_LTL, UWP_VS2022, Linux_libcxx, Linux_gnustl]
     steps:
     - uses: actions/checkout@v4
+    - name: Download iOS libs
+      uses: actions/download-artifact@v3
+      with:
+        name: devpkgs-iOS-MinSizeRel
     - name: Download macOS libs
       uses: actions/download-artifact@v3
       with:

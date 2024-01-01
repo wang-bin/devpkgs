@@ -152,29 +152,89 @@
             "problemMatcher": []
         },
         {
-            "label": "config.iOS.device",
+            "label": "config.iOS",
             "args": [
                 "-DCMAKE_BUILD_TYPE=MinSizeRel",
                 "-H${workspaceRoot}",
-                "-B${workspaceRoot}/build/iOS.device",
+                "-B${workspaceRoot}/build/iOS",
                 "-GNinja",
                 "-DCMAKE_SYSTEM_NAME=iOS", // explicitly set system name will enable CMAKE_CROSSCOMPILING
                 //"-DCMAKE_OSX_SYSROOT=iphoneos",
                 //"-DCMAKE_TOOLCHAIN_FILE=${workspaceRoot}/cmake/tools/ios.cmake",
-                "-DCMAKE_INSTALL_PREFIX=${workspaceRoot}/build/iOS.device/install",
+                "-DCMAKE_INSTALL_PREFIX=${workspaceRoot}/build/iOS/install",
                 "-DCMAKE_OSX_ARCHITECTURES=arm64",
                 //"-DIOS_ARCH=arm64",
+                "-DBUILD_WOLFSSL=1",
                 "-DHB_IOS=1",
                 "-DIOS_BITCODE=0"
             ],
             "problemMatcher": []
         },
         {
-            "label": "build.iOS.device",
+            "label": "build.iOS",
             "command": "cmake",
             "args": [
                 "--build",
-                "${workspaceRoot}/build/iOS.device"
+                "${workspaceRoot}/build/iOS"
+            ],
+            "group": "build",
+            "problemMatcher": []
+        },
+        {
+            "label": "config.tvOS",
+            "args": [
+                "-DCMAKE_BUILD_TYPE=MinSizeRel",
+                "-H${workspaceRoot}",
+                "-B${workspaceRoot}/build/tvOS",
+                "-GNinja",
+                "-DCMAKE_SYSTEM_NAME=tvOS", // explicitly set system name will enable CMAKE_CROSSCOMPILING
+                //"-DCMAKE_OSX_SYSROOT=appletvos",
+                "-DCMAKE_INSTALL_PREFIX=${workspaceRoot}/build/tvOS/install",
+                "-DCMAKE_OSX_ARCHITECTURES=arm64",
+                "-DMIN_SIZE=1",
+                "-DBUILD_WOLFSSL=1",
+                "-DHB_IOS=1",
+                "-DIOS_BITCODE=0"
+            ],
+            "problemMatcher": []
+        },
+        {
+            "label": "build.tvOS",
+            "command": "cmake",
+            "args": [
+                "--build",
+                "${workspaceRoot}/build/tvOS"
+            ],
+            "group": "build",
+            "problemMatcher": []
+        },
+        {
+            "label": "config.tvOSSimulator",
+            "args": [
+                "-DCMAKE_SYSTEM_NAME=tvOS",
+                "-DCMAKE_OSX_ARCHITECTURES=x86_64;arm64",
+                "-DCMAKE_OSX_DEPLOYMENT_TARGET=8.0",
+                "-DCMAKE_XCODE_ATTRIBUTE_ONLY_ACTIVE_ARCH=NO",
+                "-DCMAKE_IOS_INSTALL_COMBINED=YES",
+                "-DCMAKE_OSX_SYSROOT=appletvsimulator",
+                "-DCMAKE_BUILD_TYPE=MinSizeRel",
+                "-DCMAKE_INSTALL_PREFIX=${workspaceRoot}/build/tvOSSimulator/install",
+                "-H${workspaceRoot}",
+                "-B${workspaceRoot}/build/tvOSSimulator",
+                "-GNinja",
+                "-DMIN_SIZE=1",
+                "-DBUILD_WOLFSSL=1",
+                "-DDAV1D_NO_ASM=1",
+                "-DLIBASS_NO_ASM=1",
+            ],
+            "problemMatcher": []
+        },
+        {
+            "label": "build.tvOSSimulator",
+            "command": "cmake",
+            "args": [
+                "--build",
+                "${workspaceRoot}/build/tvOSSimulator"
             ],
             "group": "build",
             "problemMatcher": []

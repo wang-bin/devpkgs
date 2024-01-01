@@ -68,4 +68,9 @@ tar xvf devpkgs-iOS-MinSizeRel.tar.xz
 mv install/arm64/lib/*.framework dep/lib/iOS/
 rm -rf install
 
+mkdir -p dep/lib/tvOS
+tar xvf devpkgs-tvOS-MinSizeRel.tar.xz
+mv install/arm64/lib/*.framework dep/lib/tvOS/
+rm -rf install
+
 7z a -ssc -m0=lzma2 -mx=9 -ms=on -mf=off dep.7z dep

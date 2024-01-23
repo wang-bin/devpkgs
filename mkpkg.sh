@@ -57,6 +57,12 @@ for A in amd64; do
 done
 rm -rf install
 
+mkdir -p dep/lib/android/{arm64-v8a,armeabi-v7a}
+7z x -y devpkgs-android-MinSizeRel.7z
+for A in arm64-v8a armeabi-v7a; do
+    mv install/$A/lib/*.so dep/lib/android/$A/
+done
+rm -rf install
 
 mkdir -p dep/lib/macOS
 tar xvf devpkgs-macOS-MinSizeRel.tar.xz

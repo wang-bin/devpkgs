@@ -503,6 +503,14 @@ jobs:
     - name: Create Build Environment
       shell: bash
       run: sudo apt install -y cmake ninja-build nasm
+    - name: Apply patches
+      shell: bash
+      run: |
+        cd src/libass
+        for p in $(find ../../projects/libass/patches -name "*.patch"); do
+            echo $p
+            patch -p1 -N < $p
+        done
     - name: Build host gen_tab # native build first
       shell: bash
       run: |
@@ -518,6 +526,7 @@ jobs:
         cmake -DMIN_SIZE=1 -DBUILD_WOLFSSL=1 -DANDROID_LD=lld -DANDROID_ABI=${ARCH} -DANDROID_PLATFORM=android-${MIN_API_64} -DANDROID_TOOLCHAIN=clang -DANDROID_STL=c++_shared -DANDROID_PIE=ON -DCMAKE_TOOLCHAIN_FILE=$ANDROID_NDK_LATEST_HOME/build/cmake/android.toolchain.cmake -GNinja -H$PWD -Bbuild/${ARCH} -DCMAKE_BUILD_TYPE=${{ matrix.config }} -DCMAKE_INSTALL_PREFIX=install/${ARCH} -DCMAKE_VERBOSE_MAKEFILE=1
         cmake --build build/${{ env.ARCH }}
         cmake --install build/${{ env.ARCH }}
+        $ANDROID_NDK_LATEST_HOME/toolchains/llvm/prebuilt/linux-x86_64/bin/llvm-strip install/${ARCH}/lib/*.so
     - name: Build for armeabi-v7a
       env:
         ARCH: armeabi-v7a
@@ -527,6 +536,7 @@ jobs:
         cmake -DMIN_SIZE=1 -DBUILD_WOLFSSL=1 -DANDROID_LD=lld -DANDROID_ABI=${ARCH} -DANDROID_PLATFORM=android-${MIN_API} -DANDROID_TOOLCHAIN=clang -DANDROID_STL=c++_shared -DANDROID_PIE=ON -DCMAKE_TOOLCHAIN_FILE=$ANDROID_NDK_LATEST_HOME/build/cmake/android.toolchain.cmake -GNinja -H$PWD -Bbuild/${ARCH} -DCMAKE_BUILD_TYPE=${{ matrix.config }} -DCMAKE_INSTALL_PREFIX=install/${ARCH} -DCMAKE_VERBOSE_MAKEFILE=1
         cmake --build build/${{ env.ARCH }}
         cmake --install build/${{ env.ARCH }}
+        $ANDROID_NDK_LATEST_HOME/toolchains/llvm/prebuilt/linux-x86_64/bin/llvm-strip install/${ARCH}/lib/*.so
 #    - name: Build for x86_64 # yasm error
 #      env:
 #        ARCH: x86_64
@@ -535,6 +545,7 @@ jobs:
 #        cmake -DMIN_SIZE=1 -DCMAKE_ANDROID_NDK_VERSION=25.1 -DANDROID_LD=lld -DANDROID_ABI=${ARCH} -DANDROID_PLATFORM=android-${MIN_API} -DANDROID_TOOLCHAIN=clang -DANDROID_STL=c++_shared -DANDROID_PIE=ON -DCMAKE_TOOLCHAIN_FILE=$ANDROID_NDK_LATEST_HOME/build/cmake/android.toolchain.cmake -GNinja -H$PWD -Bbuild/${ARCH} -DCMAKE_BUILD_TYPE=${{ matrix.config }} -DCMAKE_INSTALL_PREFIX=install/${ARCH} -DCMAKE_VERBOSE_MAKEFILE=1
 #        cmake --build build/${{ env.ARCH }}
 #        cmake --install build/${{ env.ARCH }}
+#        $ANDROID_NDK_LATEST_HOME/toolchains/llvm/prebuilt/linux-x86_64/bin/llvm-strip install/${ARCH}/lib/*.so
     - name: Make SDK
       shell: bash
       run: 7z a  -ssc -m0=lzma2 -mx=9 -ms=on -mf=off devpkgs-${{ env.TARGET_OS }}-${{ matrix.config }}.7z install
@@ -582,6 +593,10 @@ jobs:
       uses: actions/download-artifact@v3
       with:
         name: devpkgs-linux-MinSizeRel
+    - name: Download android libs
+      uses: actions/download-artifact@v3
+      with:
+        name: devpkgs-android-MinSizeRel
     - name: Download linux gnustl libs      # for avbuild
       uses: actions/download-artifact@v3
       with:

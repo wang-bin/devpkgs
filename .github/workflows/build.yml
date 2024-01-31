@@ -61,7 +61,7 @@ jobs:
         rm -rf install/lib/{x86_64,arm64}
         tar Jcvf devpkgs-${{ env.TARGET_OS }}-${{ matrix.config }}.tar.xz install
     - name: Archieve SDK
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: devpkgs-${{ env.TARGET_OS }}-${{ matrix.config }}
         path: devpkgs-${{ env.TARGET_OS }}-${{ matrix.config }}*.tar.xz
@@ -103,7 +103,7 @@ jobs:
       run: |
         tar Jcvf devpkgs-${{ matrix.os }}-${{ matrix.config }}.tar.xz install
     - name: Archieve SDK
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: devpkgs-${{ matrix.os }}-${{ matrix.config }}
         path: devpkgs-${{ matrix.os }}-${{ matrix.config }}.tar.xz
@@ -179,7 +179,7 @@ jobs:
         cp -avf dep/include/va install/include/
         7z a  -ssc -m0=lzma2 -mx=9 -ms=on -mf=off devpkgs-${{ env.TARGET_OS }}-${{ matrix.config }}-vs2022.7z install
     - name: Archieve SDK
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: devpkgs-vs2022-${{ env.TARGET_OS }}-${{ matrix.config }}
         path: devpkgs-${{ env.TARGET_OS }}-${{ matrix.config }}-vs2022*.7z
@@ -201,7 +201,7 @@ jobs:
         fetch-depth: 0
     - name: 'Restore dep cache'
       id: dep-cache
-      uses: actions/cache@v3
+      uses: actions/cache@v4
       with:
         path: VC-LTL
         key: dep-${{ vars.VC_LTL_VER }}
@@ -245,7 +245,7 @@ jobs:
       shell: bash
       run: 7z a  -ssc -m0=lzma2 -mx=9 -ms=on -mf=off devpkgs-${{ env.TARGET_OS }}-${{ matrix.config }}-vs2022-ltl.7z install
     - name: Archieve SDK
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: devpkgs-vs2022-ltl-${{ env.TARGET_OS }}-${{ matrix.config }}
         path: devpkgs-${{ env.TARGET_OS }}-${{ matrix.config }}-vs2022-ltl*.7z
@@ -297,7 +297,7 @@ jobs:
       shell: bash
       run: 7z a  -ssc -m0=lzma2 -mx=9 -ms=on -mf=off devpkgs-${{ env.TARGET_OS }}-${{ matrix.config }}-vs2022.7z install
     - name: Archieve SDK
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: devpkgs-vs2022-${{ env.TARGET_OS }}-${{ matrix.config }}
         path: devpkgs-${{ env.TARGET_OS }}-${{ matrix.config }}-vs2022.7z
@@ -350,7 +350,7 @@ jobs:
       shell: bash
       run: 7z a -ssc -m0=lzma2 -mx=9 -ms=on -mf=off devpkgs-${{ env.TARGET_OS }}-${{ matrix.config }}.7z install
     - name: Archieve SDK
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: devpkgs-${{ env.TARGET_OS }}-${{ matrix.config }}
         path: devpkgs-${{ env.TARGET_OS }}-${{ matrix.config }}.7z
@@ -372,7 +372,7 @@ jobs:
         fetch-depth: 0
     - name: 'Restore sysroot cache'
       id: sysroot-cache
-      uses: actions/cache@v3
+      uses: actions/cache@v4
       with:
         path: ./sysroot
         key: sysroot-${{ env.TARGET_OS }}-${{ secrets.LINUX_SYSROOT_ID }}
@@ -423,7 +423,7 @@ jobs:
       shell: bash
       run: 7z a  -ssc -m0=lzma2 -mx=9 -ms=on -mf=off devpkgs-${{ env.TARGET_OS }}-${{ matrix.config }}.7z install
     - name: Archieve SDK
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: devpkgs-${{ env.TARGET_OS }}-${{ matrix.config }}
         path: devpkgs-${{ env.TARGET_OS }}-${{ matrix.config }}*.7z
@@ -445,7 +445,7 @@ jobs:
         fetch-depth: 0
     - name: 'Restore sysroot cache'
       id: sysroot-cache
-      uses: actions/cache@v3
+      uses: actions/cache@v4
       with:
         path: ./sysroot
         key: sysroot-${{ env.TARGET_OS }}-${{ secrets.LINUX_SYSROOT_ID }}
@@ -480,7 +480,7 @@ jobs:
       shell: bash
       run: 7z a -ssc -m0=lzma2 -mx=9 -ms=on -mf=off devpkgs-${{ env.TARGET_OS }}-${{ matrix.config }}-gnustl.7z install
     - name: Archieve SDK
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: devpkgs-${{ env.TARGET_OS }}-${{ matrix.config }}-gnustl
         path: devpkgs-${{ env.TARGET_OS }}-${{ matrix.config }}-gnustl.7z
@@ -550,7 +550,7 @@ jobs:
       shell: bash
       run: 7z a  -ssc -m0=lzma2 -mx=9 -ms=on -mf=off devpkgs-${{ env.TARGET_OS }}-${{ matrix.config }}.7z install
     - name: Archieve SDK
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: devpkgs-${{ env.TARGET_OS }}-${{ matrix.config }}
         path: devpkgs-${{ env.TARGET_OS }}-${{ matrix.config }}*.7z
@@ -562,43 +562,43 @@ jobs:
     steps:
     - uses: actions/checkout@v4
     - name: Download iOS libs
-      uses: actions/download-artifact@v3
+      uses: actions/download-artifact@v4
       with:
         name: devpkgs-iOS-MinSizeRel
     - name: Download tvOS libs
-      uses: actions/download-artifact@v3
+      uses: actions/download-artifact@v4
       with:
         name: devpkgs-tvOS-MinSizeRel
     - name: Download macOS libs
-      uses: actions/download-artifact@v3
+      uses: actions/download-artifact@v4
       with:
         name: devpkgs-macOS-MinSizeRel
     - name: Download win32 MD release libs
-      uses: actions/download-artifact@v3
+      uses: actions/download-artifact@v4
       with:
         name: devpkgs-vs2022-windows-desktop-Release
     - name: Download win32 MD debug libs
-      uses: actions/download-artifact@v3
+      uses: actions/download-artifact@v4
       with:
         name: devpkgs-vs2022-windows-desktop-Debug
     - name: Download win32 ltl MT release libs
-      uses: actions/download-artifact@v3
+      uses: actions/download-artifact@v4
       with:
         name: devpkgs-vs2022-ltl-windows-desktop-Release
     - name: Download uwp MD release libs
-      uses: actions/download-artifact@v3
+      uses: actions/download-artifact@v4
       with:
         name: devpkgs-vs2022-uwp-Release
     - name: Download linux libcxx libs      # for libmdk
-      uses: actions/download-artifact@v3
+      uses: actions/download-artifact@v4
       with:
         name: devpkgs-linux-MinSizeRel
     - name: Download android libs
-      uses: actions/download-artifact@v3
+      uses: actions/download-artifact@v4
       with:
         name: devpkgs-android-MinSizeRel
     - name: Download linux gnustl libs      # for avbuild
-      uses: actions/download-artifact@v3
+      uses: actions/download-artifact@v4
       with:
         name: devpkgs-linux-MinSizeRel-gnustl
     - name: Make libmdk dep
@@ -606,7 +606,7 @@ jobs:
         chmod +x mkpkg.sh
         ./mkpkg.sh
     - name: Archieve SDK
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: libmdk-dep
         path: dep.7z

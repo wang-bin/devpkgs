@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.15)
 
-project(dav1d VERSION 1.2.1)
+project(dav1d VERSION 1.4.0)
 include(CheckLibraryExists)
 include(CheckCCompilerFlag)
 include(CheckCSourceCompiles)
@@ -64,6 +64,9 @@ set(ARCH_AARCH64 0)
 set(ARCH_X86 0) # x86 32/64 bit
 set(ARCH_X86_64 0)
 set(ARCH_X86_32 0)
+set(ARCH_RISCV 0)  # ARCH_RV32/64
+set(ARCH_LOONGARCH 0)
+set(ARCH_LOONGARCH64 0)
 math(EXPR BITS "8 * ${CMAKE_SIZEOF_VOID_P}")
 
 # System architecture detection
@@ -94,7 +97,7 @@ if(X86MATCH GREATER "-1")
     set(ARCH_X86_32 1)
   endif()
 endif()
-message("BITS:${BITS} ARCH:${ARCH}, ARCH_X86: ${ARCH_X86}, ARCH_AARCH64:${ARCH_AARCH64}, ARCH_ARM:${ARCH_ARM}, ARCH_X86_64:${ARCH_X86_64}. X86MATCH:${X86MATCH}")
+message("BITS:${BITS} ARCH:${ARCH}, ARCH_X86: ${ARCH_X86}, ARCH_AARCH64:${ARCH_AARCH64}, ARCH_ARM:${ARCH_ARM}, ARCH_X86_64:${ARCH_X86_64}, ARCH_RISCV:${ARCH_RISCV}, ARCH_LOONGARCH64:${ARCH_LOONGARCH64}. X86MATCH:${X86MATCH}")
 
 if(APPLE)
   set(ASM_PREFIX_FLAG -DPREFIX) # func_.* => _func_.*
@@ -278,6 +281,34 @@ if(NOT DAV1D_NO_ASM)
       add_compile_options(-DHAVE_AS_FUNC=$<BOOL:HAVE_AS_FUNC>)
     endif()
   endif()
+  if(ARCH_RISCV)
+    set(HAVE_ASM 1)
+    set(ARCH_RV${BITS} 1)
+    set(SRC_LIST_C
+      ${SRC_DIR}/src/riscv/cpu.c
+      )
+    set(SRC_LIST_ASM
+      ${SRC_DIR}/src/riscv/${BITS}/itx.S
+    )
+  endif()
+  if(ARCH_LOONGARCH)
+    set(ARCH_LOONGARCH${BITS} 1)
+    set(HAVE_ASM 1)
+    set(SRC_LIST_C
+      ${SRC_DIR}/src/loongarch/cpu.c
+      )
+    set(SRC_LIST_ASM
+      ${SRC_DIR}/src/loongarch/mc.S
+      ${SRC_DIR}/src/loongarch/loopfilter.S
+      ${SRC_DIR}/src/loongarch/looprestoration.S
+      ${SRC_DIR}/src/loongarch/msac.S
+      ${SRC_DIR}/src/loongarch/refmvs.S
+      ${SRC_DIR}/src/loongarch/itx.S
+    )
+    set(SRC_LIST_TMP # TODO: add static/object targets per bit depth: -DBITDEPTH=8/16 + flags
+      ${SRC_DIR}/src/loongarch/looprestoration_tmpl.c
+    )
+  endif()
 endif()
 add_compile_options(-DTRIM_DSP_FUNCTIONS=1)
 
@@ -430,7 +461,7 @@ set(PACKAGE_VERSION "${PROJECT_VERSION}")
 
 
 add_definitions(-DPIC=1) # x86 only?
-foreach(VAR HAVE_ASM ARCH_X86 ARCH_AARCH64 ARCH_X86_64 ARCH_X86_32 ARCH_ARM)
+foreach(VAR HAVE_ASM ARCH_X86 ARCH_AARCH64 ARCH_X86_64 ARCH_X86_32 ARCH_ARM ARCH_RISCV ARCH_LOONGARCH ARCH_LOONGARCH64)
   add_definitions(-D${VAR}=${${VAR}})
 endforeach()
 

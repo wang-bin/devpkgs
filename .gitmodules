@@ -38,3 +38,6 @@
 [submodule "src/wolfssl"]
 	path = src/wolfssl
 	url = https://github.com/wolfSSL/wolfssl.git
+[submodule "src/uavs3d"]
+	path = src/uavs3d
+	url = https://github.com/uavs3/uavs3d.git

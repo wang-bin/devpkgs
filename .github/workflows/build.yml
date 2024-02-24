@@ -502,7 +502,9 @@ jobs:
         fetch-depth: 0
     - name: Create Build Environment
       shell: bash
-      run: sudo apt install -y cmake ninja-build nasm
+      run: |
+        sudo apt update
+        sudo apt install -y cmake ninja-build nasm
     - name: Apply patches
       shell: bash
       run: |
@@ -558,7 +560,7 @@ jobs:
 
   pkg:
     runs-on: ubuntu-latest
-    needs: [iOS, macOS, Windows_VS2022, Windows_VS2022_LTL, UWP_VS2022, Linux_libcxx, Linux_gnustl]
+    needs: [iOS, macOS, Android, Windows_VS2022, Windows_VS2022_LTL, UWP_VS2022, Linux_libcxx, Linux_gnustl]
     steps:
     - uses: actions/checkout@v4
     - name: Download iOS libs

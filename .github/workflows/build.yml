@@ -55,6 +55,7 @@ jobs:
         mkdir -p install/lib
         lipo -create install/{arm64,x86_64}/lib/libass.dylib -o install/lib/libass.dylib
         lipo -create install/{arm64,x86_64}/lib/libdav1d.dylib -o install/lib/libdav1d.dylib
+        strip -u -r install/lib/*.dylib
         lipo -create install/{arm64,x86_64}/lib/libsnappy.a -o install/lib/libsnappy.a
         lipo -create install/{arm64,x86_64}/lib/libglfw3.a -o install/lib/libglfw3.a
         ln -sf libglfw3.a install/lib/libglfw.a
@@ -101,6 +102,9 @@ jobs:
     - name: Make SDK
       shell: bash
       run: |
+        for d in $(find install/arm64/lib -name "*.framework" |xargs); do
+            strip -u -r "$d"/*
+        done
         tar Jcvf devpkgs-${{ matrix.os }}-${{ matrix.config }}.tar.xz install
     - name: Archieve SDK
       uses: actions/upload-artifact@v4
@@ -403,6 +407,7 @@ jobs:
         cmake -DMIN_SIZE=1 -DBUILD_WOLFSSL=1 -DBUILD_LIBASS=0 -DUSE_LIBCXX=1 -DCMAKE_SYSTEM_PROCESSOR=${ARCH} -DCMAKE_TOOLCHAIN_FILE=$PWD/cmake/tools/linux.clang.cmake -DLINUX_SYSROOT=$PWD/sysroot -GNinja -H$PWD -Bbuild/${ARCH} -DCMAKE_BUILD_TYPE=${{ matrix.config }} -DCMAKE_INSTALL_PREFIX=install/${ARCH} -DCMAKE_VERBOSE_MAKEFILE=1
         cmake --build build/${{ env.ARCH }}
         cmake --install build/${{ env.ARCH }}
+        llvm-strip-${LLVM_VER} install/${{ env.ARCH }}/lib/*.so
     - name: Build for arm64
       env:
         ARCH: arm64
@@ -411,6 +416,7 @@ jobs:
         cmake -DMIN_SIZE=1 -DBUILD_WOLFSSL=1 -DBUILD_LIBASS=0 -DUSE_LIBCXX=1 -DCMAKE_SYSTEM_PROCESSOR=${ARCH} -DCMAKE_TOOLCHAIN_FILE=$PWD/cmake/tools/linux.clang.cmake -DLINUX_SYSROOT=$PWD/sysroot -GNinja -H$PWD -Bbuild/${ARCH} -DCMAKE_BUILD_TYPE=${{ matrix.config }} -DCMAKE_INSTALL_PREFIX=install/${ARCH} -DCMAKE_VERBOSE_MAKEFILE=1
         cmake --build build/${{ env.ARCH }}
         cmake --install build/${{ env.ARCH }}
+        llvm-strip-${LLVM_VER} install/${{ env.ARCH }}/lib/*.so
     - name: Build for armhf
       env:
         ARCH: armhf
@@ -419,6 +425,7 @@ jobs:
         cmake -DMIN_SIZE=1 -DBUILD_WOLFSSL=1 -DBUILD_LIBASS=0 -DUSE_LIBCXX=1 -DCMAKE_SYSTEM_PROCESSOR=${ARCH} -DCMAKE_TOOLCHAIN_FILE=$PWD/cmake/tools/linux.clang.cmake -DLINUX_SYSROOT=$PWD/sysroot -GNinja -H$PWD -Bbuild/${ARCH} -DCMAKE_BUILD_TYPE=${{ matrix.config }} -DCMAKE_INSTALL_PREFIX=install/${ARCH} -DCMAKE_VERBOSE_MAKEFILE=1
         cmake --build build/${{ env.ARCH }}
         cmake --install build/${{ env.ARCH }}
+        llvm-strip-${LLVM_VER} install/${{ env.ARCH }}/lib/*.so
     - name: Make SDK
       shell: bash
       run: 7z a  -ssc -m0=lzma2 -mx=9 -ms=on -mf=off devpkgs-${{ env.TARGET_OS }}-${{ matrix.config }}.7z install
@@ -476,6 +483,7 @@ jobs:
         cmake -DMIN_SIZE=1 -DBUILD_WOLFSSL=1 -DBUILD_LIBASS=0 -DUSE_LIBCXX=0 -DCMAKE_SYSTEM_PROCESSOR=${ARCH} -DCMAKE_TOOLCHAIN_FILE=$PWD/cmake/tools/linux.clang.cmake -DLINUX_SYSROOT=$PWD/sysroot -GNinja -H$PWD -Bbuild/${ARCH} -DCMAKE_BUILD_TYPE=${{ matrix.config }} -DCMAKE_INSTALL_PREFIX=install/${ARCH} -DCMAKE_VERBOSE_MAKEFILE=1
         cmake --build build/${{ env.ARCH }}
         cmake --install build/${{ env.ARCH }}
+        llvm-strip-${LLVM_VER} install/${{ env.ARCH }}/lib/*.so
     - name: Make SDK
       shell: bash
       run: 7z a -ssc -m0=lzma2 -mx=9 -ms=on -mf=off devpkgs-${{ env.TARGET_OS }}-${{ matrix.config }}-gnustl.7z install

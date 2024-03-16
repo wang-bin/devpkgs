@@ -407,7 +407,7 @@ jobs:
         cmake -DMIN_SIZE=1 -DBUILD_WOLFSSL=1 -DBUILD_LIBASS=0 -DUSE_LIBCXX=1 -DCMAKE_SYSTEM_PROCESSOR=${ARCH} -DCMAKE_TOOLCHAIN_FILE=$PWD/cmake/tools/linux.clang.cmake -DLINUX_SYSROOT=$PWD/sysroot -GNinja -H$PWD -Bbuild/${ARCH} -DCMAKE_BUILD_TYPE=${{ matrix.config }} -DCMAKE_INSTALL_PREFIX=install/${ARCH} -DCMAKE_VERBOSE_MAKEFILE=1
         cmake --build build/${{ env.ARCH }}
         cmake --install build/${{ env.ARCH }}
-        llvm-strip-${LLVM_VER} install/${{ env.ARCH }}/lib/*.so
+        llvm-strip-${LLVM_VER} install/${{ env.ARCH }}/lib/*.so.*.*.*
     - name: Build for arm64
       env:
         ARCH: arm64
@@ -416,7 +416,7 @@ jobs:
         cmake -DMIN_SIZE=1 -DBUILD_WOLFSSL=1 -DBUILD_LIBASS=0 -DUSE_LIBCXX=1 -DCMAKE_SYSTEM_PROCESSOR=${ARCH} -DCMAKE_TOOLCHAIN_FILE=$PWD/cmake/tools/linux.clang.cmake -DLINUX_SYSROOT=$PWD/sysroot -GNinja -H$PWD -Bbuild/${ARCH} -DCMAKE_BUILD_TYPE=${{ matrix.config }} -DCMAKE_INSTALL_PREFIX=install/${ARCH} -DCMAKE_VERBOSE_MAKEFILE=1
         cmake --build build/${{ env.ARCH }}
         cmake --install build/${{ env.ARCH }}
-        llvm-strip-${LLVM_VER} install/${{ env.ARCH }}/lib/*.so
+        llvm-strip-${LLVM_VER} install/${{ env.ARCH }}/lib/*.so.*.*.*
     - name: Build for armhf
       env:
         ARCH: armhf
@@ -425,7 +425,7 @@ jobs:
         cmake -DMIN_SIZE=1 -DBUILD_WOLFSSL=1 -DBUILD_LIBASS=0 -DUSE_LIBCXX=1 -DCMAKE_SYSTEM_PROCESSOR=${ARCH} -DCMAKE_TOOLCHAIN_FILE=$PWD/cmake/tools/linux.clang.cmake -DLINUX_SYSROOT=$PWD/sysroot -GNinja -H$PWD -Bbuild/${ARCH} -DCMAKE_BUILD_TYPE=${{ matrix.config }} -DCMAKE_INSTALL_PREFIX=install/${ARCH} -DCMAKE_VERBOSE_MAKEFILE=1
         cmake --build build/${{ env.ARCH }}
         cmake --install build/${{ env.ARCH }}
-        llvm-strip-${LLVM_VER} install/${{ env.ARCH }}/lib/*.so
+        llvm-strip-${LLVM_VER} install/${{ env.ARCH }}/lib/*.so.*.*.*
     - name: Make SDK
       shell: bash
       run: 7z a  -ssc -m0=lzma2 -mx=9 -ms=on -mf=off devpkgs-${{ env.TARGET_OS }}-${{ matrix.config }}.7z install
@@ -483,7 +483,7 @@ jobs:
         cmake -DMIN_SIZE=1 -DBUILD_WOLFSSL=1 -DBUILD_LIBASS=0 -DUSE_LIBCXX=0 -DCMAKE_SYSTEM_PROCESSOR=${ARCH} -DCMAKE_TOOLCHAIN_FILE=$PWD/cmake/tools/linux.clang.cmake -DLINUX_SYSROOT=$PWD/sysroot -GNinja -H$PWD -Bbuild/${ARCH} -DCMAKE_BUILD_TYPE=${{ matrix.config }} -DCMAKE_INSTALL_PREFIX=install/${ARCH} -DCMAKE_VERBOSE_MAKEFILE=1
         cmake --build build/${{ env.ARCH }}
         cmake --install build/${{ env.ARCH }}
-        llvm-strip-${LLVM_VER} install/${{ env.ARCH }}/lib/*.so
+        llvm-strip-${LLVM_VER} install/${{ env.ARCH }}/lib/*.so.*.*.*
     - name: Make SDK
       shell: bash
       run: 7z a -ssc -m0=lzma2 -mx=9 -ms=on -mf=off devpkgs-${{ env.TARGET_OS }}-${{ matrix.config }}-gnustl.7z install

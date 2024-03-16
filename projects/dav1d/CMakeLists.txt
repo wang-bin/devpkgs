@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.15)
 
-project(dav1d VERSION 1.4.0)
+project(dav1d VERSION 1.4.1)
 include(CheckLibraryExists)
 include(CheckCCompilerFlag)
 include(CheckCSourceCompiles)
@@ -353,9 +353,14 @@ find_package(Threads)
 
 if(NOT WIN32)
   add_compile_options(-DHAVE_DLSYM=1 -DHAVE_CLOCK_GETTIME=1 -DHAVE_POSIX_MEMALIGN=1)
-  #check_symbol_exists(elf_aux_info "sys/auxv.h" HAVE_ELF_AUX_INFO) #arm, ppc
-  #check_symbol_exists(getauxval "sys/auxv.h" HAVE_GETAUXVAL) #arm, ppc
-  add_compile_options(-DHAVE_GETAUXVAL=1) # arm, android 18+
+  check_symbol_exists(elf_aux_info "sys/auxv.h" HAVE_ELF_AUX_INFO) #arm, ppc
+  if(HAVE_ELF_AUX_INFO)
+    add_compile_options(-DHAVE_ELF_AUX_INFO=${HAVE_ELF_AUX_INFO})
+  endif()
+  check_symbol_exists(getauxval "sys/auxv.h" HAVE_GETAUXVAL) #linux arm, ppc
+  if(HAVE_GETAUXVAL)
+    add_compile_options(-DHAVE_GETAUXVAL=${HAVE_GETAUXVAL}) # arm, android 18+
+  endif()
   add_compile_options($<$<COMPILE_LANGUAGE:C>:-D_GNU_SOURCE>)
   link_libraries(dl)
   if(NOT ANDROID)

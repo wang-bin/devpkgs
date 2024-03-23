@@ -423,7 +423,7 @@ set_target_properties(${PROJECT_NAME} PROPERTIES
   ##LINK_DEF_FILE_FLAG libass/libass.sym # win def only? no effect?
 )
 
-if(IOS OR TVOS OR MACCATALYST)
+if(APPLE AND NOT CMAKE_SYSTEM_NAME STREQUAL Darwin)
   set_target_properties(${PROJECT_NAME} PROPERTIES
     MACOSX_RPATH ON
     FRAMEWORK ON

@@ -101,7 +101,7 @@ if(MSVC)
   add_subdirectory(src/zlib)
 endif()
 
-if(WINDOWS_DESKTOP OR (APPLE AND NOT IOS AND NOT MACCATALYST AND NOT TVOS))
+if(WINDOWS_DESKTOP OR (CMAKE_SYSTEM_NAME STREQUAL Darwin AND NOT MACCATALYST)) # win32, macOS
   message("Configuring glfw...")
   add_subdirectory(src/glfw)
 endif()

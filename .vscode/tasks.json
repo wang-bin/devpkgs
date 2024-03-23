@@ -166,7 +166,6 @@
                 //"-DIOS_ARCH=arm64",
                 "-DBUILD_WOLFSSL=1",
                 "-DHB_IOS=1",
-                "-DIOS_BITCODE=0"
             ],
             "problemMatcher": []
         },
@@ -194,7 +193,6 @@
                 "-DMIN_SIZE=1",
                 "-DBUILD_WOLFSSL=1",
                 "-DHB_IOS=1",
-                "-DIOS_BITCODE=0"
             ],
             "problemMatcher": []
         },
@@ -235,6 +233,68 @@
             "args": [
                 "--build",
                 "${workspaceRoot}/build/tvOSSimulator"
+            ],
+            "group": "build",
+            "problemMatcher": []
+        },
+        {
+            "label": "config.visionOS",
+            "args": [
+                "-DCMAKE_SYSTEM_NAME=visionOS",
+                "-DCMAKE_OSX_ARCHITECTURES=arm64",
+                "-DCMAKE_OSX_DEPLOYMENT_TARGET=1.0", // VT since 10.2
+                "-DCMAKE_XCODE_ATTRIBUTE_ONLY_ACTIVE_ARCH=NO",
+                //"-DCMAKE_IOS_INSTALL_COMBINED=YES",
+                //"-DCMAKE_OSX_SYSROOT=xros",
+                "-DCMAKE_BUILD_TYPE=MinSizeRel",
+                "-DCMAKE_INSTALL_PREFIX=${workspaceRoot}/build/xrOS/install",
+                "-H${workspaceRoot}",
+                "-B${workspaceRoot}/build/xrOS",
+                "-GNinja",
+                "-DMIN_SIZE=1",
+                "-DBUILD_WOLFSSL=1",
+                "-DHB_IOS=1",
+            ],
+            "problemMatcher": []
+        },
+        {
+            "label": "build.visionOS",
+            "command": "cmake",
+            "args": [
+                "--build",
+                "${workspaceRoot}/build/xrOS"
+            ],
+            "group": "build",
+            "problemMatcher": []
+        },
+        {
+            "label": "config.xrSimulator",
+            "args": [
+                "-DCMAKE_SYSTEM_NAME=visionOS",
+ // libclang_rt.xros.a': fat file missing arch 'x86_64', file has 'armv7,armv7s,armv7k,arm64,arm64e'. ld: warning: no platform load command found in asm.o
+                "-DCMAKE_OSX_ARCHITECTURES=arm64",
+                "-DCMAKE_OSX_DEPLOYMENT_TARGET=1.0", // VT since 10.2
+                "-DCMAKE_XCODE_ATTRIBUTE_ONLY_ACTIVE_ARCH=NO",
+                //"-DCMAKE_IOS_INSTALL_COMBINED=YES",
+                "-DCMAKE_OSX_SYSROOT=xrsimulator",
+                "-DCMAKE_BUILD_TYPE=MinSizeRel",
+                "-DCMAKE_INSTALL_PREFIX=${workspaceRoot}/build/xrSimulator/install",
+                "-H${workspaceRoot}",
+                "-B${workspaceRoot}/build/xrSimulator",
+                "-GNinja",
+                "-DMIN_SIZE=1",
+                "-DBUILD_WOLFSSL=1",
+                "-DDAV1D_NO_ASM=1",
+                "-DLIBASS_NO_ASM=1",
+            ],
+            "problemMatcher": []
+        },
+        {
+            "label": "build.xrSimulator",
+            "command": "cmake",
+            "args": [
+                "--build",
+                "${workspaceRoot}/build/xrSimulator"
             ],
             "group": "build",
             "problemMatcher": []

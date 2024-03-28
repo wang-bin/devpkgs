@@ -236,6 +236,13 @@ check_include_file(dirent.h HAVE_DIRENT_H)
 if(NOT HAVE_DIRENT_H)
   include_directories(compat)
 endif()
+if(MSVC)
+  set(HAVE_STRDUP 0)
+else()
+  set(HAVE_STRDUP 1)
+endif()
+#HAVE_AS_FUNC
+#HAVE_C11_GENERIC
 
 if(TARGET fribidi_static)
     list(APPEND EXTRA_LIBS fribidi_static)
@@ -318,10 +325,11 @@ endforeach()
 
 # define if 1
 foreach(VAR
+    HAVE_STRDUP
     CONFIG_ANDROID
     CONFIG_CORETEXT CONFIG_FONTCONFIG CONFIG_DIRECTWRITE CONFIG_FREETYPE CONFIG_FRIBIDI CONFIG_ICONV CONFIG_LIBPNG CONFIG_RASTERIZER CONFIG_LARGE_TILES)
   if(${VAR})
     set(CONF "${CONF}\n#define ${VAR} ${${VAR}}")
   endif()
 endforeach()
-file(WRITE "${PROJECT_BINARY_DIR}/config.h" "${CONF}")
+file(GENERATE OUTPUT "${PROJECT_BINARY_DIR}/config.h" CONTENT "${CONF}")

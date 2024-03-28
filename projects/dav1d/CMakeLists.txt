@@ -479,13 +479,13 @@ foreach(VAR CONFIG_8BPC CONFIG_16BPC CONFIG_LOG ENDIANNESS_BIG ARCH_PPC64LE)
   endif()
   set(CONF "${CONF}\n#define ${VAR} ${${VAR}}")
 endforeach()
-file(WRITE "${PROJECT_BINARY_DIR}/config.h" "${CONF}")
+file(GENERATE OUTPUT "${PROJECT_BINARY_DIR}/config.h" CONTENT "${CONF}")
 
 # private_prefix, PIC, PREFIX
 foreach(VAR STACK_ALIGNMENT ARCH_X86_64 ARCH_X86_32 FORCE_VEX_ENCODING)
   set(CONF_ASM "${CONF_ASM}\n%define ${VAR} ${${VAR}}")
 endforeach()
-file(WRITE "${PROJECT_BINARY_DIR}/config.asm" "${CONF_ASM}")
+file(GENERATE OUTPUT "${PROJECT_BINARY_DIR}/config.asm" CONTENT "${CONF_ASM}")
 
 find_package(Git QUIET)
 if(GIT_FOUND)

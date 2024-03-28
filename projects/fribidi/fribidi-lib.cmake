@@ -4,7 +4,7 @@ list(APPEND FRIBIDI_SRC
 )
 
 file(READ ${SRC_DIR}/lib/fribidi.def DEF_CONTENT)
-file(WRITE "${PROJECT_BINARY_DIR}/${PROJECT_NAME}.def" "EXPORTS\n${DEF_CONTENT}")
+file(GENERATE OUTPUT "${PROJECT_BINARY_DIR}/${PROJECT_NAME}.def" CONTENT "EXPORTS\n${DEF_CONTENT}")
 add_library(fribidi_static STATIC ${FRIBIDI_SRC})
 target_compile_definitions(fribidi_static PRIVATE FRIBIDI_LIB_STATIC)
 set(FRIBIDI_TARGETS fribidi_static)

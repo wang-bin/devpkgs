@@ -4,6 +4,10 @@ project(devpkgs C CXX ASM)
 
 option(WITH_LTO "Build with LTO" ON)
 option(WITH_LTO_STATIC "Build static lib with LTO. Worse compiler compatibility" OFF)
+option(BUILD_FREETYPE "Build freetype" ON)
+option(BUILD_FRIBIDI "Build fribidi" ON)
+option(BUILD_HARFBUZZ "Build harfbuzz" ON)
+option(BUILD_EXPAT "Build expat" ON)
 option(BUILD_LIBASS "Build libass" ON)
 option(BUILD_DAV1D "Build dav1d" ON)
 option(BUILD_VALD "Build libva loader" ON)
@@ -75,7 +79,7 @@ set(CMAKE_REQUIRED_INCLUDES ${CMAKE_SOURCE_DIR}/dep/include)
 
 set(FT_DISABLE_BROTLI 1)
 set(FT_DISABLE_PNG 1)
-if(BUILD_LIBASS)
+if(BUILD_LIBASS OR BUILD_FREETYPE)
   message("Configuring freetype...")
   add_subdirectory(src/freetype)
 endif()
@@ -83,9 +87,21 @@ set(HB_BUILD_SUBSET 0)
 if(IOS OR MACCATALYST OR TVOS)
   set(HB_IOS 1)
 endif()
-if(BUILD_LIBASS)
+if(BUILD_LIBASS OR BUILD_HARFBUZZ)
   message("Configuring harfbuzz...")
   add_subdirectory(src/harfbuzz)
+endif()
+
+# expat options via macro expat_shy_set
+set(EXPAT_BUILD_TOOLS 0)
+set(EXPAT_BUILD_EXAMPLES 0)
+set(EXPAT_BUILD_TESTS 0)
+set(EXPAT_SHARED_LIBS 0) #BUILD_SHARED_LIBS
+set(EXPAT_BUILD_DOCS 0)
+set(EXPAT_MIN_SIZE 1)
+if(BUILD_LIBASS OR BUILD_EXPAT)
+  message("Configuring expat...")
+  add_subdirectory(src/libexpat/expat)
 endif()
 add_subdirectory(projects)
 
@@ -141,7 +157,7 @@ endif()
 
 # android INTERPROCEDURAL_OPTIMIZATION: cmake will force gold linker if CMAKE_ANDROID_NDK_VERSION is not set(e.g. use ndk's cmake toolchain file) or less than 22
 # TODO: INTERPROCEDURAL_OPTIMIZATION is thin lto, how to enable full lto?
-foreach(tgt freetype harfbuzz fribidi_shared fribidi_static ass zlib)
+foreach(tgt expat freetype harfbuzz fribidi_shared fribidi_static ass zlib)
   if(TARGET ${tgt})
     set_target_properties(${tgt} PROPERTIES
         INTERPROCEDURAL_OPTIMIZATION ${WITH_LTO})

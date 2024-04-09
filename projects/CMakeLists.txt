@@ -1,5 +1,5 @@
 set(SRC_DIR ${CMAKE_SOURCE_DIR}/src/fribidi)
-if(BUILD_LIBASS)
+if(BUILD_LIBASS OR BUILD_FRIBIDI)
   message("Configuring fribidi...")
   add_subdirectory(fribidi)
 endif()

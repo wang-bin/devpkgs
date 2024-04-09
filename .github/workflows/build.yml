@@ -23,9 +23,9 @@ jobs:
       with:
         submodules: 'recursive'
         fetch-tags: true
-        fetch-depth: 0
+        fetch-depth: 0 # depth 0: whole history. used by git describe(lib version detail)
     - name: Setup Xcode
-      run: sudo xcode-select -s /Applications/Xcode_15.2.app
+      run: sudo xcode-select -s /Applications/Xcode_15.3.app
     - name: Create Build Environment
       shell: bash
       run: |
@@ -82,7 +82,7 @@ jobs:
         fetch-tags: true
         fetch-depth: 0
     - name: Setup Xcode
-      run: sudo xcode-select -s /Applications/Xcode_15.2.app
+      run: sudo xcode-select -s /Applications/Xcode_15.3.app
     - name: Create Build Environment
       shell: bash
       run: brew install ninja nasm
@@ -515,28 +515,58 @@ jobs:
       shell: bash
       run: |
         sudo apt update
-        sudo apt install -y cmake ninja-build nasm
-    - name: Apply patches
-      shell: bash
-      run: |
-        cd src/libass
-        for p in $(find ../../projects/libass/patches -name "*.patch"); do
-            echo $p
-            patch -p1 -N < $p
-        done
+        sudo apt install -y cmake ninja-build nasm autopoint gperf
+        sudo apt remove -y libfontconfig-dev uuid-dev # affects FindFontconfig, and PKG_FONTCONFIG_STATIC_LIBRARIES
+#    - name: Apply patches
+#      shell: bash
+#      run: |
+#        cd src/libass
+#        for p in $(find ../../projects/libass/patches -name "*.patch"); do
+#            echo $p
+#            patch -p1 -N < $p
+#        done
     - name: Build host gen_tab # native build first
       shell: bash
       run: |
-        cmake -DFRIBIDI_GENTAB=1 -Bbuild/host -DCMAKE_VERBOSE_MAKEFILE=1 -DCMAKE_BUILD_TYPE=${{ matrix.config }}
+        cmake -DFRIBIDI_GENTAB=1 -DBUILD_LIBASS=0 -Bbuild/host -DCMAKE_VERBOSE_MAKEFILE=1 -DCMAKE_BUILD_TYPE=${{ matrix.config }}
         cmake --build build/host -t gen_tab
-    - name: Build for arm64-v8a
+    - name: Build for arm64-v8a libass dependencies
       env:
         ARCH: arm64-v8a
       shell: bash
       run: |
         MIN_API_64=21
         [ $MIN_API -gt 21 ] && MIN_API_64=$MIN_API
-        cmake -DMIN_SIZE=1 -DBUILD_WOLFSSL=1 -DANDROID_LD=lld -DANDROID_ABI=${ARCH} -DANDROID_PLATFORM=android-${MIN_API_64} -DANDROID_TOOLCHAIN=clang -DANDROID_STL=c++_shared -DANDROID_PIE=ON -DCMAKE_TOOLCHAIN_FILE=$ANDROID_NDK_LATEST_HOME/build/cmake/android.toolchain.cmake -GNinja -H$PWD -Bbuild/${ARCH} -DCMAKE_BUILD_TYPE=${{ matrix.config }} -DCMAKE_INSTALL_PREFIX=install/${ARCH} -DCMAKE_VERBOSE_MAKEFILE=1
+        cmake -DMIN_SIZE=1 -DBUILD_LIBASS=0 -DBUILD_FREETYPE=1 -DBUILD_EXPAT=1 -DBUILD_WOLFSSL=1 -DANDROID_LD=lld -DANDROID_ABI=${ARCH} -DANDROID_PLATFORM=android-${MIN_API_64} -DANDROID_TOOLCHAIN=clang -DANDROID_STL=c++_shared -DANDROID_PIE=ON -DCMAKE_TOOLCHAIN_FILE=$ANDROID_NDK_LATEST_HOME/build/cmake/android.toolchain.cmake -GNinja -H$PWD -Bbuild/${ARCH} -DCMAKE_BUILD_TYPE=${{ matrix.config }} -DCMAKE_INSTALL_PREFIX=install/${ARCH} -DCMAKE_VERBOSE_MAKEFILE=1
+        cmake --build build/${{ env.ARCH }}
+        cmake --install build/${{ env.ARCH }}
+    - name: Build for arm64-v8a fontconfig
+      env:
+        ARCH: arm64-v8a
+      shell: bash
+      run: |
+        export PATH=$ANDROID_NDK_LATEST_HOME/toolchains/llvm/prebuilt/linux-x86_64/bin:$PATH
+        SRC_DIR=$PWD
+        MIN_API_64=21
+        [ $MIN_API -gt 21 ] && MIN_API_64=$MIN_API
+        cd src/fontconfig
+        autoreconf -fiv
+        cd -
+        mkdir -p build/${{ env.ARCH }}/fc
+        cd build/${{ env.ARCH }}/fc
+        ../../../src/fontconfig/configure --prefix=$SRC_DIR/install/${ARCH} --enable-static --disable-shared --host=aarch64-linux-android${MIN_API_64} CC=aarch64-linux-android${MIN_API_64}-clang PKG_CONFIG_PATH=$SRC_DIR/install/${ARCH}/lib/pkgconfig
+        # make install will build test programs, and can not be disabled in configure
+        make -C src -j$(nproc) install V=1      # libfontconfig
+        make -C fontconfig -j$(nproc) install   # headers
+        make install-pkgconfigDATA              # fontconfig.pc
+    - name: Build for arm64-v8a with libass
+      env:
+        ARCH: arm64-v8a
+      shell: bash
+      run: |
+        MIN_API_64=21
+        [ $MIN_API -gt 21 ] && MIN_API_64=$MIN_API
+        cmake --debug-find-pkg=Fontconfig -DMIN_SIZE=1 -DBUILD_LIBASS=1 -DBUILD_WOLFSSL=1 -DANDROID_LD=lld -DANDROID_ABI=${ARCH} -DANDROID_PLATFORM=android-${MIN_API_64} -DANDROID_TOOLCHAIN=clang -DANDROID_STL=c++_shared -DANDROID_PIE=ON -DCMAKE_TOOLCHAIN_FILE=$ANDROID_NDK_LATEST_HOME/build/cmake/android.toolchain.cmake -GNinja -H$PWD -Bbuild/${ARCH} -DCMAKE_BUILD_TYPE=${{ matrix.config }} -DCMAKE_INSTALL_PREFIX=install/${ARCH} -DCMAKE_VERBOSE_MAKEFILE=1
         cmake --build build/${{ env.ARCH }}
         cmake --install build/${{ env.ARCH }}
         $ANDROID_NDK_LATEST_HOME/toolchains/llvm/prebuilt/linux-x86_64/bin/llvm-strip install/${ARCH}/lib/*.so

@@ -136,7 +136,7 @@ if(NOT NO_ASM)
   endif()
   if(ARCH_AARCH64 AND HAS_ASM_COMPILER)
     set(CONFIG_ASM 1)
-    file(GLOB SRC_LIST_ASM "${SRC_DIR}/libass/aarch64/*.S")
+    file(GLOB SRC_LIST_ASM "${SRC_DIR}/libass/aarch64/*.S") # requires master branch
     add_compile_options(${ASM_PREFIX_FLAG})
   endif()
 endif()
@@ -175,11 +175,23 @@ else()
   list(FILTER SRC_LIST EXCLUDE REGEX ".*ass_androidfonts.c$")
 endif()
 
-# TODO: android
+
 if(UNIX AND NOT APPLE)
-  include(FindFontconfig)
+  list(APPEND CMAKE_PREFIX_PATH ${CMAKE_INSTALL_PREFIX}) # in pkg_check_modules search path by default(PKG_CONFIG_USE_CMAKE_PREFIX_PATH)
+  set(CMAKE_FIND_ROOT_PATH_MODE_LIBRARY BOTH)
+  set(CMAKE_FIND_ROOT_PATH_MODE_INCLUDE BOTH) # otherwise hint paths will be prefixed with sysroot
+  find_package(Fontconfig REQUIRED)
+  message("Fontconfig_INCLUDE_DIRS: ${Fontconfig_INCLUDE_DIRS}")
+  message("Fontconfig_LIBRARIES: ${Fontconfig_LIBRARIES}")
+  message("PKG_FONTCONFIG_STATIC_LIBRARIES: ${PKG_FONTCONFIG_STATIC_LIBRARIES}")
+  link_libraries(Fontconfig::Fontconfig)# no private dependencies if static
+  include_directories(${Fontconfig_INCLUDE_DIRS}) # ?
+  link_directories(${PKG_FONTCONFIG_LIBRARY_DIRS})
+  link_libraries(${PKG_FONTCONFIG_STATIC_LIBRARIES})
+  set(CONFIG_FONTCONFIG 1)
+  add_link_options(-Wl,-t -v)
 endif()
-if(NOT Fontconfig_FOUND)
+if(NOT CONFIG_FONTCONFIG AND NOT Fontconfig_FOUND)
   list(FILTER SRC_LIST EXCLUDE REGEX ".*ass_fontconfig.c$")
 endif()
 

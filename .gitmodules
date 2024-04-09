@@ -41,3 +41,9 @@
 [submodule "src/uavs3d"]
 	path = src/uavs3d
 	url = https://github.com/uavs3/uavs3d.git
+[submodule "src/fontconfig"]
+	path = src/fontconfig
+	url = https://gitlab.freedesktop.org/fontconfig/fontconfig.git
+[submodule "src/libexpat"]
+	path = src/libexpat
+	url = https://github.com/libexpat/libexpat.git

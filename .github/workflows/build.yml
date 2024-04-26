@@ -570,7 +570,7 @@ jobs:
 
 
   pkg:
-    runs-on: ubuntu-latest
+    runs-on: macos-14
     needs: [iOS, macOS, Android, Windows_VS2022, Windows_VS2022_LTL, UWP_VS2022, Linux_libcxx, Linux_gnustl]
     steps:
     - uses: actions/checkout@v4
@@ -620,6 +620,7 @@ jobs:
         name: devpkgs-linux-MinSizeRel-gnustl
     - name: Make libmdk dep
       run: |
+        brew install shaderc
         chmod +x mkpkg.sh
         ./mkpkg.sh
     - name: Archieve SDK

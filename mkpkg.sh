@@ -84,4 +84,8 @@ tar xvf devpkgs-visionOS-MinSizeRel.tar.xz
 mv install/arm64/lib/*.framework dep/lib/visionOS/
 rm -rf install
 
+if [ -d /opt/homebrew/include/shaderc ]; then
+    cp -avfL /opt/homebrew/include/shaderc dep/include/
+fi
+
 7z a -ssc -m0=lzma2 -mx=9 -ms=on -mf=off dep.7z dep

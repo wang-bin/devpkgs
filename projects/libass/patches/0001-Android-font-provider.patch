@@ -1,4 +1,4 @@
-From 8b839fdd83880bd9b783c6111c9a5f0d8fa6a394 Mon Sep 17 00:00:00 2001
+From deaac330f5b8fb3b57b1a8549089dea7e4a83fdb Mon Sep 17 00:00:00 2001
 From: sfan5 <sfan5@live.de>
 Date: Sat, 10 Feb 2018 11:20:45 +0100
 Subject: [PATCH] Android font provider
@@ -28,7 +28,7 @@ index 05d97fb..91b436b 100644
  typedef enum {
 diff --git a/libass/ass_androidfonts.c b/libass/ass_androidfonts.c
 new file mode 100644
-index 0000000..bf9f666
+index 0000000..e72c9a2
 --- /dev/null
 +++ b/libass/ass_androidfonts.c
 @@ -0,0 +1,656 @@
@@ -541,7 +541,7 @@ index 0000000..bf9f666
 +
 +static void scan_fonts(ASS_FontProvider *provider, ProviderPrivate *af, FT_Library ftlib)
 +{
-+    ASS_FontProviderMetaData meta;
++    ASS_FontProviderMetaData meta = {0};
 +    FILE *f = NULL;
 +    struct xml_parser *p = NULL;
 +    struct xml_thing t;

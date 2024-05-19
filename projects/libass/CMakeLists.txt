@@ -2,14 +2,11 @@ cmake_minimum_required(VERSION 3.15)
 
 # https://github.com/hozuki/libass-cmake/blob/master/cmake/libass.cmake
 
-PROJECT(libass VERSION 0.17.1)
+PROJECT(libass VERSION 0.17.2) # TODO: read from RELEASEVERSION since 0.17.2
 set(CMAKE_C_VISIBILITY_PRESET default) # hidden symbols can not be exported via libass.sym
 include(CheckCCompilerFlag)
 include(CheckIncludeFile)
 include(CheckTypeSize)
-
-
-set(SO_VERSION 9) #FIXME:
 
 set(CMAKE_FIND_ROOT_PATH_MODE_PROGRAM ONLY)
 set(CMAKE_FIND_ROOT_PATH_MODE_LIBRARY ONLY)
@@ -19,6 +16,18 @@ set(CMAKE_FIND_ROOT_PATH_MODE_INCLUDE ONLY)
 if(NOT SRC_DIR)
   set(SRC_DIR ${PROJECT_SOURCE_DIR})
 endif()
+
+file(STRINGS ${SRC_DIR}/libass/Makefile_library.am VERSION_LINES LIMIT_COUNT 4)
+foreach(VLINE ${VERSION_LINES})
+  if(VLINE MATCHES "^[\t ]*LIBASS_LT_CURRENT[\t ]*=[\t ]*([0-9]+)")
+    set(LT_CURREN "${CMAKE_MATCH_1}")
+  elseif(VLINE MATCHES "^[\t ]*LIBASS_LT_REVISION[\t ]*=[\t ]*([0-9]+)")
+    set(LT_REVISIO "${CMAKE_MATCH_1}")
+  elseif(VLINE MATCHES "^[\t ]*LIBASS_LT_AGE[\t ]*=[\t ]*([0-9]+)")
+    set(LT_AGE "${CMAKE_MATCH_1}")
+  endif()
+endforeach()
+math(EXPR SO_VERSION "${LT_CURREN} - ${LT_AGE}")
 
 find_package(Git QUIET)
 if(GIT_FOUND)

@@ -1,4 +1,4 @@
-From deaac330f5b8fb3b57b1a8549089dea7e4a83fdb Mon Sep 17 00:00:00 2001
+From c42547588c44b9e75a5ea287e824b905cbccf212 Mon Sep 17 00:00:00 2001
 From: sfan5 <sfan5@live.de>
 Date: Sat, 10 Feb 2018 11:20:45 +0100
 Subject: [PATCH] Android font provider
@@ -15,7 +15,7 @@ Signed-off-by: Aman Gupta <aman@tmm1.net>
  create mode 100644 libass/ass_androidfonts.h
 
 diff --git a/libass/ass.h b/libass/ass.h
-index 05d97fb..91b436b 100644
+index dd6667f..78cdf67 100644
 --- a/libass/ass.h
 +++ b/libass/ass.h
 @@ -221,6 +221,7 @@ typedef enum {
@@ -28,7 +28,7 @@ index 05d97fb..91b436b 100644
  typedef enum {
 diff --git a/libass/ass_androidfonts.c b/libass/ass_androidfonts.c
 new file mode 100644
-index 0000000..e72c9a2
+index 0000000..60a8aab
 --- /dev/null
 +++ b/libass/ass_androidfonts.c
 @@ -0,0 +1,656 @@
@@ -595,7 +595,7 @@ index 0000000..e72c9a2
 +                    font_attr_read = 1;
 +                } else {
 +                    // lol
-+                    meta.width = strstr(path, "Condensed") == NULL ? FONT_WIDTH_NORMAL : FONT_WIDTH_CONDENSED;
++                    //meta.width = strstr(path, "Condensed") == NULL ? FONT_WIDTH_NORMAL : FONT_WIDTH_CONDENSED;
 +                    add_font(provider, &meta, index, path, ftlib);
 +                    index = 0;
 +                }
@@ -623,7 +623,7 @@ index 0000000..e72c9a2
 +            } else if (font_attr_read && !strcmp(t.attr.key, "weight")) {
 +                meta.weight = atoi(t.attr.value);
 +            } else if (font_attr_read && !strcmp(t.attr.key, "style")) {
-+                meta.slant = !strcmp(t.attr.value, "italic") ? FONT_SLANT_ITALIC : FONT_SLANT_NONE;
++                meta.style_flags = !strcmp(t.attr.value, "italic") ? FT_STYLE_FLAG_ITALIC : 0;
 +            } else if (font_attr_read && !strcmp(t.attr.key, "index")) {
 +                index = atoi(t.attr.value);
 +            } else if (alias_read && !strcmp(t.attr.key, "weight")) {
@@ -728,7 +728,7 @@ index 0000000..c037f75
 +
 +#endif
 diff --git a/libass/ass_fontselect.c b/libass/ass_fontselect.c
-index 6b98cc2..71a82b0 100644
+index df0b281..4ce41fa 100644
 --- a/libass/ass_fontselect.c
 +++ b/libass/ass_fontselect.c
 @@ -44,6 +44,7 @@
@@ -739,7 +739,7 @@ index 6b98cc2..71a82b0 100644
  #include "ass_font.h"
  #include "ass_string.h"
  
-@@ -1069,6 +1070,9 @@ struct font_constructors font_constructors[] = {
+@@ -1058,6 +1059,9 @@ struct font_constructors font_constructors[] = {
  #endif
  #ifdef CONFIG_FONTCONFIG
      { ASS_FONTPROVIDER_FONTCONFIG,      &ass_fontconfig_add_provider,   "fontconfig"},

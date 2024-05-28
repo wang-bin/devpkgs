@@ -99,7 +99,7 @@ jobs:
         minver=8.0
         [[ "${{ matrix.os }}" == "tv"* ]] && minver=9.0
         [[ "${{ matrix.os }}" == "vision"* ]] && minver=1.0
-        cmake -DMIN_SIZE=1 -DBUILD_WOLFSSL=1 -DHB_IOS=1 -DCMAKE_IOS_INSTALL_COMBINED=YES -DCMAKE_SYSTEM_NAME=${{ matrix.os }} -DCMAKE_OSX_DEPLOYMENT_TARGET=${minver} -GNinja -DCMAKE_OSX_ARCHITECTURES=${{ env.ARCH }} -Bbuild/${{ env.ARCH }} -DCMAKE_VERBOSE_MAKEFILE=1 -DCMAKE_BUILD_TYPE=${{ matrix.config }} -DCMAKE_INSTALL_PREFIX=install/${{ env.ARCH }}
+        cmake -DMIN_SIZE=1 -DWITH_DEB_INFO=1 -DBUILD_WOLFSSL=1 -DHB_IOS=1 -DCMAKE_IOS_INSTALL_COMBINED=YES -DCMAKE_SYSTEM_NAME=${{ matrix.os }} -DCMAKE_OSX_DEPLOYMENT_TARGET=${minver} -GNinja -DCMAKE_OSX_ARCHITECTURES=${{ env.ARCH }} -Bbuild/${{ env.ARCH }} -DCMAKE_VERBOSE_MAKEFILE=1 -DCMAKE_BUILD_TYPE=${{ matrix.config }} -DCMAKE_INSTALL_PREFIX=install/${{ env.ARCH }}
         cmake --build build/${{ env.ARCH }}
         cmake --install build/${{ env.ARCH }}
     - name: Make SDK
@@ -407,7 +407,7 @@ jobs:
         ARCH: amd64
       shell: bash
       run: |
-        cmake -DMIN_SIZE=1 -DBUILD_WOLFSSL=1 -DBUILD_LIBASS=0 -DUSE_LIBCXX=1 -DCMAKE_SYSTEM_PROCESSOR=${ARCH} -DCMAKE_TOOLCHAIN_FILE=$PWD/cmake/tools/linux.clang.cmake -DLINUX_SYSROOT=$PWD/sysroot -GNinja -H$PWD -Bbuild/${ARCH} -DCMAKE_BUILD_TYPE=${{ matrix.config }} -DCMAKE_INSTALL_PREFIX=install/${ARCH} -DCMAKE_VERBOSE_MAKEFILE=1
+        cmake -DMIN_SIZE=1 -DWITH_DEB_INFO=1 -DBUILD_WOLFSSL=1 -DBUILD_LIBASS=0 -DUSE_LIBCXX=1 -DCMAKE_SYSTEM_PROCESSOR=${ARCH} -DCMAKE_TOOLCHAIN_FILE=$PWD/cmake/tools/linux.clang.cmake -DLINUX_SYSROOT=$PWD/sysroot -GNinja -H$PWD -Bbuild/${ARCH} -DCMAKE_BUILD_TYPE=${{ matrix.config }} -DCMAKE_INSTALL_PREFIX=install/${ARCH} -DCMAKE_VERBOSE_MAKEFILE=1
         cmake --build build/${{ env.ARCH }}
         cmake --install build/${{ env.ARCH }}
         llvm-strip-${LLVM_VER} install/${{ env.ARCH }}/lib/*.so.*.*.*
@@ -416,7 +416,7 @@ jobs:
         ARCH: arm64
       shell: bash
       run: |
-        cmake -DMIN_SIZE=1 -DBUILD_WOLFSSL=1 -DBUILD_LIBASS=0 -DUSE_LIBCXX=1 -DCMAKE_SYSTEM_PROCESSOR=${ARCH} -DCMAKE_TOOLCHAIN_FILE=$PWD/cmake/tools/linux.clang.cmake -DLINUX_SYSROOT=$PWD/sysroot -GNinja -H$PWD -Bbuild/${ARCH} -DCMAKE_BUILD_TYPE=${{ matrix.config }} -DCMAKE_INSTALL_PREFIX=install/${ARCH} -DCMAKE_VERBOSE_MAKEFILE=1
+        cmake -DMIN_SIZE=1 -DWITH_DEB_INFO=1 -DBUILD_WOLFSSL=1 -DBUILD_LIBASS=0 -DUSE_LIBCXX=1 -DCMAKE_SYSTEM_PROCESSOR=${ARCH} -DCMAKE_TOOLCHAIN_FILE=$PWD/cmake/tools/linux.clang.cmake -DLINUX_SYSROOT=$PWD/sysroot -GNinja -H$PWD -Bbuild/${ARCH} -DCMAKE_BUILD_TYPE=${{ matrix.config }} -DCMAKE_INSTALL_PREFIX=install/${ARCH} -DCMAKE_VERBOSE_MAKEFILE=1
         cmake --build build/${{ env.ARCH }}
         cmake --install build/${{ env.ARCH }}
         llvm-strip-${LLVM_VER} install/${{ env.ARCH }}/lib/*.so.*.*.*
@@ -483,7 +483,7 @@ jobs:
         ARCH: amd64
       shell: bash
       run: |
-        cmake -DMIN_SIZE=1 -DBUILD_WOLFSSL=1 -DBUILD_LIBASS=0 -DUSE_LIBCXX=0 -DCMAKE_SYSTEM_PROCESSOR=${ARCH} -DCMAKE_TOOLCHAIN_FILE=$PWD/cmake/tools/linux.clang.cmake -DLINUX_SYSROOT=$PWD/sysroot -GNinja -H$PWD -Bbuild/${ARCH} -DCMAKE_BUILD_TYPE=${{ matrix.config }} -DCMAKE_INSTALL_PREFIX=install/${ARCH} -DCMAKE_VERBOSE_MAKEFILE=1
+        cmake -DMIN_SIZE=1 -DWITH_DEB_INFO=1 -DBUILD_WOLFSSL=1 -DBUILD_LIBASS=0 -DUSE_LIBCXX=0 -DCMAKE_SYSTEM_PROCESSOR=${ARCH} -DCMAKE_TOOLCHAIN_FILE=$PWD/cmake/tools/linux.clang.cmake -DLINUX_SYSROOT=$PWD/sysroot -GNinja -H$PWD -Bbuild/${ARCH} -DCMAKE_BUILD_TYPE=${{ matrix.config }} -DCMAKE_INSTALL_PREFIX=install/${ARCH} -DCMAKE_VERBOSE_MAKEFILE=1
         cmake --build build/${{ env.ARCH }}
         cmake --install build/${{ env.ARCH }}
         llvm-strip-${LLVM_VER} install/${{ env.ARCH }}/lib/*.so.*.*.*
@@ -536,7 +536,7 @@ jobs:
       run: |
         MIN_API_64=21
         [ $MIN_API -gt 21 ] && MIN_API_64=$MIN_API
-        cmake -DMIN_SIZE=1 -DBUILD_WOLFSSL=1 -DANDROID_LD=lld -DANDROID_ABI=${ARCH} -DANDROID_PLATFORM=android-${MIN_API_64} -DANDROID_TOOLCHAIN=clang -DANDROID_STL=c++_shared -DANDROID_PIE=ON -DCMAKE_TOOLCHAIN_FILE=$ANDROID_NDK_LATEST_HOME/build/cmake/android.toolchain.cmake -GNinja -H$PWD -Bbuild/${ARCH} -DCMAKE_BUILD_TYPE=${{ matrix.config }} -DCMAKE_INSTALL_PREFIX=install/${ARCH} -DCMAKE_VERBOSE_MAKEFILE=1
+        cmake -DMIN_SIZE=1 -DWITH_DEB_INFO=1 -DBUILD_WOLFSSL=1 -DANDROID_LD=lld -DANDROID_ABI=${ARCH} -DANDROID_PLATFORM=android-${MIN_API_64} -DANDROID_TOOLCHAIN=clang -DANDROID_STL=c++_shared -DANDROID_PIE=ON -DCMAKE_TOOLCHAIN_FILE=$ANDROID_NDK_LATEST_HOME/build/cmake/android.toolchain.cmake -GNinja -H$PWD -Bbuild/${ARCH} -DCMAKE_BUILD_TYPE=${{ matrix.config }} -DCMAKE_INSTALL_PREFIX=install/${ARCH} -DCMAKE_VERBOSE_MAKEFILE=1
         cmake --build build/${{ env.ARCH }}
         cmake --install build/${{ env.ARCH }}
         $ANDROID_NDK_LATEST_HOME/toolchains/llvm/prebuilt/linux-x86_64/bin/llvm-strip install/${ARCH}/lib/*.so

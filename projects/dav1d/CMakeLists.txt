@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.15)
 
-project(dav1d VERSION 1.4.1)
+project(dav1d VERSION 1.4.2)
 include(CheckLibraryExists)
 include(CheckCCompilerFlag)
 include(CheckCSourceCompiles)
@@ -57,7 +57,8 @@ set(ENDIANNESS_BIG 0)
 set(ARCH_PPC64LE 0)
 
 set(HAVE_ASM 0) # used by ass_bitmao_engine.c
-
+set(HAVE_DOTPROD 0) # armv8.4a
+set(HAVE_I8MM 0)    # armv8.6a
 
 set(ARCH_ARM 0)       # arm32
 set(ARCH_AARCH64 0)
@@ -270,6 +271,7 @@ if(NOT DAV1D_NO_ASM)
         )
     endif()
   endif()
+  # TODO: arm64 v8.4a: arm/64/mc_dotprod.S
   if(ARCH_ARM OR ARCH_AARCH64)
     check_c_source_compiles("
     __asm__ (
@@ -466,7 +468,9 @@ set(PACKAGE_VERSION "${PROJECT_VERSION}")
 
 
 add_definitions(-DPIC=1) # x86 only?
-foreach(VAR HAVE_ASM ARCH_X86 ARCH_AARCH64 ARCH_X86_64 ARCH_X86_32 ARCH_ARM ARCH_RISCV ARCH_LOONGARCH ARCH_LOONGARCH64)
+foreach(VAR HAVE_ASM ARCH_X86 ARCH_AARCH64 ARCH_X86_64 ARCH_X86_32 ARCH_ARM ARCH_RISCV ARCH_LOONGARCH ARCH_LOONGARCH64
+    HAVE_DOTPROD
+    )
   add_definitions(-D${VAR}=${${VAR}})
 endforeach()
 

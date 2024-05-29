@@ -135,6 +135,7 @@ if(BUILD_WOLFSSL)
   add_compile_definitions(NO_WOLFSSL_SERVER=1)
   set(BUILD_SHARED_LIBS 0)
   set(WOLFSSL_CRYPT_TESTS no)
+  set(WOLFSSL_FAST_MATH yes)
 # macOS x64 build arm64: CMAKE_SYSTEM_PROCESSOR is x86_64 used CMAKE_SYSTEM_PROCESSOR by wolfssl is wrong
   add_subdirectory(src/wolfssl)
 endif()

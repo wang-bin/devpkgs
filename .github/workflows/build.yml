@@ -11,7 +11,7 @@ env:
 jobs:
   macOS:
     # See: https://docs.github.com/en/actions/configuring-and-managing-workflows/configuring-a-workflow#configuring-a-build-matrix
-    runs-on: macos-14
+    runs-on: macos-latest
     env:
       TARGET_OS: 'macOS'
     strategy:
@@ -69,7 +69,7 @@ jobs:
 
 
   iOS:
-    runs-on: macos-14
+    runs-on: macos-latest
     strategy:
       fail-fast: false
       matrix:
@@ -497,7 +497,7 @@ jobs:
         path: devpkgs-${{ env.TARGET_OS }}-${{ matrix.config }}-gnustl.7z
 
   Android:
-    runs-on: ubuntu-latest
+    runs-on: macos-latest
     env:
       TARGET_OS: android
       MIN_API: 19
@@ -513,9 +513,7 @@ jobs:
         fetch-depth: 0
     - name: Create Build Environment
       shell: bash
-      run: |
-        sudo apt update
-        sudo apt install -y cmake ninja-build nasm
+      run: brew install ninja nasm
     - name: Apply patches
       shell: bash
       run: |
@@ -539,7 +537,7 @@ jobs:
         cmake -DMIN_SIZE=1 -DWITH_DEB_INFO=1 -DBUILD_WOLFSSL=1 -DANDROID_LD=lld -DANDROID_ABI=${ARCH} -DANDROID_PLATFORM=android-${MIN_API_64} -DANDROID_TOOLCHAIN=clang -DANDROID_STL=c++_shared -DANDROID_PIE=ON -DCMAKE_TOOLCHAIN_FILE=$ANDROID_NDK_LATEST_HOME/build/cmake/android.toolchain.cmake -GNinja -H$PWD -Bbuild/${ARCH} -DCMAKE_BUILD_TYPE=${{ matrix.config }} -DCMAKE_INSTALL_PREFIX=install/${ARCH} -DCMAKE_VERBOSE_MAKEFILE=1
         cmake --build build/${{ env.ARCH }}
         cmake --install build/${{ env.ARCH }}
-        $ANDROID_NDK_LATEST_HOME/toolchains/llvm/prebuilt/linux-x86_64/bin/llvm-strip install/${ARCH}/lib/*.so
+        $ANDROID_NDK_LATEST_HOME/toolchains/llvm/prebuilt/darwin-x86_64/bin/llvm-strip install/${ARCH}/lib/*.so
     - name: Build for armeabi-v7a
       env:
         ARCH: armeabi-v7a
@@ -549,7 +547,7 @@ jobs:
         cmake -DMIN_SIZE=1 -DBUILD_WOLFSSL=1 -DANDROID_LD=lld -DANDROID_ABI=${ARCH} -DANDROID_PLATFORM=android-${MIN_API} -DANDROID_TOOLCHAIN=clang -DANDROID_STL=c++_shared -DANDROID_PIE=ON -DCMAKE_TOOLCHAIN_FILE=$ANDROID_NDK_LATEST_HOME/build/cmake/android.toolchain.cmake -GNinja -H$PWD -Bbuild/${ARCH} -DCMAKE_BUILD_TYPE=${{ matrix.config }} -DCMAKE_INSTALL_PREFIX=install/${ARCH} -DCMAKE_VERBOSE_MAKEFILE=1
         cmake --build build/${{ env.ARCH }}
         cmake --install build/${{ env.ARCH }}
-        $ANDROID_NDK_LATEST_HOME/toolchains/llvm/prebuilt/linux-x86_64/bin/llvm-strip install/${ARCH}/lib/*.so
+        $ANDROID_HOME/ndk/25.2.9519653/toolchains/llvm/prebuilt/darwin-x86_64/bin/llvm-strip install/${ARCH}/lib/*.so
 #    - name: Build for x86_64 # yasm error
 #      env:
 #        ARCH: x86_64
@@ -558,7 +556,7 @@ jobs:
 #        cmake -DMIN_SIZE=1 -DCMAKE_ANDROID_NDK_VERSION=25.1 -DANDROID_LD=lld -DANDROID_ABI=${ARCH} -DANDROID_PLATFORM=android-${MIN_API} -DANDROID_TOOLCHAIN=clang -DANDROID_STL=c++_shared -DANDROID_PIE=ON -DCMAKE_TOOLCHAIN_FILE=$ANDROID_NDK_LATEST_HOME/build/cmake/android.toolchain.cmake -GNinja -H$PWD -Bbuild/${ARCH} -DCMAKE_BUILD_TYPE=${{ matrix.config }} -DCMAKE_INSTALL_PREFIX=install/${ARCH} -DCMAKE_VERBOSE_MAKEFILE=1
 #        cmake --build build/${{ env.ARCH }}
 #        cmake --install build/${{ env.ARCH }}
-#        $ANDROID_NDK_LATEST_HOME/toolchains/llvm/prebuilt/linux-x86_64/bin/llvm-strip install/${ARCH}/lib/*.so
+#        $ANDROID_NDK_LATEST_HOME/toolchains/llvm/prebuilt/darwin-x86_64/bin/llvm-strip install/${ARCH}/lib/*.so
     - name: Make SDK
       shell: bash
       run: 7z a  -ssc -m0=lzma2 -mx=9 -ms=on -mf=off devpkgs-${{ env.TARGET_OS }}-${{ matrix.config }}.7z install
@@ -570,7 +568,7 @@ jobs:
 
 
   pkg:
-    runs-on: macos-14
+    runs-on: macos-latest
     needs: [iOS, macOS, Android, Windows_VS2022, Windows_VS2022_LTL, UWP_VS2022, Linux_libcxx, Linux_gnustl]
     steps:
     - uses: actions/checkout@v4

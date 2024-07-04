@@ -53,6 +53,7 @@ set(EXTRA_LIBS "")
 
 option(ENABLE_LARGE_TILES "" OFF)
 option(NO_ASM "Disable use of assembly coded primitives (default: auto detect)" OFF)
+option(LIBASS_MSVC_ARM64_ASM "Enable arm64 asm for msvc. requires clang-cl <= 16." OFF)
 
 set(CONFIG_ASM 0) # used by ass_bitmao_engine.c
 set(CONFIG_FREETYPE 1) #required
@@ -122,18 +123,21 @@ if(NOT NO_ASM)
       endif()
   endif()
   set(HAS_ASM_COMPILER TRUE)
-  if(ARCH_AARCH64 AND CMAKE_C_COMPILER_ID MATCHES "MSVC") # TODO: ASM_MARMASM cmake3.26
-#    enable_language(ASM_MARMASM)
+  if(ARCH_AARCH64 AND CMAKE_C_COMPILER_ID MATCHES "MSVC")
+# clang-cl 17+ with link.exe: blend_bitmaps.S.obj : fatal error LNK1183: invalid or corrupt file: extended relocation count 0 less than 65535
+#    enable_language(ASM_MARMASM) and set_source_files_properties(... PROPERTIES LANGUAGE ASM_MARMASM) # requires cmake 3.26 and gas-preprocess.pl -arch aarch64 -as-type armasm -- cl x.S
     execute_process(
         COMMAND clang-cl --version
         ERROR_VARIABLE CLANG_ERROR
-        OUTPUT_QUIET
+        OUTPUT_VARIABLE CLANG_VER_STR
     )
-    if(NOT CLANG_ERROR)
+    message("CLANG_VER_STR: ${CLANG_VER_STR}")
+    if(NOT CLANG_ERROR AND LIBASS_MSVC_ARM64_ASM)
       set(CMAKE_ASM_COMPILER clang-cl)
       set(CMAKE_ASM_FLAGS "--target=aarch64-pc-windows-msvc ${CMAKE_ASM_FLAGS}")
       message("using clang-cl as arm64 asm compiler... CMAKE_ASM_FLAGS:${CMAKE_ASM_FLAGS}")
-      add_link_options(-ALIGN:8192) # blend_bitmaps.S.obj : fatal error LNK1164: section 0x4 alignment (8192) greater than /ALIGN value
+      # clang-18: warning LNK4108: /ALIGN specified without /DRIVER; image may not run. blend_bitmaps.S.obj : fatal error LNK1183: invalid or corrupt file: extended relocation count 0 less than 65535
+      #add_link_options(-ALIGN:8192) # clang-16 blend_bitmaps.S.obj : fatal error LNK1164: section 0x4 alignment (8192) greater than /ALIGN value
 # Fix:  MSVC_RUNTIME_LIBRARY value 'MultiThreadedDLL' not known for this ASM
       set(CMAKE_ASM_COMPILE_OPTIONS_MSVC_RUNTIME_LIBRARY_MultiThreaded         "-MT"  CACHE STRING "clang-cl arm64 asm MSVC_RUNTIME_LIBRARY flags")
       set(CMAKE_ASM_COMPILE_OPTIONS_MSVC_RUNTIME_LIBRARY_MultiThreadedDLL      "-MD"  CACHE STRING "clang-cl arm64 asm MSVC_RUNTIME_LIBRARY flags")

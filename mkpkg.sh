@@ -1,5 +1,6 @@
-rm -rf dep
+rm -rf dep dep-av
 mkdir -p dep/include
+mkdir -p dep-av/{vision,i,tv}OS dep-av/{android,linux}
 
 mkdir -p dep/bin/windows/{x86,x64}/LTL
 mkdir -p dep/bin/{WinRT,windows}/{arm64,x64,x86}
@@ -44,10 +45,11 @@ rm -rf install
 
 mkdir -p dep/lib/Linux/{amd64,arm64,armhf}
 7z x -y devpkgs-linux-MinSizeRel.7z
+rsync -avm --include='*/' --include='*wolfssl*' --include='**/wolfssl/**' --exclude='*' install/* dep-av/linux
 for A in amd64 arm64 armhf; do
     mv install/$A/lib/* dep/lib/Linux/$A/
 done
-find dep/lib/Linux -name libwolfssl.a -delete
+find dep/lib/Linux -name "*wolfssl*" -exec rm -rf {} \;
 rm -rf install
 
 mkdir -p dep/lib/LinuxGnuStl/amd64
@@ -55,13 +57,16 @@ mkdir -p dep/lib/LinuxGnuStl/amd64
 for A in amd64; do
     mv install/$A/lib/* dep/lib/LinuxGnuStl/$A/
 done
+find dep/lib/LinuxGnuStl -name "*wolfssl*" -exec rm -rf {} \;
 rm -rf install
 
 mkdir -p dep/lib/android/{arm64-v8a,armeabi-v7a}
 7z x -y devpkgs-android-MinSizeRel.7z
+rsync -avm --include='*/' --include='*wolfssl*' --include='**/wolfssl/**' --exclude='*' install/* dep-av/android
 for A in arm64-v8a armeabi-v7a; do
     mv install/$A/lib/*.so dep/lib/android/$A/
 done
+find dep/lib/android -name "*wolfssl*" -exec rm -rf {} \;
 rm -rf install
 
 mkdir -p dep/lib/macOS
@@ -71,21 +76,27 @@ rm -rf install
 
 mkdir -p dep/lib/iOS
 tar xvf devpkgs-iOS-MinSizeRel.tar.xz
+rsync -avm --include='*/' --include='*wolfssl*' --include='**/wolfssl/**' --exclude='*' install/arm64/* dep-av/iOS
 mv install/arm64/lib/*.framework dep/lib/iOS/
 rm -rf install
 
 mkdir -p dep/lib/tvOS
 tar xvf devpkgs-tvOS-MinSizeRel.tar.xz
+rsync -avm --include='*/' --include='*wolfssl*' --include='**/wolfssl/**' --exclude='*' install/arm64/* dep-av/tvOS
 mv install/arm64/lib/*.framework dep/lib/tvOS/
 rm -rf install
 
 mkdir -p dep/lib/visionOS
 tar xvf devpkgs-visionOS-MinSizeRel.tar.xz
+rsync -avm --include='*/' --include='*wolfssl*' --include='**/wolfssl/**' --exclude='*' install/arm64/* dep-av/visionOS
 mv install/arm64/lib/*.framework dep/lib/visionOS/
 rm -rf install
+
+find dep-av -name share -type d -exec rm -rf {} \;
 
 if [ -d /opt/homebrew/include/shaderc ]; then
     cp -avfL /opt/homebrew/include/shaderc dep/include/
 fi
 
 7z a -ssc -m0=lzma2 -mx=9 -ms=on -mf=off dep.7z dep
+7z a -ssc -m0=lzma2 -mx=9 -ms=on -mf=off dep-av.7z dep-av

@@ -2,6 +2,8 @@ name: Build
 
 on:
   push:
+  schedule:
+      - cron: '0 6 * * 2'
 
 env:
   NINJA_STATUS: '[%f/%t %e %r]'
@@ -24,8 +26,8 @@ jobs:
         submodules: 'recursive'
         fetch-tags: true
         fetch-depth: 0
-    - name: Setup Xcode
-      run: sudo xcode-select -s /Applications/Xcode_15.4.app
+    #- name: Setup Xcode
+    #  run: sudo xcode-select -s /Applications/Xcode_15.4.app
     - name: Create Build Environment
       shell: bash
       run: |
@@ -81,8 +83,8 @@ jobs:
         submodules: 'recursive'
         fetch-tags: true
         fetch-depth: 0
-    - name: Setup Xcode
-      run: sudo xcode-select -s /Applications/Xcode_15.4.app
+    #- name: Setup Xcode
+    #  run: sudo xcode-select -s /Applications/Xcode_15.4.app
     - name: Create Build Environment
       shell: bash
       run: brew install ninja nasm
@@ -625,4 +627,4 @@ jobs:
       uses: actions/upload-artifact@v4
       with:
         name: libmdk-dep
-        path: dep.7z
+        path: dep*.7z

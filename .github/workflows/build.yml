@@ -26,8 +26,8 @@ jobs:
         submodules: 'recursive'
         fetch-tags: true
         fetch-depth: 0
-    #- name: Setup Xcode
-    #  run: sudo xcode-select -s /Applications/Xcode_15.4.app
+    - name: Setup Xcode
+      run: sudo xcode-select -s /Applications/Xcode_${{ vars.XCODE }}.app
     - name: Create Build Environment
       shell: bash
       run: |
@@ -83,8 +83,8 @@ jobs:
         submodules: 'recursive'
         fetch-tags: true
         fetch-depth: 0
-    #- name: Setup Xcode
-    #  run: sudo xcode-select -s /Applications/Xcode_15.4.app
+    - name: Setup Xcode
+      run: sudo xcode-select -s /Applications/Xcode_${{ vars.XCODE }}.app
     - name: Create Build Environment
       shell: bash
       run: brew install ninja nasm

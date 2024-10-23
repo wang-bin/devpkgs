@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.15)
 
-project(dav1d VERSION 1.4.2)
+project(dav1d VERSION 1.5.0)
 include(CheckLibraryExists)
 include(CheckCCompilerFlag)
 include(CheckCSourceCompiles)
@@ -8,17 +8,6 @@ include(CheckIncludeFile)
 include(CheckTypeSize)
 include(CheckSymbolExists)
 
-# rc
-set(API_VERSION_MAJOR 7)
-set(API_VERSION_MINOR 0)
-set(API_VERSION_REVISION 0)
-set(PROJECT_VERSION_REVISION ${PROJECT_VERSION_PATCH})
-# version.h
-set(DAV1D_API_VERSION_MAJOR ${API_VERSION_MAJOR})
-set(DAV1D_API_VERSION_MINOR ${API_VERSION_MINOR})
-set(DAV1D_API_VERSION_PATCH ${API_VERSION_REVISION})
-# so
-set(SO_VERSION ${API_VERSION_MAJOR})
 
 set(CMAKE_FIND_ROOT_PATH_MODE_PROGRAM ONLY)
 set(CMAKE_FIND_ROOT_PATH_MODE_LIBRARY ONLY)
@@ -28,6 +17,33 @@ set(CMAKE_FIND_ROOT_PATH_MODE_INCLUDE ONLY)
 if(NOT SRC_DIR)
   set(SRC_DIR ${PROJECT_SOURCE_DIR})
 endif()
+
+# used by rc file. for api version <= 7.0, set manually
+set(API_VERSION_MAJOR 7)
+set(API_VERSION_MINOR 0)
+set(API_VERSION_REVISION 0)
+
+# since 1.5.0(api 7.0.0), parse version.h
+set(VERSION_H "${SRC_DIR}/include/dav1d/version.h")
+if(EXISTS "${VERSION_H}") # 1.5.0
+    foreach(V MAJOR MINOR PATCH)
+        file(STRINGS "${VERSION_H}" DAV1D_${V} REGEX "^#[\t ]*define[\t ]+DAV1D_API_VERSION_${V}[\t ]+[0-9]+$")
+        foreach(VLINE ${DAV1D_${V}})
+          if(VLINE MATCHES "^#[\t ]*define[\t ]+DAV1D_API_VERSION_${V}[\t ]+([0-9]+)$")
+            set(API_VERSION_${V} "${CMAKE_MATCH_1}")
+            break()
+          endif()
+        endforeach()
+        message("API_VERSION_${V}: ${API_VERSION_${V}}")
+    endforeach()
+endif()
+set(PROJECT_VERSION_REVISION ${PROJECT_VERSION_PATCH})
+# gen version.h
+set(DAV1D_API_VERSION_MAJOR ${API_VERSION_MAJOR})
+set(DAV1D_API_VERSION_MINOR ${API_VERSION_MINOR})
+set(DAV1D_API_VERSION_PATCH ${API_VERSION_REVISION})
+# so
+set(SO_VERSION ${API_VERSION_MAJOR})
 
 enable_language(ASM)
 enable_language(C)
@@ -258,6 +274,9 @@ if(NOT DAV1D_NO_ASM)
         ${SRC_DIR}/src/arm/${BITS}/looprestoration.S
         ${SRC_DIR}/src/arm/${BITS}/mc.S
         )
+      if(EXISTS ${SRC_DIR}/src/arm/${BITS}/mc_dotprod.S) #1.5.0
+        list(APPEND SRC_LIST_ASM ${SRC_DIR}/src/arm/${BITS}/mc_dotprod.S)
+      endif()
     endif()
     if(DAV1D_16BIT)
       list(APPEND SRC_LIST_ASM
@@ -269,6 +288,9 @@ if(NOT DAV1D_NO_ASM)
         ${SRC_DIR}/src/arm/${BITS}/looprestoration16.S
         ${SRC_DIR}/src/arm/${BITS}/mc16.S
         )
+      if(EXISTS ${SRC_DIR}/src/arm/${BITS}/mc16_sve.S) #1.5.0
+        list(APPEND SRC_LIST_ASM ${SRC_DIR}/src/arm/${BITS}/mc16_sve.S)
+      endif()
     endif()
   endif()
   # TODO: arm64 v8.4a: arm/64/mc_dotprod.S
@@ -279,9 +301,8 @@ if(NOT DAV1D_NO_ASM)
         .
         );
     " HAVE_AS_FUNC)
-    if(HAVE_AS_FUNC)
-      add_compile_options(-DHAVE_AS_FUNC=$<BOOL:HAVE_AS_FUNC>)
-    endif()
+  endif()
+  if(ARCH_AARCH64) # TODO: dotprod i8mm sve sve2
   endif()
   if(ARCH_RISCV)
     set(HAVE_ASM 1)
@@ -353,16 +374,15 @@ endif()
 find_package(Threads)
 #link_libraries(Threads::Threads) # will add -pthread in nasm flags. link_libraries() affect targets ONLY add later
 
+check_symbol_exists(aligned_alloc "stdlib.h" HAVE_ALIGNED_ALLOC)
+check_symbol_exists(memalign "malloc.h" HAVE_MEMALIGN)
 if(NOT WIN32)
-  add_compile_options(-DHAVE_DLSYM=1 -DHAVE_CLOCK_GETTIME=1 -DHAVE_POSIX_MEMALIGN=1)
+  set(HAVE_POSIX_MEMALIGN 1)
+  set(HAVE_CLOCK_GETTIME 1)
+  set(HAVE_DLSYM 1)
+  set(HAVE_UNISTD_H 1)
   check_symbol_exists(elf_aux_info "sys/auxv.h" HAVE_ELF_AUX_INFO) #arm, ppc
-  if(HAVE_ELF_AUX_INFO)
-    add_compile_options(-DHAVE_ELF_AUX_INFO=${HAVE_ELF_AUX_INFO})
-  endif()
   check_symbol_exists(getauxval "sys/auxv.h" HAVE_GETAUXVAL) #linux arm, ppc
-  if(HAVE_GETAUXVAL)
-    add_compile_options(-DHAVE_GETAUXVAL=${HAVE_GETAUXVAL}) # arm, android 18+
-  endif()
   add_compile_options($<$<COMPILE_LANGUAGE:C>:-D_GNU_SOURCE>)
   link_libraries(dl)
   if(NOT ANDROID)
@@ -373,16 +393,16 @@ if(NOT WIN32)
   if(${HAS_ATOMIC})
     include_directories(${SRC_DIR}/include/compat/gcc)
   endif()
-  check_include_file(pthread_np.h HAS_pthread_np.h)
-  if(${HAS_pthread_np.h})
-    add_compile_definitions(HAVE_PTHREAD_NP_H)
-  endif()
-  check_library_exists(pthread pthread_getaffinity_np "" HAVE_PTHREAD_SETAFFINITY_NP) # libc
+  check_include_file(pthread_np.h HAVE_PTHREAD_NP_H)
+  check_symbol_exists(pthread_getaffinity_np "pthread.h" HAVE_PTHREAD_GETAFFINITY_NP)
+  check_symbol_exists(pthread_setaffinity_np "pthread.h" HAVE_PTHREAD_SETAFFINITY_NP)
+  check_symbol_exists(pthread_setname_np "pthread.h" HAVE_PTHREAD_SETNAME_NP)
+  check_symbol_exists(pthread_set_name_np "pthread.h" HAVE_PTHREAD_SET_NAME_NP)
+  #check_library_exists(pthread pthread_getaffinity_np "" HAVE_PTHREAD_SETAFFINITY_NP) # libc, libSystem
 endif()
 if(MSVC)
-  add_compile_options(-DHAVE_ALIGNED_MALLOC=1) # GetThreadGroupAffinity: win7
+  set(HAVE_ALIGNED_MALLOC 1) # GetThreadGroupAffinity: win7
   add_compile_options("$<$<COMPILE_LANGUAGE:C>:-wd4028;-wd4090;-wd4996>")
-
   add_compile_options_if_supported(-experimental:c11atomics)
 else()
   add_compile_options("$<$<COMPILE_LANGUAGE:C>:-ffast-math;-Wundef;-Werror=vla;-Wno-uninitialized;-Wno-missing-field-initializers;-Wno-unused-parameter;-Wstrict-prototypes;-Werror=missing-prototypes>")
@@ -391,6 +411,25 @@ else()
   endif()
 endif()
 
+set(HAVE_VARS
+    HAVE_AS_FUNC HAVE_DOTPROD HAVE_I8MM HAVE_SVE HAVE_SVE2
+    HAVE_UNISTD_H
+    HAVE_DLSYM HAVE_CLOCK_GETTIME
+    HAVE_MEMALIGN HAVE_ALIGNED_ALLOC HAVE_POSIX_MEMALIGN
+    HAVE_ELF_AUX_INFO HAVE_GETAUXVAL
+    HAVE_PTHREAD_NP_H HAVE_PTHREAD_GETAFFINITY_NP HAVE_PTHREAD_SETAFFINITY_NP HAVE_PTHREAD_SETNAME_NP HAVE_PTHREAD_SET_NAME_NP
+    )
+if(NOT dav1d_VERSION VERSION_LESS 1.5.0)
+  foreach(P ${HAVE_VARS})
+    add_compile_definitions(${P}=$<BOOL:${${P}}>) # gen expr, 0 or 1
+  endforeach()
+else()
+  foreach(P ${HAVE_VARS})
+    if(${${P}})
+      add_compile_definitions(${P}=$<BOOL:${${P}}>) # gen expr, 0 or 1
+    endif()
+  endforeach()
+endif()
 
 add_library(${PROJECT_NAME} SHARED ${SRC_LIST})
 
@@ -440,12 +479,17 @@ endif()
 
 target_link_libraries(${PROJECT_NAME} LINK_PRIVATE "${EXTRA_LIBS}")
 
-configure_file(
+file(GLOB HEADERS "${SRC_DIR}/include/dav1d/*.h")
+if(EXISTS "${SRC_DIR}/include/dav1d/version.h.in")
+  configure_file(
     "${SRC_DIR}/include/dav1d/version.h.in"
     "${PROJECT_BINARY_DIR}/version.h"
     @ONLY)
-file(GLOB HEADERS "${SRC_DIR}/include/dav1d/*.h")
-list(APPEND HEADERS "${PROJECT_BINARY_DIR}/version.h")
+  list(APPEND HEADERS "${PROJECT_BINARY_DIR}/version.h")
+endif()
+if(EXISTS "${SRC_DIR}/include/dav1d/version.h") # 1.5.0
+  list(APPEND HEADERS "${SRC_DIR}/include/dav1d/version.h")
+endif()
 install(FILES ${HEADERS} DESTINATION include/${PROJECT_NAME})
 install(TARGETS ${PROJECT_NAME} EXPORT ${PROJECT_NAME}
   RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR} # *.dll

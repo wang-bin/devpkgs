@@ -12,7 +12,7 @@ option(WITH_VC_LTL "Build with VC-LTL crt for windows. Recommend to use with -DC
 set(VC_LTL_DIR "${CMAKE_CURRENT_SOURCE_DIR}/VC-LTL" CACHE STRING "VC-LTL dir")
 
 set(CMAKE_C_STANDARD 11)
-set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 set(CMAKE_MODULE_PATH
@@ -138,6 +138,9 @@ if(BUILD_WOLFSSL)
   set(WOLFSSL_FAST_MATH yes)
 # macOS x64 build arm64: CMAKE_SYSTEM_PROCESSOR is x86_64 used CMAKE_SYSTEM_PROCESSOR by wolfssl is wrong
   add_subdirectory(src/wolfssl)
+endif()
+if(LINUX)
+  add_subdirectory(src/cppcompat)
 endif()
 
 # android INTERPROCEDURAL_OPTIMIZATION: cmake will force gold linker if CMAKE_ANDROID_NDK_VERSION is not set(e.g. use ndk's cmake toolchain file) or less than 22

@@ -41,3 +41,6 @@
 [submodule "src/uavs3d"]
 	path = src/uavs3d
 	url = https://github.com/uavs3/uavs3d.git
+[submodule "src/cppcompat"]
+	path = src/cppcompat
+	url = https://github.com/wang-bin/cppcompat.git

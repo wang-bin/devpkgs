@@ -8,6 +8,9 @@ option(BUILD_LIBASS "Build libass" ON)
 option(BUILD_DAV1D "Build dav1d" ON)
 option(BUILD_VALD "Build libva loader" ON)
 option(BUILD_WOLFSSL "Build wolfssl" OFF)
+option(BUILD_FT "Build freetype" ON)
+option(BUILD_HB "Build harfbuzz" ON) # OFF to build freetype, then ON and BUILD_HB_FT to build hb-ft
+option(BUILD_HB_FT "Build harfbuzz with freetype and hb-ft.h" OFF)
 option(WITH_VC_LTL "Build with VC-LTL crt for windows. Recommend to use with -DCMAKE_MSVC_RUNTIME_LIBRARY=MultiThreaded" OFF)
 set(VC_LTL_DIR "${CMAKE_CURRENT_SOURCE_DIR}/VC-LTL" CACHE STRING "VC-LTL dir")
 
@@ -18,7 +21,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_MODULE_PATH
     ${CMAKE_SOURCE_DIR}/cmake
     ${CMAKE_SOURCE_DIR}/cmake/tools
-    #${CMAKE_INSTALL_PREFIX}/lib
+    #${CMAKE_INSTALL_PREFIX}     # ft, hb.
     )
 
 include(CheckIncludeFile)
@@ -49,9 +52,18 @@ set(CMAKE_VISIBILITY_INLINES_HIDDEN ON)
 
 message("CMAKE_SYSTEM_PROCESSOR: ${CMAKE_SYSTEM_PROCESSOR}")
 
-# ignore homebrew. affect find_...()
-set(CMAKE_SYSTEM_IGNORE_PREFIX_PATH "/opt/homebrew;/usr/local")
-#set(CMAKE_FIND_USE_INSTALL_PREFIX 1) # find_...()
+# ignore homebrew. affect find_...(). not working?
+set(CMAKE_IGNORE_PREFIX_PATH /opt/homebrew /usr/local)
+#set(CMAKE_FIND_USE_INSTALL_PREFIX 1) # find_...(). default will search if no CMAKE_FIND_NO_INSTALL_PREFIX
+# find in install dir. otherwise install dir with sysroot prefix is searched
+message("CMAKE_SYSROOT:${CMAKE_SYSROOT}. CMAKE_CROSSCOMPILING:${CMAKE_CROSSCOMPILING},CMAKE_OSX_SYSROOT:${CMAKE_OSX_SYSROOT}")
+if(CMAKE_CROSSCOMPILING)
+  set(CMAKE_FIND_ROOT_PATH ${CMAKE_INSTALL_PREFIX} ${CMAKE_SYSROOT} ${CMAKE_OSX_SYSROOT})
+  set(CMAKE_FIND_ROOT_PATH_MODE_PROGRAM NEVER)
+  set(CMAKE_FIND_ROOT_PATH_MODE_PACKAGE ONLY)
+  set(CMAKE_FIND_ROOT_PATH_MODE_INCLUDE ONLY)
+  set(CMAKE_FIND_ROOT_PATH_MODE_LIBRARY ONLY)
+endif()
     # Always add debug flags
 if(CMAKE_BUILD_TYPE MATCHES MinSizeRel AND WITH_DEB_INFO)
   if(MSVC)
@@ -75,7 +87,7 @@ set(CMAKE_REQUIRED_INCLUDES ${CMAKE_SOURCE_DIR}/dep/include)
 
 set(FT_DISABLE_BROTLI 1)
 set(FT_DISABLE_PNG 1)
-if(BUILD_LIBASS)
+if((BUILD_LIBASS OR BUILD_FT) AND NOT BUILD_HB_FT)
   message("Configuring freetype...")
   add_subdirectory(src/freetype)
 endif()
@@ -83,8 +95,11 @@ set(HB_BUILD_SUBSET 0)
 if(IOS OR MACCATALYST OR TVOS)
   set(HB_IOS 1)
 endif()
-if(BUILD_LIBASS)
+if(BUILD_LIBASS OR BUILD_HB)
   message("Configuring harfbuzz...")
+  if(BUILD_HB_FT)
+    set(HB_HAVE_FREETYPE 1)
+  endif()
   add_subdirectory(src/harfbuzz)
 endif()
 add_subdirectory(projects)
@@ -145,7 +160,7 @@ endif()
 
 # android INTERPROCEDURAL_OPTIMIZATION: cmake will force gold linker if CMAKE_ANDROID_NDK_VERSION is not set(e.g. use ndk's cmake toolchain file) or less than 22
 # TODO: INTERPROCEDURAL_OPTIMIZATION is thin lto, how to enable full lto?
-foreach(tgt freetype harfbuzz fribidi_shared fribidi_static ass zlib)
+foreach(tgt freetype harfbuzz fribidi_shared fribidi_static ass zlib) # TODO: no lto for other projects(ffmpeg)
   if(TARGET ${tgt})
     set_target_properties(${tgt} PROPERTIES
         INTERPROCEDURAL_OPTIMIZATION ${WITH_LTO})

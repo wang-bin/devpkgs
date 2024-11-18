@@ -1,4 +1,4 @@
-name: Build
+name: Build No LTO
 
 on:
   push:
@@ -9,8 +9,9 @@ env:
   NINJA_STATUS: '[%f/%t %e %r]'
   LLVM_VER: ${{ vars.LLVM_VER }}
   VC_LTL_VER: ${{ vars.VC_LTL_VER }}
-  OPTIONS: -DMIN_SIZE=1 -DWITH_LTO_STATIC=1 -DCMAKE_VERBOSE_MAKEFILE=1 -GNinja
-
+  OPTIONS: -DMIN_SIZE=1 -DWITH_LTO=0 -DCMAKE_VERBOSE_MAKEFILE=1 -GNinja
+  OPTIONS0: -DBUILD_LIBASS=0 -DBUILD_HB=0
+  OPTIONS1: -DBUILD_LIBASS=1 -DBUILD_FT=0 -DBUILD_HB=1 -DBUILD_HB_FT=1
 jobs:
   macOS:
     # See: https://docs.github.com/en/actions/configuring-and-managing-workflows/configuring-a-workflow#configuring-a-build-matrix
@@ -41,7 +42,10 @@ jobs:
       # access regardless of the host operating system
       shell: bash
       run: |
-        cmake ${{ env.OPTIONS }} -DFRIBIDI_GENTAB=1 -DBUILD_WOLFSSL=0 -DCMAKE_OSX_DEPLOYMENT_TARGET=10.9 -DCMAKE_OSX_ARCHITECTURES=${{ env.ARCH }} -Bbuild/${{ env.ARCH }} -DCMAKE_BUILD_TYPE=${{ matrix.config }} -DCMAKE_INSTALL_PREFIX=install/${{ env.ARCH }}
+        cmake ${{ env.OPTIONS }} ${{ env.OPTIONS0 }} -DFRIBIDI_GENTAB=1 -DBUILD_WOLFSSL=0 -DCMAKE_OSX_DEPLOYMENT_TARGET=10.9 -DCMAKE_OSX_ARCHITECTURES=${{ env.ARCH }} -Bbuild/${{ env.ARCH }} -DCMAKE_BUILD_TYPE=${{ matrix.config }} -DCMAKE_INSTALL_PREFIX=install/${{ env.ARCH }}
+        cmake --build build/${{ env.ARCH }}
+        cmake --install build/${{ env.ARCH }}
+        cmake ${{ env.OPTIONS }} ${{ env.OPTIONS1 }} -DBUILD_WOLFSSL=0 -DCMAKE_OSX_DEPLOYMENT_TARGET=10.9 -DCMAKE_OSX_ARCHITECTURES=${{ env.ARCH }} -Bbuild/${{ env.ARCH }} -DCMAKE_BUILD_TYPE=${{ matrix.config }} -DCMAKE_INSTALL_PREFIX=install/${{ env.ARCH }}
         cmake --build build/${{ env.ARCH }}
         cmake --install build/${{ env.ARCH }}
     - name: Build for arm64
@@ -49,7 +53,10 @@ jobs:
         ARCH: arm64
       shell: bash
       run: |
-        cmake ${{ env.OPTIONS }} -DBUILD_WOLFSSL=0 -DCMAKE_OSX_DEPLOYMENT_TARGET=11.0 -DCMAKE_OSX_ARCHITECTURES=${{ env.ARCH }} -Bbuild/${{ env.ARCH }} -DCMAKE_BUILD_TYPE=${{ matrix.config }} -DCMAKE_INSTALL_PREFIX=install/${{ env.ARCH }}
+        cmake ${{ env.OPTIONS }} ${{ env.OPTIONS0 }} -DBUILD_WOLFSSL=0 -DCMAKE_OSX_DEPLOYMENT_TARGET=11.0 -DCMAKE_OSX_ARCHITECTURES=${{ env.ARCH }} -Bbuild/${{ env.ARCH }} -DCMAKE_BUILD_TYPE=${{ matrix.config }} -DCMAKE_INSTALL_PREFIX=install/${{ env.ARCH }}
+        cmake --build build/${{ env.ARCH }}
+        cmake --install build/${{ env.ARCH }}
+        cmake ${{ env.OPTIONS }} ${{ env.OPTIONS1 }} -DBUILD_WOLFSSL=0 -DCMAKE_OSX_DEPLOYMENT_TARGET=11.0 -DCMAKE_OSX_ARCHITECTURES=${{ env.ARCH }} -Bbuild/${{ env.ARCH }} -DCMAKE_BUILD_TYPE=${{ matrix.config }} -DCMAKE_INSTALL_PREFIX=install/${{ env.ARCH }}
         cmake --build build/${{ env.ARCH }}
         cmake --install build/${{ env.ARCH }}
     - name: Make SDK
@@ -101,7 +108,10 @@ jobs:
         minver=8.0
         [[ "${{ matrix.os }}" == "tv"* ]] && minver=9.0
         [[ "${{ matrix.os }}" == "vision"* ]] && minver=1.0
-        cmake ${{ env.OPTIONS }} -DWITH_DEB_INFO=0 -DBUILD_WOLFSSL=1 -DHB_IOS=1 -DCMAKE_IOS_INSTALL_COMBINED=YES -DCMAKE_SYSTEM_NAME=${{ matrix.os }} -DCMAKE_OSX_DEPLOYMENT_TARGET=${minver} -DCMAKE_OSX_ARCHITECTURES=${{ env.ARCH }} -Bbuild/${{ env.ARCH }} -DCMAKE_BUILD_TYPE=${{ matrix.config }} -DCMAKE_INSTALL_PREFIX=install/${{ env.ARCH }}
+        cmake ${{ env.OPTIONS }} ${{ env.OPTIONS0 }} -DWITH_DEB_INFO=0 -DBUILD_WOLFSSL=1 -DHB_IOS=1 -DCMAKE_IOS_INSTALL_COMBINED=YES -DCMAKE_SYSTEM_NAME=${{ matrix.os }} -DCMAKE_OSX_DEPLOYMENT_TARGET=${minver} -DCMAKE_OSX_ARCHITECTURES=${{ env.ARCH }} -Bbuild/${{ env.ARCH }} -DCMAKE_BUILD_TYPE=${{ matrix.config }} -DCMAKE_INSTALL_PREFIX=install/${{ env.ARCH }}
+        cmake --build build/${{ env.ARCH }}
+        cmake --install build/${{ env.ARCH }}
+        cmake ${{ env.OPTIONS }} ${{ env.OPTIONS1 }} -DWITH_DEB_INFO=0 -DBUILD_WOLFSSL=1 -DHB_IOS=1 -DCMAKE_IOS_INSTALL_COMBINED=YES -DCMAKE_SYSTEM_NAME=${{ matrix.os }} -DCMAKE_OSX_DEPLOYMENT_TARGET=${minver} -DCMAKE_OSX_ARCHITECTURES=${{ env.ARCH }} -Bbuild/${{ env.ARCH }} -DCMAKE_BUILD_TYPE=${{ matrix.config }} -DCMAKE_INSTALL_PREFIX=install/${{ env.ARCH }}
         cmake --build build/${{ env.ARCH }}
         cmake --install build/${{ env.ARCH }}
     - name: Make SDK
@@ -155,7 +165,10 @@ jobs:
         ARCH: x64
       run: |
         clang-cl --version
-        cmake ${{ env.OPTIONS }} -DBUILD_WOLFSSL=0 -DBUILD_VALD=${{ matrix.dll }} -DBUILD_LIBASS=${{ matrix.dll }} -DBUILD_DAV1D=${{ matrix.dll }} -DFRIBIDI_GENTAB=1  -DCMAKE_SYSTEM_PROCESSOR=${{ env.ARCH }} -DCMAKE_SYSTEM_VERSION="6.0"  -Bbuild/${{ env.ARCH }} -DCMAKE_BUILD_TYPE=${{ matrix.config }} -DCMAKE_INSTALL_PREFIX=install/${{ env.ARCH }} .
+        cmake ${{ env.OPTIONS }} ${{ env.OPTIONS0 }} -DBUILD_WOLFSSL=0 -DBUILD_VALD=${{ matrix.dll }} -DBUILD_DAV1D=${{ matrix.dll }} -DFRIBIDI_GENTAB=1  -DCMAKE_SYSTEM_PROCESSOR=${{ env.ARCH }} -DCMAKE_SYSTEM_VERSION="6.0"  -Bbuild/${{ env.ARCH }} -DCMAKE_BUILD_TYPE=${{ matrix.config }} -DCMAKE_INSTALL_PREFIX=install/${{ env.ARCH }} .
+        cmake --build build/${{ env.ARCH }}
+        cmake --install build/${{ env.ARCH }}
+        cmake ${{ env.OPTIONS }} ${{ env.OPTIONS1 }} -DBUILD_FT=0 -DBUILD_HB=1 -DBUILD_HB_FT=1 -DBUILD_WOLFSSL=0 -DBUILD_VALD=${{ matrix.dll }} -DBUILD_LIBASS=${{ matrix.dll }} -DBUILD_DAV1D=${{ matrix.dll }} -DFRIBIDI_GENTAB=1  -DCMAKE_SYSTEM_PROCESSOR=${{ env.ARCH }} -DCMAKE_SYSTEM_VERSION="6.0"  -Bbuild/${{ env.ARCH }} -DCMAKE_BUILD_TYPE=${{ matrix.config }} -DCMAKE_INSTALL_PREFIX=install/${{ env.ARCH }} .
         cmake --build build/${{ env.ARCH }}
         cmake --install build/${{ env.ARCH }}
     - name: Use MSVC arm64
@@ -166,7 +179,10 @@ jobs:
       env:
         ARCH: arm64
       run: |
-        cmake ${{ env.OPTIONS }} -DBUILD_WOLFSSL=0 -DBUILD_VALD=${{ matrix.dll }} -DBUILD_LIBASS=${{ matrix.dll }} -DBUILD_DAV1D=${{ matrix.dll }} -DCMAKE_SYSTEM_NAME=Windows -DCMAKE_SYSTEM_VERSION="10.0" -DCMAKE_SYSTEM_PROCESSOR=${{ env.ARCH }}  -Bbuild/${{ env.ARCH }} -DCMAKE_BUILD_TYPE=${{ matrix.config }} -DCMAKE_INSTALL_PREFIX=install/${{ env.ARCH }} .
+        cmake ${{ env.OPTIONS }} ${{ env.OPTIONS0 }} -DBUILD_WOLFSSL=0 -DBUILD_VALD=${{ matrix.dll }} -DBUILD_DAV1D=${{ matrix.dll }} -DCMAKE_SYSTEM_NAME=Windows -DCMAKE_SYSTEM_VERSION="10.0" -DCMAKE_SYSTEM_PROCESSOR=${{ env.ARCH }}  -Bbuild/${{ env.ARCH }} -DCMAKE_BUILD_TYPE=${{ matrix.config }} -DCMAKE_INSTALL_PREFIX=install/${{ env.ARCH }} .
+        cmake --build build/${{ env.ARCH }}
+        cmake --install build/${{ env.ARCH }}
+        cmake ${{ env.OPTIONS }} ${{ env.OPTIONS1 }} -DBUILD_WOLFSSL=0 -DBUILD_VALD=${{ matrix.dll }} -DBUILD_LIBASS=${{ matrix.dll }} -DBUILD_DAV1D=${{ matrix.dll }} -DCMAKE_SYSTEM_NAME=Windows -DCMAKE_SYSTEM_VERSION="10.0" -DCMAKE_SYSTEM_PROCESSOR=${{ env.ARCH }}  -Bbuild/${{ env.ARCH }} -DCMAKE_BUILD_TYPE=${{ matrix.config }} -DCMAKE_INSTALL_PREFIX=install/${{ env.ARCH }} .
         cmake --build build/${{ env.ARCH }}
         cmake --install build/${{ env.ARCH }}
     - name: Use MSVC x86
@@ -178,7 +194,10 @@ jobs:
         ARCH: x86
       # dav1d: win7 required(atomic, GetThreadGroupAffinity)
       run: |
-        cmake ${{ env.OPTIONS }} -DBUILD_WOLFSSL=0 -DBUILD_VALD=${{ matrix.dll }} -DBUILD_LIBASS=${{ matrix.dll }} -DBUILD_DAV1D=${{ matrix.dll }} -DCMAKE_SYSTEM_PROCESSOR=${{ env.ARCH }} -DCMAKE_SYSTEM_VERSION="6.1"  -Bbuild/${{ env.ARCH }} -DCMAKE_BUILD_TYPE=${{ matrix.config }} -DCMAKE_INSTALL_PREFIX=install/${{ env.ARCH }} .
+        cmake ${{ env.OPTIONS }} ${{ env.OPTIONS0 }} -DBUILD_WOLFSSL=0 -DBUILD_VALD=${{ matrix.dll }} -DBUILD_DAV1D=${{ matrix.dll }} -DCMAKE_SYSTEM_PROCESSOR=${{ env.ARCH }} -DCMAKE_SYSTEM_VERSION="6.1"  -Bbuild/${{ env.ARCH }} -DCMAKE_BUILD_TYPE=${{ matrix.config }} -DCMAKE_INSTALL_PREFIX=install/${{ env.ARCH }} .
+        cmake --build build/${{ env.ARCH }}
+        cmake --install build/${{ env.ARCH }}
+        cmake ${{ env.OPTIONS }} ${{ env.OPTIONS1 }} -DBUILD_WOLFSSL=0 -DBUILD_VALD=${{ matrix.dll }} -DBUILD_LIBASS=${{ matrix.dll }} -DBUILD_DAV1D=${{ matrix.dll }} -DCMAKE_SYSTEM_PROCESSOR=${{ env.ARCH }} -DCMAKE_SYSTEM_VERSION="6.1"  -Bbuild/${{ env.ARCH }} -DCMAKE_BUILD_TYPE=${{ matrix.config }} -DCMAKE_INSTALL_PREFIX=install/${{ env.ARCH }} .
         cmake --build build/${{ env.ARCH }}
         cmake --install build/${{ env.ARCH }}
     - name: Make SDK
@@ -236,7 +255,10 @@ jobs:
       env:
         ARCH: x64
       run: |
-        cmake ${{ env.OPTIONS }} -DFRIBIDI_GENTAB=1 -DBUILD_WOLFSSL=0 -DCMAKE_MSVC_RUNTIME_LIBRARY=MultiThreaded -DWITH_VC_LTL=1 -DCMAKE_SYSTEM_PROCESSOR=${{ env.ARCH }} -DCMAKE_SYSTEM_VERSION="6.0"  -Bbuild/${{ env.ARCH }} -DCMAKE_BUILD_TYPE=${{ matrix.config }} -DCMAKE_INSTALL_PREFIX=install/${{ env.ARCH }} .
+        cmake ${{ env.OPTIONS }} ${{ env.OPTIONS0 }} -DFRIBIDI_GENTAB=1 -DBUILD_WOLFSSL=0 -DCMAKE_MSVC_RUNTIME_LIBRARY=MultiThreaded -DWITH_VC_LTL=1 -DCMAKE_SYSTEM_PROCESSOR=${{ env.ARCH }} -DCMAKE_SYSTEM_VERSION="6.0"  -Bbuild/${{ env.ARCH }} -DCMAKE_BUILD_TYPE=${{ matrix.config }} -DCMAKE_INSTALL_PREFIX=install/${{ env.ARCH }} .
+        cmake --build build/${{ env.ARCH }}
+        cmake --install build/${{ env.ARCH }}
+        cmake ${{ env.OPTIONS }} ${{ env.OPTIONS1 }} -DFRIBIDI_GENTAB=1 -DBUILD_WOLFSSL=0 -DCMAKE_MSVC_RUNTIME_LIBRARY=MultiThreaded -DWITH_VC_LTL=1 -DCMAKE_SYSTEM_PROCESSOR=${{ env.ARCH }} -DCMAKE_SYSTEM_VERSION="6.0"  -Bbuild/${{ env.ARCH }} -DCMAKE_BUILD_TYPE=${{ matrix.config }} -DCMAKE_INSTALL_PREFIX=install/${{ env.ARCH }} .
         cmake --build build/${{ env.ARCH }}
         cmake --install build/${{ env.ARCH }}
     - name: Use MSVC x86
@@ -247,7 +269,10 @@ jobs:
       env:
         ARCH: x86
       run: |
-        cmake ${{ env.OPTIONS }} -DBUILD_WOLFSSL=0 -DCMAKE_MSVC_RUNTIME_LIBRARY=MultiThreaded -DWITH_VC_LTL=1 -DCMAKE_SYSTEM_PROCESSOR=${{ env.ARCH }} -DCMAKE_SYSTEM_VERSION="6.1"  -Bbuild/${{ env.ARCH }} -DCMAKE_BUILD_TYPE=${{ matrix.config }} -DCMAKE_INSTALL_PREFIX=install/${{ env.ARCH }} .
+        cmake ${{ env.OPTIONS }} ${{ env.OPTIONS0 }} -DBUILD_WOLFSSL=0 -DCMAKE_MSVC_RUNTIME_LIBRARY=MultiThreaded -DWITH_VC_LTL=1 -DCMAKE_SYSTEM_PROCESSOR=${{ env.ARCH }} -DCMAKE_SYSTEM_VERSION="6.1"  -Bbuild/${{ env.ARCH }} -DCMAKE_BUILD_TYPE=${{ matrix.config }} -DCMAKE_INSTALL_PREFIX=install/${{ env.ARCH }} .
+        cmake --build build/${{ env.ARCH }}
+        cmake --install build/${{ env.ARCH }}
+        cmake ${{ env.OPTIONS }} ${{ env.OPTIONS1 }} -DBUILD_WOLFSSL=0 -DCMAKE_MSVC_RUNTIME_LIBRARY=MultiThreaded -DWITH_VC_LTL=1 -DCMAKE_SYSTEM_PROCESSOR=${{ env.ARCH }} -DCMAKE_SYSTEM_VERSION="6.1"  -Bbuild/${{ env.ARCH }} -DCMAKE_BUILD_TYPE=${{ matrix.config }} -DCMAKE_INSTALL_PREFIX=install/${{ env.ARCH }} .
         cmake --build build/${{ env.ARCH }}
         cmake --install build/${{ env.ARCH }}
     - name: Make SDK
@@ -282,13 +307,16 @@ jobs:
         arch: x64
     - name: Build for host gen_tab
       run: |
-        cmake -DFRIBIDI_GENTAB=1  -GNinja  -Bbuild/host -DCMAKE_BUILD_TYPE=${{ matrix.config }} -DCMAKE_VERBOSE_MAKEFILE=1 .
+        cmake -DFRIBIDI_GENTAB=1   -Bbuild/host -DCMAKE_BUILD_TYPE=${{ matrix.config }} .
         cmake --build build/host -t gen_tab
     - name: Build for uwp x64
       env:
         ARCH: x64
       run: |
-        cmake ${{ env.OPTIONS }} -DCMAKE_ASM_NASM_COMPILER="C:/Users/runneradmin/nasm/nasm.exe" -DBUILD_WOLFSSL=0 -DCMAKE_SYSTEM_PROCESSOR=${{ env.ARCH }} -DCMAKE_SYSTEM_NAME=WindowsStore -DCMAKE_SYSTEM_VERSION="10.0"  -Bbuild/${{ env.ARCH }} -DCMAKE_BUILD_TYPE=${{ matrix.config }} -DCMAKE_INSTALL_PREFIX=install/${{ env.ARCH }} .
+        cmake ${{ env.OPTIONS }} ${{ env.OPTIONS0 }} -DCMAKE_ASM_NASM_COMPILER="C:/Users/runneradmin/nasm/nasm.exe" ${{ env.OPTIONS0 }} -DBUILD_WOLFSSL=0 -DCMAKE_SYSTEM_PROCESSOR=${{ env.ARCH }} -DCMAKE_SYSTEM_NAME=WindowsStore -DCMAKE_SYSTEM_VERSION="10.0"  -Bbuild/${{ env.ARCH }} -DCMAKE_BUILD_TYPE=${{ matrix.config }} -DCMAKE_INSTALL_PREFIX=install/${{ env.ARCH }} .
+        cmake --build build/${{ env.ARCH }}
+        cmake --install build/${{ env.ARCH }}
+        cmake ${{ env.OPTIONS }} ${{ env.OPTIONS1 }} -DCMAKE_ASM_NASM_COMPILER="C:/Users/runneradmin/nasm/nasm.exe" ${{ env.OPTIONS1 }} -DBUILD_WOLFSSL=0 -DCMAKE_SYSTEM_PROCESSOR=${{ env.ARCH }} -DCMAKE_SYSTEM_NAME=WindowsStore -DCMAKE_SYSTEM_VERSION="10.0"  -Bbuild/${{ env.ARCH }} -DCMAKE_BUILD_TYPE=${{ matrix.config }} -DCMAKE_INSTALL_PREFIX=install/${{ env.ARCH }} .
         cmake --build build/${{ env.ARCH }}
         cmake --install build/${{ env.ARCH }}
     - name: Use MSVC arm64
@@ -299,7 +327,10 @@ jobs:
       env:
         ARCH: arm64
       run: |
-        cmake ${{ env.OPTIONS }}  -DBUILD_WOLFSSL=0 -DCMAKE_SYSTEM_PROCESSOR=${{ env.ARCH }} -DCMAKE_SYSTEM_NAME=WindowsStore -DCMAKE_SYSTEM_VERSION="10.0"  -Bbuild/${{ env.ARCH }} -DCMAKE_BUILD_TYPE=${{ matrix.config }} -DCMAKE_INSTALL_PREFIX=install/${{ env.ARCH }} .
+        cmake ${{ env.OPTIONS }} ${{ env.OPTIONS0 }} -DBUILD_WOLFSSL=0 -DCMAKE_SYSTEM_PROCESSOR=${{ env.ARCH }} -DCMAKE_SYSTEM_NAME=WindowsStore -DCMAKE_SYSTEM_VERSION="10.0"  -Bbuild/${{ env.ARCH }} -DCMAKE_BUILD_TYPE=${{ matrix.config }} -DCMAKE_INSTALL_PREFIX=install/${{ env.ARCH }} .
+        cmake --build build/${{ env.ARCH }}
+        cmake --install build/${{ env.ARCH }}
+        cmake ${{ env.OPTIONS }} ${{ env.OPTIONS1 }} -DBUILD_WOLFSSL=0 -DCMAKE_SYSTEM_PROCESSOR=${{ env.ARCH }} -DCMAKE_SYSTEM_NAME=WindowsStore -DCMAKE_SYSTEM_VERSION="10.0"  -Bbuild/${{ env.ARCH }} -DCMAKE_BUILD_TYPE=${{ matrix.config }} -DCMAKE_INSTALL_PREFIX=install/${{ env.ARCH }} .
         cmake --build build/${{ env.ARCH }}
         cmake --install build/${{ env.ARCH }}
     - name: Make SDK
@@ -337,14 +368,17 @@ jobs:
     - name: Build host gen_tab # native build first
       shell: bash
       run: |
-        cmake -DFRIBIDI_GENTAB=1 -Bbuild/host -DCMAKE_VERBOSE_MAKEFILE=1 -DCMAKE_BUILD_TYPE=${{ matrix.config }}
+        cmake -DFRIBIDI_GENTAB=1 -Bbuild/host -DCMAKE_BUILD_TYPE=${{ matrix.config }}
         cmake --build build/host -t gen_tab
     - name: Build for x64
       env:
         ARCH: x64
       shell: bash
       run: |
-        cmake ${{ env.OPTIONS }} -DWITH_LTO=0 -DBUILD_WOLFSSL=0 -DBUILD_LIBASS=1 -DUSE_LIBCXX=0 -DCMAKE_SYSTEM_PROCESSOR=${ARCH} -DCMAKE_TOOLCHAIN_FILE=$PWD/cmake/tools/llvm-mingw.cmake -H$PWD -Bbuild/${ARCH} -DCMAKE_BUILD_TYPE=${{ matrix.config }} -DCMAKE_INSTALL_PREFIX=install/${ARCH}
+        cmake ${{ env.OPTIONS }} ${{ env.OPTIONS0 }} -DBUILD_WOLFSSL=0 -DUSE_LIBCXX=0 -DCMAKE_SYSTEM_PROCESSOR=${ARCH} -DCMAKE_TOOLCHAIN_FILE=$PWD/cmake/tools/llvm-mingw.cmake -H$PWD -Bbuild/${ARCH} -DCMAKE_BUILD_TYPE=${{ matrix.config }} -DCMAKE_INSTALL_PREFIX=install/${ARCH}
+        cmake --build build/${{ env.ARCH }}
+        cmake --install build/${{ env.ARCH }}
+        cmake ${{ env.OPTIONS }} ${{ env.OPTIONS1 }} -DBUILD_WOLFSSL=0 -DUSE_LIBCXX=0 -DCMAKE_SYSTEM_PROCESSOR=${ARCH} -DCMAKE_TOOLCHAIN_FILE=$PWD/cmake/tools/llvm-mingw.cmake -H$PWD -Bbuild/${ARCH} -DCMAKE_BUILD_TYPE=${{ matrix.config }} -DCMAKE_INSTALL_PREFIX=install/${ARCH}
         cmake --build build/${{ env.ARCH }}
         cmake --install build/${{ env.ARCH }}
     - name: Build for x86
@@ -352,7 +386,10 @@ jobs:
         ARCH: x86
       shell: bash
       run: |
-        cmake ${{ env.OPTIONS }} -DWITH_LTO=0 -DBUILD_DAV1D=0 -DBUILD_WOLFSSL=0 -DBUILD_LIBASS=1 -DUSE_LIBCXX=0 -DCMAKE_SYSTEM_PROCESSOR=${ARCH} -DCMAKE_TOOLCHAIN_FILE=$PWD/cmake/tools/llvm-mingw.cmake -H$PWD -Bbuild/${ARCH} -DCMAKE_BUILD_TYPE=${{ matrix.config }} -DCMAKE_INSTALL_PREFIX=install/${ARCH}
+        cmake ${{ env.OPTIONS }} ${{ env.OPTIONS0 }} -DBUILD_DAV1D=0 -DBUILD_WOLFSSL=0 -DUSE_LIBCXX=0 -DCMAKE_SYSTEM_PROCESSOR=${ARCH} -DCMAKE_TOOLCHAIN_FILE=$PWD/cmake/tools/llvm-mingw.cmake -H$PWD -Bbuild/${ARCH} -DCMAKE_BUILD_TYPE=${{ matrix.config }} -DCMAKE_INSTALL_PREFIX=install/${ARCH}
+        cmake --build build/${{ env.ARCH }}
+        cmake --install build/${{ env.ARCH }}
+        cmake ${{ env.OPTIONS }} ${{ env.OPTIONS1 }} -DBUILD_DAV1D=0 -DBUILD_WOLFSSL=0 -DUSE_LIBCXX=0 -DCMAKE_SYSTEM_PROCESSOR=${ARCH} -DCMAKE_TOOLCHAIN_FILE=$PWD/cmake/tools/llvm-mingw.cmake -H$PWD -Bbuild/${ARCH} -DCMAKE_BUILD_TYPE=${{ matrix.config }} -DCMAKE_INSTALL_PREFIX=install/${ARCH}
         cmake --build build/${{ env.ARCH }}
         cmake --install build/${{ env.ARCH }}
     - name: Make SDK
@@ -403,7 +440,7 @@ jobs:
     - name: Build host gen_tab # native build first
       shell: bash
       run: |
-        cmake -DFRIBIDI_GENTAB=1 -Bbuild/host -DCMAKE_VERBOSE_MAKEFILE=1 -DCMAKE_BUILD_TYPE=${{ matrix.config }}
+        cmake -DFRIBIDI_GENTAB=1 -Bbuild/host -DCMAKE_BUILD_TYPE=${{ matrix.config }}
         cmake --build build/host -t gen_tab
     - name: Build for x64
       env:
@@ -479,7 +516,7 @@ jobs:
     - name: Build host gen_tab # native build first
       shell: bash
       run: |
-        cmake -DFRIBIDI_GENTAB=1 -Bbuild/host -DCMAKE_VERBOSE_MAKEFILE=1 -DCMAKE_BUILD_TYPE=${{ matrix.config }}
+        cmake -DFRIBIDI_GENTAB=1 -Bbuild/host -DCMAKE_BUILD_TYPE=${{ matrix.config }}
         cmake --build build/host -t gen_tab
     - name: Build for x64
       env:
@@ -528,7 +565,7 @@ jobs:
     - name: Build host gen_tab # native build first
       shell: bash
       run: |
-        cmake -DFRIBIDI_GENTAB=1 -Bbuild/host -DCMAKE_VERBOSE_MAKEFILE=1 -DCMAKE_BUILD_TYPE=${{ matrix.config }}
+        cmake -DFRIBIDI_GENTAB=1 -Bbuild/host -DCMAKE_BUILD_TYPE=${{ matrix.config }}
         cmake --build build/host -t gen_tab
     - name: Build for arm64-v8a
       env:
@@ -537,7 +574,10 @@ jobs:
       run: |
         MIN_API_64=21
         [ $MIN_API -gt 21 ] && MIN_API_64=$MIN_API
-        cmake ${{ env.OPTIONS }} -DWITH_DEB_INFO=0 -DBUILD_WOLFSSL=1 -DANDROID_LD=lld -DANDROID_ABI=${ARCH} -DANDROID_PLATFORM=android-${MIN_API_64} -DANDROID_TOOLCHAIN=clang -DANDROID_STL=c++_shared -DANDROID_PIE=ON -DCMAKE_TOOLCHAIN_FILE=$ANDROID_NDK_LATEST_HOME/build/cmake/android.toolchain.cmake -H$PWD -Bbuild/${ARCH} -DCMAKE_BUILD_TYPE=${{ matrix.config }} -DCMAKE_INSTALL_PREFIX=install/${ARCH}
+        cmake ${{ env.OPTIONS }} ${{ env.OPTIONS0 }} -DWITH_DEB_INFO=0 -DBUILD_WOLFSSL=1 -DANDROID_LD=lld -DANDROID_ABI=${ARCH} -DANDROID_PLATFORM=android-${MIN_API_64} -DANDROID_TOOLCHAIN=clang -DANDROID_STL=c++_shared -DANDROID_PIE=ON -DCMAKE_TOOLCHAIN_FILE=$ANDROID_NDK_LATEST_HOME/build/cmake/android.toolchain.cmake -H$PWD -Bbuild/${ARCH} -DCMAKE_BUILD_TYPE=${{ matrix.config }} -DCMAKE_INSTALL_PREFIX=install/${ARCH}
+        cmake --build build/${{ env.ARCH }}
+        cmake --install build/${{ env.ARCH }}
+        cmake ${{ env.OPTIONS }} ${{ env.OPTIONS1 }} -DWITH_DEB_INFO=0 -DBUILD_WOLFSSL=1 -DANDROID_LD=lld -DANDROID_ABI=${ARCH} -DANDROID_PLATFORM=android-${MIN_API_64} -DANDROID_TOOLCHAIN=clang -DANDROID_STL=c++_shared -DANDROID_PIE=ON -DCMAKE_TOOLCHAIN_FILE=$ANDROID_NDK_LATEST_HOME/build/cmake/android.toolchain.cmake -H$PWD -Bbuild/${ARCH} -DCMAKE_BUILD_TYPE=${{ matrix.config }} -DCMAKE_INSTALL_PREFIX=install/${ARCH}
         cmake --build build/${{ env.ARCH }}
         cmake --install build/${{ env.ARCH }}
         $ANDROID_NDK_LATEST_HOME/toolchains/llvm/prebuilt/darwin-x86_64/bin/llvm-strip install/${ARCH}/lib/*.so
@@ -547,7 +587,10 @@ jobs:
         MIN_API: 21  # 19: android 4.4. ndk25
       shell: bash
       run: |
-        cmake ${{ env.OPTIONS }} -DBUILD_WOLFSSL=1 -DANDROID_LD=lld -DANDROID_ABI=${ARCH} -DANDROID_PLATFORM=android-${MIN_API} -DANDROID_TOOLCHAIN=clang -DANDROID_STL=c++_shared -DANDROID_PIE=ON -DCMAKE_TOOLCHAIN_FILE=$ANDROID_NDK_LATEST_HOME/build/cmake/android.toolchain.cmake -H$PWD -Bbuild/${ARCH} -DCMAKE_BUILD_TYPE=${{ matrix.config }} -DCMAKE_INSTALL_PREFIX=install/${ARCH}
+        cmake ${{ env.OPTIONS }} ${{ env.OPTIONS0 }} -DBUILD_WOLFSSL=1 -DANDROID_LD=lld -DANDROID_ABI=${ARCH} -DANDROID_PLATFORM=android-${MIN_API} -DANDROID_TOOLCHAIN=clang -DANDROID_STL=c++_shared -DANDROID_PIE=ON -DCMAKE_TOOLCHAIN_FILE=$ANDROID_NDK_LATEST_HOME/build/cmake/android.toolchain.cmake -H$PWD -Bbuild/${ARCH} -DCMAKE_BUILD_TYPE=${{ matrix.config }} -DCMAKE_INSTALL_PREFIX=install/${ARCH}
+        cmake --build build/${{ env.ARCH }}
+        cmake --install build/${{ env.ARCH }}
+        cmake ${{ env.OPTIONS }} ${{ env.OPTIONS1 }} -DBUILD_WOLFSSL=1 -DANDROID_LD=lld -DANDROID_ABI=${ARCH} -DANDROID_PLATFORM=android-${MIN_API} -DANDROID_TOOLCHAIN=clang -DANDROID_STL=c++_shared -DANDROID_PIE=ON -DCMAKE_TOOLCHAIN_FILE=$ANDROID_NDK_LATEST_HOME/build/cmake/android.toolchain.cmake -H$PWD -Bbuild/${ARCH} -DCMAKE_BUILD_TYPE=${{ matrix.config }} -DCMAKE_INSTALL_PREFIX=install/${ARCH}
         cmake --build build/${{ env.ARCH }}
         cmake --install build/${{ env.ARCH }}
         $ANDROID_NDK_LATEST_HOME/toolchains/llvm/prebuilt/darwin-x86_64/bin/llvm-strip install/${ARCH}/lib/*.so

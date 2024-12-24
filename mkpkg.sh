@@ -44,7 +44,7 @@ rm -rf install
 
 7z x -y devpkgs-uwp-Release-vs2022.7z
 rsync -avm --include='*/' --include='*freetype*' --include='*harfbuzz*' --include='**/freetype2/**' --include='**/harfbuzz/**' --exclude='*' install/* dep-av/uwp
-for A in x64 arm64; do
+for A in x64 x86 arm64; do
     mv install/$A/bin/{libass,*dav1d,zlib}.dll dep/bin/WinRT/$A
     mv install/$A/lib/{dav1d,snappy,zlib*}.lib dep/lib/WinRT/$A
 done

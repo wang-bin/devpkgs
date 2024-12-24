@@ -309,6 +309,11 @@ jobs:
       run: |
         cmake -DFRIBIDI_GENTAB=1   -Bbuild/host -DCMAKE_BUILD_TYPE=${{ matrix.config }} .
         cmake --build build/host -t gen_tab
+    - name: Use MSVC x64 uwp
+      uses: ilammy/msvc-dev-cmd@v1
+      with:
+        arch: x64
+        uwp: true
     - name: Build for uwp x64
       env:
         ARCH: x64
@@ -319,10 +324,11 @@ jobs:
         cmake ${{ env.OPTIONS }} ${{ env.OPTIONS1 }} -DCMAKE_ASM_NASM_COMPILER="C:/Users/runneradmin/nasm/nasm.exe" ${{ env.OPTIONS1 }} -DBUILD_WOLFSSL=0 -DCMAKE_SYSTEM_PROCESSOR=${{ env.ARCH }} -DCMAKE_SYSTEM_NAME=WindowsStore -DCMAKE_SYSTEM_VERSION="10.0"  -Bbuild/${{ env.ARCH }} -DCMAKE_BUILD_TYPE=${{ matrix.config }} -DCMAKE_INSTALL_PREFIX=install/${{ env.ARCH }} .
         cmake --build build/${{ env.ARCH }}
         cmake --install build/${{ env.ARCH }}
-    - name: Use MSVC arm64
+    - name: Use MSVC arm64 uwp
       uses: ilammy/msvc-dev-cmd@v1
       with:
         arch: amd64_arm64
+        uwp: true
     - name: Build for uwp arm64
       env:
         ARCH: arm64
@@ -333,10 +339,11 @@ jobs:
         cmake ${{ env.OPTIONS }} ${{ env.OPTIONS1 }} -DBUILD_WOLFSSL=0 -DCMAKE_SYSTEM_PROCESSOR=${{ env.ARCH }} -DCMAKE_SYSTEM_NAME=WindowsStore -DCMAKE_SYSTEM_VERSION="10.0"  -Bbuild/${{ env.ARCH }} -DCMAKE_BUILD_TYPE=${{ matrix.config }} -DCMAKE_INSTALL_PREFIX=install/${{ env.ARCH }} .
         cmake --build build/${{ env.ARCH }}
         cmake --install build/${{ env.ARCH }}
-    - name: Use MSVC x86
+    - name: Use MSVC x86 uwp
       uses: ilammy/msvc-dev-cmd@v1
       with:
         arch: amd64_x86
+        uwp: true
     - name: Build for uwp x86
       env:
         ARCH: x86

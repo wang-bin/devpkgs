@@ -8,6 +8,7 @@ option(BUILD_LIBASS "Build libass" ON)
 option(BUILD_DAV1D "Build dav1d" ON)
 option(BUILD_VALD "Build libva loader" ON)
 option(BUILD_WOLFSSL "Build wolfssl" OFF)
+option(BUILD_SHADERC "Build shaderc" OFF)
 option(BUILD_FT "Build freetype" ON)
 option(BUILD_HB "Build harfbuzz" ON) # OFF to build freetype, then ON and BUILD_HB_FT to build hb-ft
 option(BUILD_HB_FT "Build harfbuzz with freetype and hb-ft.h" OFF)
@@ -128,7 +129,7 @@ if((WINDOWS_DESKTOP OR LINUX) AND (ARCH MATCHES "[aA][mM][dD]64" OR ARCH MATCHES
   message("Configuring mfx_dispatch...")
   add_subdirectory(src/mfx_dispatch)
   # TODO: libmfx.pc
-  set(BUILD_SHARED_LIBS OFF)
+  set(BUILD_SHARED_LIBS OFF) # TODO: global option in cmake
   #if(CMAKE_CROSSCOMPILING) # onevpl tools does not support c++17, and requires rtti
     set(BUILD_DEV_ONLY ON)
   #endif()
@@ -161,6 +162,14 @@ if(LINUX)
   add_subdirectory(src/cppcompat)
 endif()
 
+add_subdirectory(src/libshaderc_loader)
+if(BUILD_SHADERC)
+  message("Configuring shaderc...")
+  set(SHADERC_SKIP_TESTS 1)
+  set(SHADERC_SKIP_EXAMPLES 1)
+  set(SHADERC_ENABLE_SHARED_CRT 1)
+  add_subdirectory(src/shaderc)
+endif()
 # android INTERPROCEDURAL_OPTIMIZATION: cmake will force gold linker if CMAKE_ANDROID_NDK_VERSION is not set(e.g. use ndk's cmake toolchain file) or less than 22
 # TODO: INTERPROCEDURAL_OPTIMIZATION is thin lto, how to enable full lto?
 foreach(tgt freetype harfbuzz fribidi_shared fribidi_static ass zlib) # TODO: no lto for other projects(ffmpeg)

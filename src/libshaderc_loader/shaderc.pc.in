@@ -1,0 +1,12 @@
+prefix=${pcfiledir}/../..
+exec_prefix=${prefix}
+libdir=${pcfiledir}/../
+includedir=${prefix}/include
+
+Name: shaderc
+Description: Tools and libraries for Vulkan shader compilation
+Version: @PROJECT_VERSION@
+URL: https://github.com/google/shaderc
+
+Libs: -L${libdir} @LIBS@
+Cflags: -I${includedir}

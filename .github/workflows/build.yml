@@ -56,7 +56,7 @@ jobs:
       shell: bash
       run: |
         mkdir -p install/lib
-        for d in libass.dylib libdav1d.dylib libsnappy.a libglfw3.a libfreetype.a libfribidi.a libharfbuzz.a; do
+        for d in libass.dylib libdav1d.dylib libsnappy.a libglfw3.a libfreetype.a libfribidi.a libharfbuzz.a libshaderc_loader.a; do
             lipo -create install/{arm64,x86_64}/lib/$d -o install/lib/$d
         done
         strip -u -r install/lib/*.dylib
@@ -296,6 +296,7 @@ jobs:
         cmake ${{ env.OPTIONS }} -DCMAKE_ASM_NASM_COMPILER="C:/Users/runneradmin/nasm/nasm.exe" -DBUILD_WOLFSSL=0 -DCMAKE_SYSTEM_PROCESSOR=${{ env.ARCH }} -DCMAKE_SYSTEM_NAME=WindowsStore -DCMAKE_SYSTEM_VERSION="10.0"  -Bbuild/${{ env.ARCH }} -DCMAKE_BUILD_TYPE=${{ matrix.config }} -DCMAKE_INSTALL_PREFIX=install/${{ env.ARCH }} .
         cmake --build build/${{ env.ARCH }}
         cmake --install build/${{ env.ARCH }}
+        llvm-readobj --needed-libs install/${{ env.ARCH }}/bin/*.dll
     - name: Use MSVC arm64 uwp
       uses: ilammy/msvc-dev-cmd@v1
       with:
@@ -308,6 +309,7 @@ jobs:
         cmake ${{ env.OPTIONS }}  -DBUILD_WOLFSSL=0 -DCMAKE_SYSTEM_PROCESSOR=${{ env.ARCH }} -DCMAKE_SYSTEM_NAME=WindowsStore -DCMAKE_SYSTEM_VERSION="10.0"  -Bbuild/${{ env.ARCH }} -DCMAKE_BUILD_TYPE=${{ matrix.config }} -DCMAKE_INSTALL_PREFIX=install/${{ env.ARCH }} .
         cmake --build build/${{ env.ARCH }}
         cmake --install build/${{ env.ARCH }}
+        llvm-readobj --needed-libs install/${{ env.ARCH }}/bin/*.dll
     - name: Use MSVC x86 uwp
       uses: ilammy/msvc-dev-cmd@v1
       with:
@@ -320,6 +322,7 @@ jobs:
         cmake ${{ env.OPTIONS }} -DCMAKE_ASM_NASM_COMPILER="C:/Users/runneradmin/nasm/nasm.exe" -DBUILD_WOLFSSL=0 -DCMAKE_SYSTEM_PROCESSOR=${{ env.ARCH }} -DCMAKE_SYSTEM_NAME=WindowsStore -DCMAKE_SYSTEM_VERSION="10.0"  -Bbuild/${{ env.ARCH }} -DCMAKE_BUILD_TYPE=${{ matrix.config }} -DCMAKE_INSTALL_PREFIX=install/${{ env.ARCH }} .
         cmake --build build/${{ env.ARCH }}
         cmake --install build/${{ env.ARCH }}
+        llvm-readobj --needed-libs install/${{ env.ARCH }}/bin/*.dll
     - name: Make SDK
       shell: bash
       run: 7z a  -ssc -m0=lzma2 -mx=9 -ms=on -mf=off devpkgs-${{ env.TARGET_OS }}-${{ matrix.config }}-vs2022.7z install

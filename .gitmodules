@@ -44,3 +44,6 @@
 [submodule "src/cppcompat"]
 	path = src/cppcompat
 	url = https://github.com/wang-bin/cppcompat.git
+[submodule "src/shaderc"]
+	path = src/shaderc
+	url = https://github.com/google/shaderc.git

@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.15)
 
-project(dav1d VERSION 1.5.0)
+project(dav1d VERSION 1.5.1)
 include(CheckLibraryExists)
 include(CheckCCompilerFlag)
 include(CheckCSourceCompiles)

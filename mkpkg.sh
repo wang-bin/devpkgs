@@ -13,7 +13,7 @@ sed_bak=
 uname |grep -iq darwin && sed_bak=".bak"
 
 7z x -y devpkgs-windows-desktop-Release-vs2022.7z
-rsync -avm --include='*/' --include='*shaderc*' --include='**/shaderc/**' --include='*freetype*' --include='*fribidi*' --include='*harfbuzz*' --include='*ass.*' --include='**/ass/**' --include='**/freetype2/**' --include='**/fribidi/**' --include='**/harfbuzz/**' --exclude='*' install/* dep-av/windows
+rsync -avm --include='*/' --include='**/mfx/**' --include='*mfx.lib' --include='**/vpl/**' --include='*vpl.lib' --include='*shaderc*' --include='**/shaderc/**' --include='*freetype*' --include='*fribidi*' --include='*harfbuzz*' --include='*ass.*' --include='**/ass/**' --include='**/freetype2/**' --include='**/fribidi/**' --include='**/harfbuzz/**' --exclude='*' install/* dep-av/windows
 find dep-av/windows -name "*.pc" -exec sed -i $sed_bak '/-lm/d' {} \;   # harfbuzz.pc -lm
 cp -avf install/include/va dep/include/
 cp -avf install/x64/include/{ass,dav1d,GLFW,mfx,vpl,*.h} dep/include
@@ -36,7 +36,7 @@ done
 rm -rf install
 
 7z x -y devpkgs-windows-desktop-Release-vs2022-ltl.7z
-rsync -avm --include='*/' --include='*shaderc*' --include='**/shaderc/**' --include='*freetype*' --include='*fribidi*' --include='*harfbuzz*' --include='*ass.*' --include='**/ass/**' --include='**/freetype2/**' --include='**/fribidi/**' --include='**/harfbuzz/**' --exclude='*' install/* dep-av/windows-ltl
+rsync -avm --include='*/' --include='**/mfx/**' --include='*mfx.lib' --include='**/vpl/**' --include='*vpl.lib' --include='*shaderc*' --include='**/shaderc/**' --include='*freetype*' --include='*fribidi*' --include='*harfbuzz*' --include='*ass.*' --include='**/ass/**' --include='**/freetype2/**' --include='**/fribidi/**' --include='**/harfbuzz/**' --exclude='*' install/* dep-av/windows-ltl
 find dep-av/windows-ltl -name "*.pc" -exec sed -i $sed_bak '/-lm/d' {} \;   # harfbuzz.pc -lm
 for A in x64 x86; do
     mv install/$A/bin/{libass,*dav1d,zlib}.dll dep/bin/windows/$A/LTL
@@ -55,7 +55,7 @@ rm -rf install
 
 mkdir -p dep/lib/Linux/{amd64,arm64,armhf}
 7z x -y devpkgs-linux-MinSizeRel.7z
-rsync -avm --include='*/' --include='*/libcppcompat.a' --include='*shaderc*' --include='**/shaderc/**' --include='*wolfssl*' --include='**/wolfssl/**' --exclude='*' install/* dep-av/linux
+rsync -avm --include='*/' --include='**/mfx/**' --include='*/libmfx.a' --include='**/vpl/**' --include='*/libvpl.a' --include='*/libcppcompat.a' --include='*shaderc*' --include='**/shaderc/**' --include='*wolfssl*' --include='**/wolfssl/**' --exclude='*' install/* dep-av/linux
 for A in amd64 arm64 armhf; do
     mv install/$A/lib/* dep/lib/Linux/$A/
     rm dep/lib/Linux/$A/lib{harfbuzz,freetype}*

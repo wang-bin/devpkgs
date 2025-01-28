@@ -385,7 +385,6 @@ jobs:
         name: devpkgs-${{ env.TARGET_OS }}-${{ matrix.config }}
         path: devpkgs-${{ env.TARGET_OS }}-${{ matrix.config }}.7z
 
-# FIXME: wolfssl/options.h wrong in ci
   Linux_libcxx:
     runs-on: ubuntu-latest
     env:

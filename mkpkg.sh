@@ -3,6 +3,7 @@ mkdir -p dep/include
 mkdir -p dep-av/{vision,i,tv}OS dep-av/{android,linux}
 # TODO: xcframework
 
+#TODO: fribidi include
 mkdir -p dep/bin/windows/{x86,x64}/LTL
 mkdir -p dep/bin/{WinRT,windows}/{arm64,x64,x86}
 mkdir -p dep/lib/windows/{arm64,x64,x86}/{MD,MDd,MT}
@@ -54,7 +55,7 @@ rm -rf install
 
 mkdir -p dep/lib/Linux/{amd64,arm64,armhf}
 7z x -y devpkgs-linux-MinSizeRel.7z
-rsync -avm --include='*/' --include='*shaderc*' --include='**/shaderc/**' --include='*wolfssl*' --include='**/wolfssl/**' --exclude='*' install/* dep-av/linux
+rsync -avm --include='*/' --include='*/libcppcompat.a' --include='*shaderc*' --include='**/shaderc/**' --include='*wolfssl*' --include='**/wolfssl/**' --exclude='*' install/* dep-av/linux
 for A in amd64 arm64 armhf; do
     mv install/$A/lib/* dep/lib/Linux/$A/
     rm dep/lib/Linux/$A/lib{harfbuzz,freetype}*
@@ -94,21 +95,21 @@ rm -rf install
 mkdir -p dep/lib/iOS
 tar xvf devpkgs-iOS-MinSizeRel.tar.xz
 rsync -avm --include='*/' --include='*wolfssl*' --include='**/wolfssl/**' --exclude='*' install/arm64/* dep-av/iOS
-rsync -avm --include='*/' --include='*freetype*' --include='*fribidi*' --include='*harfbuzz*' --include='*ass.*' --include='**/ass/**' --include='**/freetype2/**' --include='**/fribidi/**' --include='**/harfbuzz/**' --exclude='*' install/* dep-av/iOS
+rsync -avm --include='*/' --include='*freetype*' --include='*fribidi*' --include='*harfbuzz*' --include='*ass.*' --include='**/ass/**' --include='**/freetype2/**' --include='**/fribidi/**' --include='**/harfbuzz/**' --exclude='*' install/arm64/* dep-av/iOS
 mv install/arm64/lib/*.framework dep/lib/iOS/
 rm -rf install
 
 mkdir -p dep/lib/tvOS
 tar xvf devpkgs-tvOS-MinSizeRel.tar.xz
 rsync -avm --include='*/' --include='*wolfssl*' --include='**/wolfssl/**' --exclude='*' install/arm64/* dep-av/tvOS
-rsync -avm --include='*/' --include='*freetype*' --include='*fribidi*' --include='*harfbuzz*' --include='*ass.*' --include='**/ass/**' --include='**/freetype2/**' --include='**/fribidi/**' --include='**/harfbuzz/**' --exclude='*' install/* dep-av/tvOS
+rsync -avm --include='*/' --include='*freetype*' --include='*fribidi*' --include='*harfbuzz*' --include='*ass.*' --include='**/ass/**' --include='**/freetype2/**' --include='**/fribidi/**' --include='**/harfbuzz/**' --exclude='*' install/arm64/* dep-av/tvOS
 mv install/arm64/lib/*.framework dep/lib/tvOS/
 rm -rf install
 
 mkdir -p dep/lib/visionOS
 tar xvf devpkgs-visionOS-MinSizeRel.tar.xz
 rsync -avm --include='*/' --include='*wolfssl*' --include='**/wolfssl/**' --exclude='*' install/arm64/* dep-av/visionOS
-rsync -avm --include='*/' --include='*freetype*' --include='*fribidi*' --include='*harfbuzz*' --include='*ass.*' --include='**/ass/**' --include='**/freetype2/**' --include='**/fribidi/**' --include='**/harfbuzz/**' --exclude='*' install/* dep-av/visionOS
+rsync -avm --include='*/' --include='*freetype*' --include='*fribidi*' --include='*harfbuzz*' --include='*ass.*' --include='**/ass/**' --include='**/freetype2/**' --include='**/fribidi/**' --include='**/harfbuzz/**' --exclude='*' install/arm64/* dep-av/visionOS
 mv install/arm64/lib/*.framework dep/lib/visionOS/
 rm -rf install
 

@@ -435,6 +435,7 @@ jobs:
         cmake --build build/${{ env.ARCH }}
         cmake --install build/${{ env.ARCH }}
         llvm-strip-${LLVM_VER} install/${{ env.ARCH }}/lib/*.so.*.*.*
+        cat build/${{ env.ARCH }}/src/wolfssl/wolfssl/options.h
     - name: Build for arm64
       env:
         ARCH: arm64

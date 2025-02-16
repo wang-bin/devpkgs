@@ -57,7 +57,7 @@ using namespace std;
 template<typename T> static T default_rv() {return {};}
 template<> void default_rv<void>() {}
 
-inline string to_string(const wchar_t* ws)
+static inline string to_string(const wchar_t* ws)
 {
     string s(snprintf(nullptr, 0, "%ls", ws), 0);
     snprintf(&s[0], s.size() + 1, "%ls", ws);
@@ -75,7 +75,7 @@ static auto libname(int version = -1)
 #elif (__APPLE__+0)
         string("libshaderc_shared.dylib")
 #else
-        string("libshaderc_shared.so")
+        string("libshaderc.so")
 #endif
         ;
     }
@@ -84,7 +84,7 @@ static auto libname(int version = -1)
 #elif (__APPLE__+0)
     return "libshaderc_shared." + to_string(version) + ".dylib";
 #else
-    return "libshaderc_shared.so." + to_string(version);
+    return "libshaderc.so." + to_string(version);
 #endif
 }
 

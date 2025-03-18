@@ -9,7 +9,7 @@
 	url = https://github.com/harfbuzz/harfbuzz.git
 [submodule "src/freetype"]
 	path = src/freetype
-	url = https://gitlab.freedesktop.org/freetype/freetype.git
+	url = https://github.com/freetype/freetype
 [submodule "src/libass"]
 	path = src/libass
 	url = https://github.com/libass/libass.git

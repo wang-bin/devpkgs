@@ -19,28 +19,28 @@ add_custom_command(TARGET gen-unicode-version POST_BUILD
   COMMAND gen-unicode-version unidata/ReadMe.txt unidata/BidiMirroring.txt gen-unicode-version.c >fribidi-unicode-version.h
   WORKING_DIRECTORY "${SRC_GEN_DIR}"
 )
-add_custom_command(TARGET gen-bidi-type-tab
+add_custom_command(TARGET gen-bidi-type-tab POST_BUILD
   #COMMAND gen-bidi-type-tab unidata/DerivedBidiClass.txt fribidi-unicode-version.h gen-bidi-type-tab.c packtab.c packtab.h > derived_bidi-type.tab.i
   COMMAND gen-bidi-type-tab 2 unidata/UnicodeData.txt > bidi-type.tab.i
   WORKING_DIRECTORY "${SRC_GEN_DIR}"
 )
-add_custom_command(TARGET gen-joining-type-tab
+add_custom_command(TARGET gen-joining-type-tab POST_BUILD
   COMMAND gen-joining-type-tab 2 unidata/UnicodeData.txt unidata/ArabicShaping.txt >joining-type.tab.i
   WORKING_DIRECTORY "${SRC_GEN_DIR}"
 )
-add_custom_command(TARGET gen-arabic-shaping-tab
+add_custom_command(TARGET gen-arabic-shaping-tab POST_BUILD
   COMMAND gen-arabic-shaping-tab 2 unidata/UnicodeData.txt >arabic-shaping.tab.i
   WORKING_DIRECTORY "${SRC_GEN_DIR}"
 )
-add_custom_command(TARGET gen-mirroring-tab
+add_custom_command(TARGET gen-mirroring-tab POST_BUILD
   COMMAND gen-mirroring-tab 2 unidata/BidiMirroring.txt >mirroring.tab.i
   WORKING_DIRECTORY "${SRC_GEN_DIR}"
 )
-add_custom_command(TARGET gen-brackets-tab
+add_custom_command(TARGET gen-brackets-tab POST_BUILD
   COMMAND gen-brackets-tab 2 unidata/BidiBrackets.txt unidata/UnicodeData.txt > brackets.tab.i
   WORKING_DIRECTORY "${SRC_GEN_DIR}"
 )
-add_custom_command(TARGET gen-brackets-type-tab
+add_custom_command(TARGET gen-brackets-type-tab POST_BUILD
   COMMAND gen-brackets-type-tab 2 unidata/BidiBrackets.txt > brackets-type.tab.i
   WORKING_DIRECTORY "${SRC_GEN_DIR}"
 )

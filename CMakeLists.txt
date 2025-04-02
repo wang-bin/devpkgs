@@ -51,7 +51,7 @@ set(CMAKE_C_VISIBILITY_PRESET hidden)
 set(CMAKE_CXX_VISIBILITY_PRESET hidden)
 set(CMAKE_VISIBILITY_INLINES_HIDDEN ON)
 
-message("CMAKE_SYSTEM_PROCESSOR: ${CMAKE_SYSTEM_PROCESSOR}")
+message("CMake: ${CMAKE_VERSION}. CMAKE_SYSTEM_PROCESSOR: ${CMAKE_SYSTEM_PROCESSOR}")
 
 # ignore homebrew. affect find_...(). not working?
 set(CMAKE_IGNORE_PREFIX_PATH /opt/homebrew /usr/local)
@@ -126,8 +126,8 @@ if(WINDOWS_DESKTOP OR (CMAKE_SYSTEM_NAME STREQUAL Darwin AND NOT MACCATALYST)) #
 endif()
 
 if((WINDOWS_DESKTOP OR LINUX) AND (ARCH MATCHES "[aA][mM][dD]64" OR ARCH MATCHES "[xX].*64" OR ARCH MATCHES 86))
-  message("Configuring mfx_dispatch...")
-  add_subdirectory(src/mfx_dispatch)
+  #message("Configuring mfx_dispatch...")
+  #add_subdirectory(src/mfx_dispatch)
   # TODO: libmfx.pc
   set(BUILD_SHARED_LIBS OFF) # TODO: global option in cmake
   #if(CMAKE_CROSSCOMPILING) # onevpl tools does not support c++17, and requires rtti

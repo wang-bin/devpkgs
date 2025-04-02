@@ -16,7 +16,7 @@
 	branch = master
 [submodule "src/snappy"]
 	path = src/snappy
-	url = ../snappy
+	url = https://github.com/google/snappy.git
 [submodule "src/zlib"]
 	path = src/zlib
 	url = https://github.com/madler/zlib.git

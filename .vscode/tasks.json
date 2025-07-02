@@ -300,6 +300,32 @@
             "problemMatcher": []
         },
         {
+            "label": "config.ohos.arm64",
+            "args": [
+                "-DCMAKE_TOOLCHAIN_FILE=${env:OHOS_NDK}/build/cmake/ohos.toolchain.cmake",
+                "-DCMAKE_BUILD_TYPE=MinSizeRel",
+                "-DOHOS_ARCH=arm64-v8a",
+                "-DCMAKE_C_COMPILER_FRONTEND_VARIANT=GNU",
+                "-DCMAKE_CXX_COMPILER_FRONTEND_VARIANT=GNU",
+                "-H${workspaceRoot}",
+                "-B${workspaceRoot}/build/ohos-arm64",
+                "-GNinja",
+                "-DCMAKE_INSTALL_PREFIX=${workspaceRoot}/build/ohos-arm64/install",
+                //"-DCMAKE_ANDROID_NDK_VERSION=25.1", //INTERPROCEDURAL_OPTIMIZATION: cmake will force gold linker if CMAKE_ANDROID_NDK_VERSION is not set(e.g. use ndk's cmake toolchain file) or less than 22
+            ],
+            "problemMatcher": []
+        },
+        {
+            "label": "build.ohos.arm64",
+            "command": "cmake",
+            "args": [
+                "--build",
+                "${workspaceRoot}/build/ohos-arm64"
+            ],
+            "group": "build",
+            "problemMatcher": []
+        },
+        {
             "label": "config.android.x64",
             "args": [
                 "-DCMAKE_TOOLCHAIN_FILE=${env:ANDROID_NDK}/build/cmake/android.toolchain.cmake",

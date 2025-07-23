@@ -1,0 +1,30 @@
+name: 'Install LLVM'
+description: 'Install LLVM by apt'
+inputs:
+  version:  # id of input
+    description: 'LLVM version to install'
+    required: true
+    default: '22'
+#outputs:
+#  random-number:
+#    description: "Random number"
+#    value: ${{ steps.random-number-generator.outputs.random-number }}
+runs:
+  using: "composite"
+  steps:
+    - name: Add LLVM apt repository
+      run: |
+        wget -O - https://apt.llvm.org/llvm-snapshot.gpg.key | sudo apt-key add -
+        source /etc/os-release
+        sudo add-apt-repository -y "deb http://apt.llvm.org/${VERSION_CODENAME}/ llvm-toolchain-${VERSION_CODENAME} main"
+      shell: bash
+
+    - name: Update apt
+      #id: random-number-generator
+      run: sudo apt update
+      #echo "random-number=$(echo $RANDOM)" >> $GITHUB_OUTPUT
+      shell: bash
+
+    - name: Install LLVM
+      run: sudo apt install -y llvm-${{ inputs.version }}-tools clang-${{ inputs.version }} clang-tools-${{ inputs.version }} clang-tidy-${{ inputs.version }} lld-${{ inputs.version }} libc++-${{ inputs.version }}-dev libclang-rt-${{ inputs.version }}-dev
+      shell: bash

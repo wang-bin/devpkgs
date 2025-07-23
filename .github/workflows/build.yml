@@ -347,14 +347,12 @@ jobs:
         submodules: 'recursive'
         fetch-tags: true
         fetch-depth: 0
+    - uses: ./.github/actions/install-llvm
+      with:
+        version: ${{ vars.LLVM_VER }}
     - name: Create Build Environment
       shell: bash
-      run: |
-        wget https://apt.llvm.org/llvm.sh
-        chmod +x llvm.sh
-        sudo ./llvm.sh ${LLVM_VER} all
-        #bash -c "$(wget -O - https://apt.llvm.org/llvm.sh)"
-        sudo apt install -y cmake ninja-build nasm g++-mingw-w64
+      run: sudo apt install -y cmake ninja-build nasm g++-mingw-w64
     - name: Build host gen_tab # native build first
       shell: bash
       run: |
@@ -406,6 +404,9 @@ jobs:
       with:
         path: ./sysroot
         key: sysroot-${{ env.TARGET_OS }}-${{ secrets.LINUX_SYSROOT_ID }}
+    - uses: ./.github/actions/install-llvm
+      with:
+        version: ${{ vars.LLVM_VER }}
     - name: Create Build Environment
       shell: bash
       env:
@@ -415,10 +416,6 @@ jobs:
           wget https://sourceforge.net/projects/avbuild/files/${TARGET_OS}/${TARGET_OS/r*pi/rpi}-sysroot.tar.xz/download -O sysroot.tar.xz
           tar Jxf sysroot.tar.xz
         fi
-        wget https://apt.llvm.org/llvm.sh
-        chmod +x llvm.sh
-        sudo ./llvm.sh ${LLVM_VER} all
-        #bash -c "$(wget -O - https://apt.llvm.org/llvm.sh)"
         sudo apt install -y cmake ninja-build nasm libva-dev libvdpau-dev
     - name: Build host gen_tab # native build first
       shell: bash
@@ -483,6 +480,9 @@ jobs:
       with:
         path: ./sysroot
         key: sysroot-${{ env.TARGET_OS }}-${{ secrets.LINUX_SYSROOT_ID }}
+    - uses: ./.github/actions/install-llvm
+      with:
+        version: ${{ vars.LLVM_VER }}
     - name: Create Build Environment
       shell: bash
       env:
@@ -492,10 +492,6 @@ jobs:
           wget https://sourceforge.net/projects/avbuild/files/${TARGET_OS}/${TARGET_OS/r*pi/rpi}-sysroot.tar.xz/download -O sysroot.tar.xz
           tar Jxf sysroot.tar.xz
         fi
-        wget https://apt.llvm.org/llvm.sh
-        chmod +x llvm.sh
-        sudo ./llvm.sh ${LLVM_VER} all
-        #bash -c "$(wget -O - https://apt.llvm.org/llvm.sh)"
         sudo apt install -y cmake ninja-build nasm libva-dev libvdpau-dev
     - name: Build host gen_tab # native build first
       shell: bash

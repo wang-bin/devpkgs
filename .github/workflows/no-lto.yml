@@ -23,7 +23,7 @@ jobs:
       matrix:
         config: [MinSizeRel]
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v5
       with:
         submodules: 'recursive'
         fetch-tags: true
@@ -85,7 +85,7 @@ jobs:
         config: [MinSizeRel]
         os: [iOS, tvOS, visionOS]
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v5
       with:
         submodules: 'recursive'
         fetch-tags: true
@@ -143,7 +143,7 @@ jobs:
           - config: Debug
             dll: 1
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v5
       with:
         submodules: 'recursive'
         fetch-tags: true
@@ -222,7 +222,7 @@ jobs:
       matrix:
         config: [Release]
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v5
       with:
         submodules: 'recursive'
         fetch-tags: true
@@ -294,7 +294,7 @@ jobs:
       matrix:
         config: [Release]
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v5
       with:
         submodules: 'recursive'
         fetch-tags: true
@@ -376,7 +376,7 @@ jobs:
       matrix:
         config: [MinSizeRel]
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v5
       with:
         submodules: 'recursive'
         fetch-tags: true
@@ -433,7 +433,7 @@ jobs:
       matrix:
         config: [MinSizeRel]
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v5
       with:
         submodules: 'recursive'
         fetch-tags: true
@@ -508,7 +508,7 @@ jobs:
       matrix:
         config: [MinSizeRel]
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v5
       with:
         submodules: 'recursive'
         fetch-tags: true
@@ -565,7 +565,7 @@ jobs:
       matrix:
         config: [MinSizeRel] # https://github.com/android/ndk/issues/721
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v5
       with:
         submodules: 'recursive'
         fetch-tags: true
@@ -636,7 +636,7 @@ jobs:
     runs-on: macos-latest
     needs: [iOS, macOS, Android, Windows_VS2022, Windows_VS2022_LTL, UWP_VS2022, Linux_libcxx, Linux_gnustl]
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v5
     - name: Download iOS libs
       uses: actions/download-artifact@v4
       with:

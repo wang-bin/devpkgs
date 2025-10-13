@@ -14,7 +14,7 @@ env:
 jobs:
   macOS:
     # See: https://docs.github.com/en/actions/configuring-and-managing-workflows/configuring-a-workflow#configuring-a-build-matrix
-    runs-on: macos-15
+    runs-on: macos-latest
     env:
       TARGET_OS: 'macOS'
     strategy:
@@ -71,7 +71,7 @@ jobs:
 
 
   iOS:
-    runs-on: macos-15
+    runs-on: macos-latest
     strategy:
       fail-fast: false
       matrix:

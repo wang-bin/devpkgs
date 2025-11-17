@@ -1,6 +1,6 @@
 rm -rf dep dep-av
 mkdir -p dep/include
-mkdir -p dep-av/{vision,i,tv}OS dep-av/{android,linux}
+mkdir -p dep-av/{vision,i,tv}OS dep-av/{android,linux,ohos}
 # TODO: xcframework
 
 #TODO: fribidi include
@@ -80,6 +80,16 @@ for A in arm64-v8a armeabi-v7a; do
     mv install/$A/lib/*.so dep/lib/android/$A/
 done
 find dep/lib/android -name "*wolfssl*" -exec rm -rf {} \;
+rm -rf install
+
+mkdir -p dep/lib/ohos/arm64-v8a
+7z x -y devpkgs-ohos-MinSizeRel.7z
+rsync -avm --include='*/' --include='*shaderc*' --include='**/shaderc/**' --include='*wolfssl*' --include='**/wolfssl/**' --exclude='*' install/* dep-av/ohos
+rsync -avm --include='*/' --include='*freetype*' --include='*fribidi*' --include='*harfbuzz*' --include='*ass.*' --include='**/ass/**' --include='**/freetype2/**' --include='**/fribidi/**' --include='**/harfbuzz/**' --exclude='*' install/* dep-av/ohos
+for A in arm64-v8a; do
+    mv install/$A/lib/*.so dep/lib/ohos/$A/
+done
+find dep/lib/ohos -name "*wolfssl*" -exec rm -rf {} \;
 rm -rf install
 
 mkdir -p dep/lib/macOS

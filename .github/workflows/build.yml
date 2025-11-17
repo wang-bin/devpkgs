@@ -586,10 +586,57 @@ jobs:
         name: devpkgs-${{ env.TARGET_OS }}-${{ matrix.config }}
         path: devpkgs-${{ env.TARGET_OS }}-${{ matrix.config }}*.7z
 
+  ohos:
+    runs-on: ubuntu-latest
+    env:
+      TARGET_OS: ohos
+    strategy:
+      fail-fast: false
+      matrix:
+        config: [MinSizeRel]
+    steps:
+    - uses: actions/checkout@v5
+      with:
+        submodules: 'recursive'
+        fetch-tags: true
+        fetch-depth: 0
+    - name: Setup HarmonyOS CLI tools
+      uses: ErBWs/setup-ohos@v1
+      with:
+        version: latest
+        cache: true
+    - run: hvigorw -v
+    - name: Create Build Environment
+      shell: bash
+      run: |
+        sudo apt install -y cmake ninja-build nasm
+    - name: Build host gen_tab # native build first
+      shell: bash
+      run: |
+        cmake -DFRIBIDI_GENTAB=1 -Bbuild/host -DCMAKE_VERBOSE_MAKEFILE=1 -DCMAKE_BUILD_TYPE=${{ matrix.config }}
+        cmake --build build/host -t gen_tab
+    - name: Build for arm64
+      env:
+        ARCH: arm64-v8a
+      shell: bash
+      run: |
+        export OHOS_NDK=$OHOS_NDK_HOME/native
+        cmake ${{ env.OPTIONS }} -DWITH_DEB_INFO=0 -DBUILD_WOLFSSL=1 -DOHOS_ARCH=${ARCH} -DCMAKE_TOOLCHAIN_FILE=$OHOS_NDK/build/cmake/ohos.toolchain.cmake -H$PWD -Bbuild/${ARCH} -DCMAKE_BUILD_TYPE=${{ matrix.config }} -DCMAKE_INSTALL_PREFIX=install/${ARCH}
+        cmake --build build/${{ env.ARCH }}
+        cmake --install build/${{ env.ARCH }}
+        $OHOS_NDK/llvm/bin/llvm-strip install/${ARCH}/lib/*.so
+    - name: Make SDK
+      shell: bash
+      run: 7z a  -ssc -m0=lzma2 -mx=9 -ms=on -mf=off devpkgs-${{ env.TARGET_OS }}-${{ matrix.config }}.7z install
+    - name: Archieve SDK
+      uses: actions/upload-artifact@v4
+      with:
+        name: devpkgs-${{ env.TARGET_OS }}-${{ matrix.config }}
+        path: devpkgs-${{ env.TARGET_OS }}-${{ matrix.config }}*.7z
 
   pkg:
     runs-on: macos-latest
-    needs: [iOS, macOS, Android, Windows_VS2022, Windows_VS2022_LTL, UWP_VS2022, Linux_libcxx, Linux_gnustl]
+    needs: [iOS, macOS, Android, ohos, Windows_VS2022, Windows_VS2022_LTL, UWP_VS2022, Linux_libcxx, Linux_gnustl]
     steps:
     - uses: actions/checkout@v5
     - name: Download iOS libs
@@ -632,6 +679,10 @@ jobs:
       uses: actions/download-artifact@v4
       with:
         name: devpkgs-android-MinSizeRel
+    - name: Download ohos libs
+      uses: actions/download-artifact@v4
+      with:
+        name: devpkgs-ohos-MinSizeRel
     - name: Download linux gnustl libs      # for avbuild
       uses: actions/download-artifact@v4
       with:

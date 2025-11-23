@@ -33,7 +33,7 @@ jobs:
     - name: Create Build Environment
       shell: bash
       run: |
-        brew install ninja nasm
+        brew install nasm
         brew uninstall --ignore-dependencies harfbuzz
     - name: Build for x86_64 # native build first
       env:
@@ -94,7 +94,7 @@ jobs:
       run: sudo xcode-select -s /Applications/Xcode_${{ vars.XCODE }}.app
     - name: Create Build Environment
       shell: bash
-      run: brew install ninja nasm
+      run: brew install nasm
     - name: Build host gen_tab # native build first
       shell: bash
       run: |
@@ -237,7 +237,7 @@ jobs:
       name: Get VC-LTL
       shell: bash
       run: |
-        curl -kL -o ltl.7z https://github.com/Chuyu-Team/VC-LTL5/releases/download/v${VC_LTL_VER}/VC-LTL-${VC_LTL_VER}-Binary.7z
+        curl -kL -o ltl.7z https://github.com/Chuyu-Team/VC-LTL5/releases/download/v${{ vars.VC_LTL_VER }}/VC-LTL-Binary.7z
         7z x ltl.7z -oVC-LTL
     - name: Get libva
       shell: bash
@@ -572,7 +572,7 @@ jobs:
         fetch-depth: 0
     - name: Create Build Environment
       shell: bash
-      run: brew install ninja nasm
+      run: brew install nasm
     - name: Apply patches
       shell: bash
       run: |

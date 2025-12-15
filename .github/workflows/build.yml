@@ -640,51 +640,51 @@ jobs:
     steps:
     - uses: actions/checkout@v6
     - name: Download iOS libs
-      uses: actions/download-artifact@v6
+      uses: actions/download-artifact@v7
       with:
         name: devpkgs-iOS-MinSizeRel
     - name: Download tvOS libs
-      uses: actions/download-artifact@v6
+      uses: actions/download-artifact@v7
       with:
         name: devpkgs-tvOS-MinSizeRel
     - name: Download visionOS libs
-      uses: actions/download-artifact@v6
+      uses: actions/download-artifact@v7
       with:
         name: devpkgs-visionOS-MinSizeRel
     - name: Download macOS libs
-      uses: actions/download-artifact@v6
+      uses: actions/download-artifact@v7
       with:
         name: devpkgs-macOS-MinSizeRel
     - name: Download win32 MD release libs
-      uses: actions/download-artifact@v6
+      uses: actions/download-artifact@v7
       with:
         name: devpkgs-vs2022-windows-desktop-Release
     - name: Download win32 MD debug libs
-      uses: actions/download-artifact@v6
+      uses: actions/download-artifact@v7
       with:
         name: devpkgs-vs2022-windows-desktop-Debug
     - name: Download win32 ltl MT release libs
-      uses: actions/download-artifact@v6
+      uses: actions/download-artifact@v7
       with:
         name: devpkgs-vs2022-ltl-windows-desktop-Release
     - name: Download uwp MD release libs
-      uses: actions/download-artifact@v6
+      uses: actions/download-artifact@v7
       with:
         name: devpkgs-vs2022-uwp-Release
     - name: Download linux libcxx libs      # for libmdk
-      uses: actions/download-artifact@v6
+      uses: actions/download-artifact@v7
       with:
         name: devpkgs-linux-MinSizeRel
     - name: Download android libs
-      uses: actions/download-artifact@v6
+      uses: actions/download-artifact@v7
       with:
         name: devpkgs-android-MinSizeRel
     - name: Download ohos libs
-      uses: actions/download-artifact@v6
+      uses: actions/download-artifact@v7
       with:
         name: devpkgs-ohos-MinSizeRel
     - name: Download linux gnustl libs      # for avbuild
-      uses: actions/download-artifact@v6
+      uses: actions/download-artifact@v7
       with:
         name: devpkgs-linux-MinSizeRel-gnustl
     - name: Make libmdk dep

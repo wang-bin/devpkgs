@@ -71,7 +71,7 @@ jobs:
         rm -rf install/lib/{x86_64,arm64}
         tar Jcvf devpkgs-${{ env.TARGET_OS }}-${{ matrix.config }}.tar.xz install
     - name: Archieve SDK
-      uses: actions/upload-artifact@v5
+      uses: actions/upload-artifact@v6
       with:
         name: devpkgs-${{ env.TARGET_OS }}-${{ matrix.config }}
         path: devpkgs-${{ env.TARGET_OS }}-${{ matrix.config }}*.tar.xz
@@ -122,7 +122,7 @@ jobs:
         done
         tar Jcvf devpkgs-${{ matrix.os }}-${{ matrix.config }}.tar.xz install
     - name: Archieve SDK
-      uses: actions/upload-artifact@v5
+      uses: actions/upload-artifact@v6
       with:
         name: devpkgs-${{ matrix.os }}-${{ matrix.config }}
         path: devpkgs-${{ matrix.os }}-${{ matrix.config }}.tar.xz
@@ -207,7 +207,7 @@ jobs:
         cp -avf dep/include/va install/include/
         7z a  -ssc -m0=lzma2 -mx=9 -ms=on -mf=off devpkgs-${{ env.TARGET_OS }}-${{ matrix.config }}-vs2022.7z install
     - name: Archieve SDK
-      uses: actions/upload-artifact@v5
+      uses: actions/upload-artifact@v6
       with:
         name: devpkgs-vs2022-${{ env.TARGET_OS }}-${{ matrix.config }}
         path: devpkgs-${{ env.TARGET_OS }}-${{ matrix.config }}-vs2022*.7z
@@ -279,7 +279,7 @@ jobs:
       shell: bash
       run: 7z a  -ssc -m0=lzma2 -mx=9 -ms=on -mf=off devpkgs-${{ env.TARGET_OS }}-${{ matrix.config }}-vs2022-ltl.7z install
     - name: Archieve SDK
-      uses: actions/upload-artifact@v5
+      uses: actions/upload-artifact@v6
       with:
         name: devpkgs-vs2022-ltl-${{ env.TARGET_OS }}-${{ matrix.config }}
         path: devpkgs-${{ env.TARGET_OS }}-${{ matrix.config }}-vs2022-ltl*.7z
@@ -361,7 +361,7 @@ jobs:
       shell: bash
       run: 7z a  -ssc -m0=lzma2 -mx=9 -ms=on -mf=off devpkgs-${{ env.TARGET_OS }}-${{ matrix.config }}-vs2022.7z install
     - name: Archieve SDK
-      uses: actions/upload-artifact@v5
+      uses: actions/upload-artifact@v6
       with:
         name: devpkgs-vs2022-${{ env.TARGET_OS }}-${{ matrix.config }}
         path: devpkgs-${{ env.TARGET_OS }}-${{ matrix.config }}-vs2022.7z
@@ -418,7 +418,7 @@ jobs:
       shell: bash
       run: 7z a -ssc -m0=lzma2 -mx=9 -ms=on -mf=off devpkgs-${{ env.TARGET_OS }}-${{ matrix.config }}.7z install
     - name: Archieve SDK
-      uses: actions/upload-artifact@v5
+      uses: actions/upload-artifact@v6
       with:
         name: devpkgs-${{ env.TARGET_OS }}-${{ matrix.config }}
         path: devpkgs-${{ env.TARGET_OS }}-${{ matrix.config }}.7z
@@ -493,7 +493,7 @@ jobs:
       shell: bash
       run: 7z a  -ssc -m0=lzma2 -mx=9 -ms=on -mf=off devpkgs-${{ env.TARGET_OS }}-${{ matrix.config }}.7z install
     - name: Archieve SDK
-      uses: actions/upload-artifact@v5
+      uses: actions/upload-artifact@v6
       with:
         name: devpkgs-${{ env.TARGET_OS }}-${{ matrix.config }}
         path: devpkgs-${{ env.TARGET_OS }}-${{ matrix.config }}*.7z
@@ -550,7 +550,7 @@ jobs:
       shell: bash
       run: 7z a -ssc -m0=lzma2 -mx=9 -ms=on -mf=off devpkgs-${{ env.TARGET_OS }}-${{ matrix.config }}-gnustl.7z install
     - name: Archieve SDK
-      uses: actions/upload-artifact@v5
+      uses: actions/upload-artifact@v6
       with:
         name: devpkgs-${{ env.TARGET_OS }}-${{ matrix.config }}-gnustl
         path: devpkgs-${{ env.TARGET_OS }}-${{ matrix.config }}-gnustl.7z
@@ -626,7 +626,7 @@ jobs:
       shell: bash
       run: 7z a  -ssc -m0=lzma2 -mx=9 -ms=on -mf=off devpkgs-${{ env.TARGET_OS }}-${{ matrix.config }}.7z install
     - name: Archieve SDK
-      uses: actions/upload-artifact@v5
+      uses: actions/upload-artifact@v6
       with:
         name: devpkgs-${{ env.TARGET_OS }}-${{ matrix.config }}
         path: devpkgs-${{ env.TARGET_OS }}-${{ matrix.config }}*.7z
@@ -678,7 +678,7 @@ jobs:
       shell: bash
       run: 7z a  -ssc -m0=lzma2 -mx=9 -ms=on -mf=off devpkgs-${{ env.TARGET_OS }}-${{ matrix.config }}.7z install
     - name: Archieve SDK
-      uses: actions/upload-artifact@v5
+      uses: actions/upload-artifact@v6
       with:
         name: devpkgs-${{ env.TARGET_OS }}-${{ matrix.config }}
         path: devpkgs-${{ env.TARGET_OS }}-${{ matrix.config }}*.7z
@@ -742,7 +742,7 @@ jobs:
         chmod +x mkpkg.sh
         ./mkpkg.sh
     - name: Archieve SDK
-      uses: actions/upload-artifact@v5
+      uses: actions/upload-artifact@v6
       with:
         name: libmdk-dep
         path: dep*.7z

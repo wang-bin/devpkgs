@@ -229,7 +229,7 @@ jobs:
         fetch-depth: 0
     - name: 'Restore dep cache'
       id: dep-cache
-      uses: actions/cache@v4
+      uses: actions/cache@v5
       with:
         path: VC-LTL
         key: dep-${{ vars.VC_LTL_VER }}
@@ -440,7 +440,7 @@ jobs:
         fetch-depth: 0
     - name: 'Restore sysroot cache'
       id: sysroot-cache
-      uses: actions/cache@v4
+      uses: actions/cache@v5
       with:
         path: ./sysroot
         key: sysroot-${{ env.TARGET_OS }}-${{ secrets.LINUX_SYSROOT_ID }}
@@ -515,7 +515,7 @@ jobs:
         fetch-depth: 0
     - name: 'Restore sysroot cache'
       id: sysroot-cache
-      uses: actions/cache@v4
+      uses: actions/cache@v5
       with:
         path: ./sysroot
         key: sysroot-${{ env.TARGET_OS }}-${{ secrets.LINUX_SYSROOT_ID }}

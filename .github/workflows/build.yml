@@ -56,7 +56,7 @@ jobs:
       shell: bash
       run: |
         mkdir -p install/lib
-        for d in libass.dylib libdav1d.dylib libsnappy.a libglfw3.a libfreetype.a libfribidi.a libharfbuzz.a libshaderc_loader.a; do
+        for d in libass.dylib libdav1d.dylib libsnappy.a libglfw3.a libfreetype.a libfribidi.a libharfbuzz.a libshaderc_loader.a liblz4.a; do
             lipo -create install/{arm64,x86_64}/lib/$d -o install/lib/$d
         done
         strip -u -r install/lib/*.dylib

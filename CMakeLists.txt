@@ -13,6 +13,7 @@ option(BUILD_FT "Build freetype" ON)
 option(BUILD_HB "Build harfbuzz" ON) # OFF to build freetype, then ON and BUILD_HB_FT to build hb-ft
 option(BUILD_HB_FT "Build harfbuzz with freetype and hb-ft.h" OFF)
 option(WITH_VC_LTL "Build with VC-LTL crt for windows. Recommend to use with -DCMAKE_MSVC_RUNTIME_LIBRARY=MultiThreaded" OFF)
+option(BUILD_LZ4 "Build lz4" ON)
 set(VC_LTL_DIR "${CMAKE_CURRENT_SOURCE_DIR}/VC-LTL" CACHE STRING "VC-LTL dir")
 
 set(CMAKE_C_STANDARD 11)
@@ -170,6 +171,15 @@ if(BUILD_SHADERC)
   set(SHADERC_ENABLE_SHARED_CRT 1)
   add_subdirectory(src/shaderc)
 endif()
+
+if(BUILD_LZ4)
+  set(LZ4_BUNDLED_MODE OFF)
+  set(LZ4_BUILD_CLI OFF)
+  message("Configuring lz4...")
+  add_subdirectory(src/lz4/build/cmake)
+  message("BUILD_SHARED_LIBS: ${BUILD_SHARED_LIBS}, BUILD_STATIC_LIBS: ${BUILD_STATIC_LIBS}, LZ4_BUNDLED_MODE: ${LZ4_BUNDLED_MODE}")
+endif()
+
 # android INTERPROCEDURAL_OPTIMIZATION: cmake will force gold linker if CMAKE_ANDROID_NDK_VERSION is not set(e.g. use ndk's cmake toolchain file) or less than 22
 # TODO: INTERPROCEDURAL_OPTIMIZATION is thin lto, how to enable full lto?
 foreach(tgt freetype harfbuzz fribidi_shared fribidi_static ass zlib) # TODO: no lto for other projects(ffmpeg)

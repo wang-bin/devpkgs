@@ -47,3 +47,6 @@
 [submodule "src/shaderc"]
 	path = src/shaderc
 	url = https://github.com/google/shaderc.git
+[submodule "src/lz4"]
+	path = src/lz4
+	url = https://github.com/lz4/lz4.git

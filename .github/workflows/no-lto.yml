@@ -467,7 +467,7 @@ jobs:
         ARCH: amd64
       shell: bash
       run: |
-        cmake ${{ env.OPTIONS }} -DWITH_DEB_INFO=0 -DBUILD_WOLFSSL=1 -DBUILD_LIBASS=0 -DUSE_LIBCXX=1 -DCMAKE_SYSTEM_PROCESSOR=${ARCH} -DCMAKE_TOOLCHAIN_FILE=$PWD/cmake/tools/linux.clang.cmake -DLINUX_SYSROOT=$PWD/sysroot -H$PWD -Bbuild/${ARCH} -DCMAKE_BUILD_TYPE=${{ matrix.config }} -DCMAKE_INSTALL_PREFIX=install/${ARCH}
+        cmake ${{ env.OPTIONS }} -DWITH_DEB_INFO=0 -DBUILD_LZ4=0 -DBUILD_WOLFSSL=1 -DBUILD_LIBASS=0 -DUSE_LIBCXX=1 -DCMAKE_SYSTEM_PROCESSOR=${ARCH} -DCMAKE_TOOLCHAIN_FILE=$PWD/cmake/tools/linux.clang.cmake -DLINUX_SYSROOT=$PWD/sysroot -H$PWD -Bbuild/${ARCH} -DCMAKE_BUILD_TYPE=${{ matrix.config }} -DCMAKE_INSTALL_PREFIX=install/${ARCH}
         cmake --build build/${{ env.ARCH }}
         cmake --install build/${{ env.ARCH }}
         llvm-strip-${LLVM_VER} install/${{ env.ARCH }}/lib/*.so.*.*.*
@@ -476,7 +476,7 @@ jobs:
         ARCH: arm64
       shell: bash
       run: |
-        cmake ${{ env.OPTIONS }} -DWITH_DEB_INFO=0 -DBUILD_WOLFSSL=1 -DBUILD_LIBASS=0 -DUSE_LIBCXX=1 -DCMAKE_SYSTEM_PROCESSOR=${ARCH} -DCMAKE_TOOLCHAIN_FILE=$PWD/cmake/tools/linux.clang.cmake -DLINUX_SYSROOT=$PWD/sysroot -H$PWD -Bbuild/${ARCH} -DCMAKE_BUILD_TYPE=${{ matrix.config }} -DCMAKE_INSTALL_PREFIX=install/${ARCH}
+        cmake ${{ env.OPTIONS }} -DWITH_DEB_INFO=0 -DBUILD_LZ4=0 -DBUILD_WOLFSSL=1 -DBUILD_LIBASS=0 -DUSE_LIBCXX=1 -DCMAKE_SYSTEM_PROCESSOR=${ARCH} -DCMAKE_TOOLCHAIN_FILE=$PWD/cmake/tools/linux.clang.cmake -DLINUX_SYSROOT=$PWD/sysroot -H$PWD -Bbuild/${ARCH} -DCMAKE_BUILD_TYPE=${{ matrix.config }} -DCMAKE_INSTALL_PREFIX=install/${ARCH}
         cmake --build build/${{ env.ARCH }}
         cmake --install build/${{ env.ARCH }}
         llvm-strip-${LLVM_VER} install/${{ env.ARCH }}/lib/*.so.*.*.*
@@ -485,7 +485,7 @@ jobs:
         ARCH: armhf
       shell: bash
       run: |
-        cmake ${{ env.OPTIONS }} -DBUILD_WOLFSSL=1 -DBUILD_LIBASS=0 -DUSE_LIBCXX=1 -DCMAKE_SYSTEM_PROCESSOR=${ARCH} -DCMAKE_TOOLCHAIN_FILE=$PWD/cmake/tools/linux.clang.cmake -DLINUX_SYSROOT=$PWD/sysroot -H$PWD -Bbuild/${ARCH} -DCMAKE_BUILD_TYPE=${{ matrix.config }} -DCMAKE_INSTALL_PREFIX=install/${ARCH}
+        cmake ${{ env.OPTIONS }} -DBUILD_LZ4=0 -DBUILD_WOLFSSL=1 -DBUILD_LIBASS=0 -DUSE_LIBCXX=1 -DCMAKE_SYSTEM_PROCESSOR=${ARCH} -DCMAKE_TOOLCHAIN_FILE=$PWD/cmake/tools/linux.clang.cmake -DLINUX_SYSROOT=$PWD/sysroot -H$PWD -Bbuild/${ARCH} -DCMAKE_BUILD_TYPE=${{ matrix.config }} -DCMAKE_INSTALL_PREFIX=install/${ARCH}
         cmake --build build/${{ env.ARCH }}
         cmake --install build/${{ env.ARCH }}
         llvm-strip-${LLVM_VER} install/${{ env.ARCH }}/lib/*.so.*.*.*
@@ -542,7 +542,7 @@ jobs:
         ARCH: amd64
       shell: bash
       run: |
-        cmake ${{ env.OPTIONS }} -DWITH_DEB_INFO=0 -DBUILD_WOLFSSL=1 -DBUILD_LIBASS=0 -DUSE_LIBCXX=0 -DCMAKE_SYSTEM_PROCESSOR=${ARCH} -DCMAKE_TOOLCHAIN_FILE=$PWD/cmake/tools/linux.clang.cmake -DLINUX_SYSROOT=$PWD/sysroot -H$PWD -Bbuild/${ARCH} -DCMAKE_BUILD_TYPE=${{ matrix.config }} -DCMAKE_INSTALL_PREFIX=install/${ARCH}
+        cmake ${{ env.OPTIONS }} -DWITH_DEB_INFO=0 -DBUILD_LZ4=0 -DBUILD_WOLFSSL=1 -DBUILD_LIBASS=0 -DUSE_LIBCXX=0 -DCMAKE_SYSTEM_PROCESSOR=${ARCH} -DCMAKE_TOOLCHAIN_FILE=$PWD/cmake/tools/linux.clang.cmake -DLINUX_SYSROOT=$PWD/sysroot -H$PWD -Bbuild/${ARCH} -DCMAKE_BUILD_TYPE=${{ matrix.config }} -DCMAKE_INSTALL_PREFIX=install/${ARCH}
         cmake --build build/${{ env.ARCH }}
         cmake --install build/${{ env.ARCH }}
         llvm-strip-${LLVM_VER} install/${{ env.ARCH }}/lib/*.so.*.*.*

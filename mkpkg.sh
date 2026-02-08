@@ -3,7 +3,7 @@ mkdir -p dep/include
 mkdir -p dep-av/{vision,i,tv}OS dep-av/{android,linux,ohos}
 # TODO: xcframework
 
-#TODO: fribidi include
+#TODO: fribidi include, zlib for av
 mkdir -p dep/bin/windows/{x86,x64}/LTL
 mkdir -p dep/bin/{WinRT,windows}/{arm64,x64,x86}
 mkdir -p dep/lib/windows/{arm64,x64,x86}/{MD,MDd,MT}
@@ -12,7 +12,7 @@ mkdir -p dep/lib/WinRT/{arm64,x64,x86}
 sed_bak=
 uname |grep -iq darwin && sed_bak=".bak"
 
-7z x -y devpkgs-windows-desktop-Release-vs2022.7z
+7z x -y devpkgs-windows-desktop-Release-vs2026.7z
 rsync -avm --include='*/' --include='**lz4**' --include='**/mfx/**' --include='*mfx.lib' --include='**/vpl/**' --include='*vpl.lib' --include='*shaderc*' --include='**/shaderc/**' --include='*freetype*' --include='*fribidi*' --include='*harfbuzz*' --include='*ass.*' --include='**/ass/**' --include='**/freetype2/**' --include='**/fribidi/**' --include='**/harfbuzz/**' --exclude='*' install/* dep-av/windows
 find dep-av/windows -name "*.pc" -exec sed -i $sed_bak '/-lm/d' {} \;   # harfbuzz.pc -lm
 cp -avf install/include/va dep/include/
@@ -28,14 +28,14 @@ for A in arm64 x64 x86; do
 done
 rm -rf install
 
-7z x -y devpkgs-windows-desktop-Debug-vs2022.7z
+7z x -y devpkgs-windows-desktop-Debug-vs2026.7z
 for A in arm64 x64 x86; do
     mv install/$A/lib/{glfw3,snappy,lz4}.lib dep/lib/windows/$A/MDd/
     [ -f install/$A/lib/vpld.lib ] && mv install/$A/lib/vpld.lib dep/lib/windows/$A/MDd/vpl.lib
 done
 rm -rf install
 
-7z x -y devpkgs-windows-desktop-Release-vs2022-ltl.7z
+7z x -y devpkgs-windows-desktop-Release-vs2026-ltl.7z
 rsync -avm --include='*/' --include='**lz4**' --include='**/mfx/**' --include='*mfx.lib' --include='**/vpl/**' --include='*vpl.lib' --include='*shaderc*' --include='**/shaderc/**' --include='*freetype*' --include='*fribidi*' --include='*harfbuzz*' --include='*ass.*' --include='**/ass/**' --include='**/freetype2/**' --include='**/fribidi/**' --include='**/harfbuzz/**' --exclude='*' install/* dep-av/windows-ltl
 find dep-av/windows-ltl -name "*.pc" -exec sed -i $sed_bak '/-lm/d' {} \;   # harfbuzz.pc -lm
 for A in x64 x86; do
@@ -44,7 +44,7 @@ for A in x64 x86; do
 done
 rm -rf install
 
-7z x -y devpkgs-uwp-Release-vs2022.7z
+7z x -y devpkgs-uwp-Release-vs2026.7z
 rsync -avm --include='*/' --include='**lz4**' --include='*shaderc*' --include='**/shaderc/**' --include='*freetype*' --include='*fribidi*' --include='*harfbuzz*' --include='*ass.*' --include='**/ass/**' --include='**/freetype2/**' --include='**/fribidi/**' --include='**/harfbuzz/**' --exclude='*' install/* dep-av/uwp
 find dep-av/uwp -name "*.pc" -exec sed -i $sed_bak '/-lm/d' {} \;   # harfbuzz.pc -lm
 for A in x64 x86 arm64; do

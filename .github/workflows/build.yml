@@ -118,8 +118,8 @@ jobs:
         path: devpkgs-${{ matrix.os }}-${{ matrix.config }}.tar.xz
 
 
-  Windows_VS2022:
-    runs-on: windows-2022
+  Windows_VS2026:
+    runs-on: windows-2025-vs2026
     env:
       TARGET_OS: windows-desktop
     strategy:
@@ -186,16 +186,16 @@ jobs:
       run: |
         mkdir -p install/include
         cp -avf dep/include/va install/include/
-        7z a  -ssc -m0=lzma2 -mx=9 -ms=on -mf=off devpkgs-${{ env.TARGET_OS }}-${{ matrix.config }}-vs2022.7z install
+        7z a  -ssc -m0=lzma2 -mx=9 -ms=on -mf=off devpkgs-${{ env.TARGET_OS }}-${{ matrix.config }}-vs2026.7z install
     - name: Archieve SDK
       uses: actions/upload-artifact@v6
       with:
-        name: devpkgs-vs2022-${{ env.TARGET_OS }}-${{ matrix.config }}
-        path: devpkgs-${{ env.TARGET_OS }}-${{ matrix.config }}-vs2022*.7z
+        name: devpkgs-vs2026-${{ env.TARGET_OS }}-${{ matrix.config }}
+        path: devpkgs-${{ env.TARGET_OS }}-${{ matrix.config }}-vs2026*.7z
 
 
-  Windows_VS2022_LTL:
-    runs-on: windows-2022
+  Windows_VS2026_LTL:
+    runs-on: windows-2025-vs2026
     env:
       TARGET_OS: windows-desktop
     strategy:
@@ -252,16 +252,16 @@ jobs:
         cmake --install build/${{ env.ARCH }}
     - name: Make SDK
       shell: bash
-      run: 7z a  -ssc -m0=lzma2 -mx=9 -ms=on -mf=off devpkgs-${{ env.TARGET_OS }}-${{ matrix.config }}-vs2022-ltl.7z install
+      run: 7z a  -ssc -m0=lzma2 -mx=9 -ms=on -mf=off devpkgs-${{ env.TARGET_OS }}-${{ matrix.config }}-vs2026-ltl.7z install
     - name: Archieve SDK
       uses: actions/upload-artifact@v6
       with:
-        name: devpkgs-vs2022-ltl-${{ env.TARGET_OS }}-${{ matrix.config }}
-        path: devpkgs-${{ env.TARGET_OS }}-${{ matrix.config }}-vs2022-ltl*.7z
+        name: devpkgs-vs2026-ltl-${{ env.TARGET_OS }}-${{ matrix.config }}
+        path: devpkgs-${{ env.TARGET_OS }}-${{ matrix.config }}-vs2026-ltl*.7z
 
 
-  UWP_VS2022:
-    runs-on: windows-2022
+  UWP_VS2026:
+    runs-on: windows-2025-vs2026
     env:
       TARGET_OS: uwp
     strategy:
@@ -325,12 +325,12 @@ jobs:
         llvm-readobj --needed-libs install/${{ env.ARCH }}/bin/*.dll
     - name: Make SDK
       shell: bash
-      run: 7z a  -ssc -m0=lzma2 -mx=9 -ms=on -mf=off devpkgs-${{ env.TARGET_OS }}-${{ matrix.config }}-vs2022.7z install
+      run: 7z a  -ssc -m0=lzma2 -mx=9 -ms=on -mf=off devpkgs-${{ env.TARGET_OS }}-${{ matrix.config }}-vs2026.7z install
     - name: Archieve SDK
       uses: actions/upload-artifact@v6
       with:
-        name: devpkgs-vs2022-${{ env.TARGET_OS }}-${{ matrix.config }}
-        path: devpkgs-${{ env.TARGET_OS }}-${{ matrix.config }}-vs2022.7z
+        name: devpkgs-vs2026-${{ env.TARGET_OS }}-${{ matrix.config }}
+        path: devpkgs-${{ env.TARGET_OS }}-${{ matrix.config }}-vs2026.7z
 
   MinGW_GCC:
     runs-on: ubuntu-latest
@@ -636,7 +636,7 @@ jobs:
 
   pkg:
     runs-on: macos-latest
-    needs: [iOS, macOS, Android, ohos, Windows_VS2022, Windows_VS2022_LTL, UWP_VS2022, Linux_libcxx, Linux_gnustl]
+    needs: [iOS, macOS, Android, ohos, Windows_VS2026, Windows_VS2026_LTL, UWP_VS2026, Linux_libcxx, Linux_gnustl]
     steps:
     - uses: actions/checkout@v6
     - name: Download iOS libs
@@ -658,19 +658,19 @@ jobs:
     - name: Download win32 MD release libs
       uses: actions/download-artifact@v7
       with:
-        name: devpkgs-vs2022-windows-desktop-Release
+        name: devpkgs-vs2026-windows-desktop-Release
     - name: Download win32 MD debug libs
       uses: actions/download-artifact@v7
       with:
-        name: devpkgs-vs2022-windows-desktop-Debug
+        name: devpkgs-vs2026-windows-desktop-Debug
     - name: Download win32 ltl MT release libs
       uses: actions/download-artifact@v7
       with:
-        name: devpkgs-vs2022-ltl-windows-desktop-Release
+        name: devpkgs-vs2026-ltl-windows-desktop-Release
     - name: Download uwp MD release libs
       uses: actions/download-artifact@v7
       with:
-        name: devpkgs-vs2022-uwp-Release
+        name: devpkgs-vs2026-uwp-Release
     - name: Download linux libcxx libs      # for libmdk
       uses: actions/download-artifact@v7
       with:

@@ -203,8 +203,10 @@ jobs:
     - name: Make SDK
       shell: bash
       run: |
-        mkdir -p install/include
+        mkdir -p install/include install/lib/pkgconfig
         cp -avf dep/include/va install/include/
+        sed 's,prefix=.*,prefix=${pcfiledir}/../..,' dep/build/native/win32/lib/pkgconfig/libva.pc >install/lib/pkgconfig/libva.pc
+        sed 's,prefix=.*,prefix=${pcfiledir}/../..,' dep/build/native/win32/lib/pkgconfig/libva-win32.pc >install/lib/pkgconfig/libva-win32.pc
         7z a  -ssc -m0=lzma2 -mx=9 -ms=on -mf=off devpkgs-${{ env.TARGET_OS }}-${{ matrix.config }}-vs2026.7z install
     - name: Archieve SDK
       uses: actions/upload-artifact@v6

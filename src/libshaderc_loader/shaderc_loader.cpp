@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2025 WangBin <wbsecg1 at gmail.com>
+ * Copyright (c) 2021-2026 WangBin <wbsecg1 at gmail.com>
  */
 #define _CRT_SECURE_NO_WARNINGS 1 // vc getenv
 #if __has_include("shaderc/shaderc.h")
@@ -57,6 +57,7 @@ using namespace std;
 template<typename T> static T default_rv() {return {};}
 template<> void default_rv<void>() {}
 
+[[maybe_unused]]
 static inline string to_string(const wchar_t* ws)
 {
     string s(snprintf(nullptr, 0, "%ls", ws), 0);
@@ -64,7 +65,8 @@ static inline string to_string(const wchar_t* ws)
     return s;
 }
 
-inline string to_string(const char* s) { return s;}
+[[maybe_unused]]
+static inline string to_string(const char* s) { return s;}
 
 static auto libname(int version = -1)
 {
@@ -102,14 +104,11 @@ static auto load_shaderc()->decltype(dlopen(nullptr, RTLD_LAZY))
     if (dso_env)
         return dlopen(dso_env, RTLD_NOW | RTLD_LOCAL);
 
-    vector<int> vs{};//SHADERC_API_VERSION_MAJOR};
-    for (int v = 1; v >= 1; --v) {
-        //if (v != SHADERC_API_VERSION_MAJOR)
-            vs.push_back(v);
-    }
-    vs.push_back(-1);
+    // TODO: macros, no vector and string, number to string literal
     invoke_result_t<decltype(libname), int> preName;
-    for (auto v : vs) {
+    for (int v = 1/*SHADERC_API_VERSION_MAJOR*/; v >= -1; --v) {
+        if (v == 0)
+            continue;
         const auto name = libname(v);
         if (preName == name)
             continue;

@@ -64,7 +64,7 @@ jobs:
         rm -rf install/lib/{x86_64,arm64}
         tar Jcvf devpkgs-${{ env.TARGET_OS }}-${{ matrix.config }}.tar.xz install
     - name: Archieve SDK
-      uses: actions/upload-artifact@v6
+      uses: actions/upload-artifact@v7
       with:
         name: devpkgs-${{ env.TARGET_OS }}-${{ matrix.config }}
         path: devpkgs-${{ env.TARGET_OS }}-${{ matrix.config }}*.tar.xz
@@ -112,7 +112,7 @@ jobs:
         done
         tar Jcvf devpkgs-${{ matrix.os }}-${{ matrix.config }}.tar.xz install
     - name: Archieve SDK
-      uses: actions/upload-artifact@v6
+      uses: actions/upload-artifact@v7
       with:
         name: devpkgs-${{ matrix.os }}-${{ matrix.config }}
         path: devpkgs-${{ matrix.os }}-${{ matrix.config }}.tar.xz
@@ -190,7 +190,7 @@ jobs:
         sed 's,prefix=.*,prefix=${pcfiledir}/../..,' dep/build/native/win32/lib/pkgconfig/libva-win32.pc >install/lib/pkgconfig/libva-win32.pc
         7z a  -ssc -m0=lzma2 -mx=9 -ms=on -mf=off devpkgs-${{ env.TARGET_OS }}-${{ matrix.config }}-vs2026.7z install
     - name: Archieve SDK
-      uses: actions/upload-artifact@v6
+      uses: actions/upload-artifact@v7
       with:
         name: devpkgs-vs2026-${{ env.TARGET_OS }}-${{ matrix.config }}
         path: devpkgs-${{ env.TARGET_OS }}-${{ matrix.config }}-vs2026*.7z
@@ -256,7 +256,7 @@ jobs:
       shell: bash
       run: 7z a  -ssc -m0=lzma2 -mx=9 -ms=on -mf=off devpkgs-${{ env.TARGET_OS }}-${{ matrix.config }}-vs2026-ltl.7z install
     - name: Archieve SDK
-      uses: actions/upload-artifact@v6
+      uses: actions/upload-artifact@v7
       with:
         name: devpkgs-vs2026-ltl-${{ env.TARGET_OS }}-${{ matrix.config }}
         path: devpkgs-${{ env.TARGET_OS }}-${{ matrix.config }}-vs2026-ltl*.7z
@@ -329,7 +329,7 @@ jobs:
       shell: bash
       run: 7z a  -ssc -m0=lzma2 -mx=9 -ms=on -mf=off devpkgs-${{ env.TARGET_OS }}-${{ matrix.config }}-vs2026.7z install
     - name: Archieve SDK
-      uses: actions/upload-artifact@v6
+      uses: actions/upload-artifact@v7
       with:
         name: devpkgs-vs2026-${{ env.TARGET_OS }}-${{ matrix.config }}
         path: devpkgs-${{ env.TARGET_OS }}-${{ matrix.config }}-vs2026.7z
@@ -380,7 +380,7 @@ jobs:
       shell: bash
       run: 7z a -ssc -m0=lzma2 -mx=9 -ms=on -mf=off devpkgs-${{ env.TARGET_OS }}-${{ matrix.config }}.7z install
     - name: Archieve SDK
-      uses: actions/upload-artifact@v6
+      uses: actions/upload-artifact@v7
       with:
         name: devpkgs-${{ env.TARGET_OS }}-${{ matrix.config }}
         path: devpkgs-${{ env.TARGET_OS }}-${{ matrix.config }}.7z
@@ -456,7 +456,7 @@ jobs:
       shell: bash
       run: 7z a  -ssc -m0=lzma2 -mx=9 -ms=on -mf=off devpkgs-${{ env.TARGET_OS }}-${{ matrix.config }}.7z install
     - name: Archieve SDK
-      uses: actions/upload-artifact@v6
+      uses: actions/upload-artifact@v7
       with:
         name: devpkgs-${{ env.TARGET_OS }}-${{ matrix.config }}
         path: devpkgs-${{ env.TARGET_OS }}-${{ matrix.config }}*.7z
@@ -513,7 +513,7 @@ jobs:
       shell: bash
       run: 7z a -ssc -m0=lzma2 -mx=9 -ms=on -mf=off devpkgs-${{ env.TARGET_OS }}-${{ matrix.config }}-gnustl.7z install
     - name: Archieve SDK
-      uses: actions/upload-artifact@v6
+      uses: actions/upload-artifact@v7
       with:
         name: devpkgs-${{ env.TARGET_OS }}-${{ matrix.config }}-gnustl
         path: devpkgs-${{ env.TARGET_OS }}-${{ matrix.config }}-gnustl.7z
@@ -583,13 +583,13 @@ jobs:
       shell: bash
       run: 7z a  -ssc -m0=lzma2 -mx=9 -ms=on -mf=off devpkgs-${{ env.TARGET_OS }}-${{ matrix.config }}.7z install
     - name: Archieve SDK
-      uses: actions/upload-artifact@v6
+      uses: actions/upload-artifact@v7
       with:
         name: devpkgs-${{ env.TARGET_OS }}-${{ matrix.config }}
         path: devpkgs-${{ env.TARGET_OS }}-${{ matrix.config }}*.7z
 
   ohos:
-    runs-on: ubuntu-latest
+    runs-on: macos-latest
     env:
       TARGET_OS: ohos
     strategy:
@@ -602,16 +602,16 @@ jobs:
         submodules: 'recursive'
         fetch-tags: true
         fetch-depth: 0
-    - name: Setup HarmonyOS CLI tools
-      uses: ErBWs/setup-ohos@v1
+    - name: Setup OpenHarmony SDK
+      id: setup-ohos-sdk
+      uses: openharmony-rs/setup-ohos-sdk@v1.0.0
       with:
-        version: latest
+        version: ${{ vars.OH_SDK_VERSION }}
         cache: true
-    - run: hvigorw -v
     - name: Create Build Environment
       shell: bash
       run: |
-        sudo apt install -y cmake ninja-build nasm
+        brew install nasm
     - name: Build host gen_tab # native build first
       shell: bash
       run: |
@@ -622,7 +622,7 @@ jobs:
         ARCH: arm64-v8a
       shell: bash
       run: |
-        export OHOS_NDK=$OHOS_NDK_HOME/native
+        export OHOS_NDK=$OHOS_SDK_NATIVE
         cmake ${{ env.OPTIONS }} -DWITH_DEB_INFO=0 -DBUILD_WOLFSSL=1 -DOHOS_ARCH=${ARCH} -DCMAKE_TOOLCHAIN_FILE=$OHOS_NDK/build/cmake/ohos.toolchain.cmake -H$PWD -Bbuild/${ARCH} -DCMAKE_BUILD_TYPE=${{ matrix.config }} -DCMAKE_INSTALL_PREFIX=install/${ARCH}
         cmake --build build/${{ env.ARCH }}
         cmake --install build/${{ env.ARCH }}
@@ -631,7 +631,7 @@ jobs:
       shell: bash
       run: 7z a  -ssc -m0=lzma2 -mx=9 -ms=on -mf=off devpkgs-${{ env.TARGET_OS }}-${{ matrix.config }}.7z install
     - name: Archieve SDK
-      uses: actions/upload-artifact@v6
+      uses: actions/upload-artifact@v7
       with:
         name: devpkgs-${{ env.TARGET_OS }}-${{ matrix.config }}
         path: devpkgs-${{ env.TARGET_OS }}-${{ matrix.config }}*.7z
@@ -642,51 +642,51 @@ jobs:
     steps:
     - uses: actions/checkout@v6
     - name: Download iOS libs
-      uses: actions/download-artifact@v7
+      uses: actions/download-artifact@v8
       with:
         name: devpkgs-iOS-MinSizeRel
     - name: Download tvOS libs
-      uses: actions/download-artifact@v7
+      uses: actions/download-artifact@v8
       with:
         name: devpkgs-tvOS-MinSizeRel
     - name: Download visionOS libs
-      uses: actions/download-artifact@v7
+      uses: actions/download-artifact@v8
       with:
         name: devpkgs-visionOS-MinSizeRel
     - name: Download macOS libs
-      uses: actions/download-artifact@v7
+      uses: actions/download-artifact@v8
       with:
         name: devpkgs-macOS-MinSizeRel
     - name: Download win32 MD release libs
-      uses: actions/download-artifact@v7
+      uses: actions/download-artifact@v8
       with:
         name: devpkgs-vs2026-windows-desktop-Release
     - name: Download win32 MD debug libs
-      uses: actions/download-artifact@v7
+      uses: actions/download-artifact@v8
       with:
         name: devpkgs-vs2026-windows-desktop-Debug
     - name: Download win32 ltl MT release libs
-      uses: actions/download-artifact@v7
+      uses: actions/download-artifact@v8
       with:
         name: devpkgs-vs2026-ltl-windows-desktop-Release
     - name: Download uwp MD release libs
-      uses: actions/download-artifact@v7
+      uses: actions/download-artifact@v8
       with:
         name: devpkgs-vs2026-uwp-Release
     - name: Download linux libcxx libs      # for libmdk
-      uses: actions/download-artifact@v7
+      uses: actions/download-artifact@v8
       with:
         name: devpkgs-linux-MinSizeRel
     - name: Download android libs
-      uses: actions/download-artifact@v7
+      uses: actions/download-artifact@v8
       with:
         name: devpkgs-android-MinSizeRel
     - name: Download ohos libs
-      uses: actions/download-artifact@v7
+      uses: actions/download-artifact@v8
       with:
         name: devpkgs-ohos-MinSizeRel
     - name: Download linux gnustl libs      # for avbuild
-      uses: actions/download-artifact@v7
+      uses: actions/download-artifact@v8
       with:
         name: devpkgs-linux-MinSizeRel-gnustl
     - name: Make libmdk dep
@@ -695,7 +695,7 @@ jobs:
         chmod +x mkpkg.sh
         ./mkpkg.sh
     - name: Archieve SDK
-      uses: actions/upload-artifact@v6
+      uses: actions/upload-artifact@v7
       with:
         name: libmdk-dep
         path: dep*.7z

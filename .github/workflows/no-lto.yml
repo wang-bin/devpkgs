@@ -78,7 +78,7 @@ jobs:
 
 
   iOS:
-    runs-on: macos-latest
+    runs-on: macos-26
     strategy:
       fail-fast: false
       matrix:
@@ -558,7 +558,7 @@ jobs:
         path: devpkgs-${{ env.TARGET_OS }}-${{ matrix.config }}-gnustl.7z
 
   Android:
-    runs-on: macos-latest
+    runs-on: macos-26
     env:
       TARGET_OS: android
       MIN_API: 19
@@ -686,7 +686,7 @@ jobs:
         path: devpkgs-${{ env.TARGET_OS }}-${{ matrix.config }}*.7z
 
   pkg:
-    runs-on: macos-latest
+    runs-on: macos-26
     needs: [iOS, macOS, Android, ohos, Windows_VS2026, Windows_VS2026_LTL, UWP_VS2026, Linux_libcxx, Linux_gnustl]
     steps:
     - uses: actions/checkout@v6

@@ -151,11 +151,13 @@ endif()
 
 if(BUILD_WOLFSSL)
   message("Configuring wolfssl...")
+  set(WOLFSSL_BUILD_OUT_OF_TREE yes)
   set(WOLFSSL_FILESYSTEM no)
   # sni test: https://www.rmp-streaming.com/media/big-buck-bunny-360p.mp4  https://omc3i.codesandbox.io/ts/playlist.m3u8
   set(WOLFSSL_SNI yes)
   add_compile_definitions(NO_WOLFSSL_SERVER=1)
   set(BUILD_SHARED_LIBS 0)
+  set(WOLFSSL_EXAMPLES no)
   set(WOLFSSL_CRYPT_TESTS no)
   set(WOLFSSL_FAST_MATH yes)
 # macOS x64 build arm64: CMAKE_SYSTEM_PROCESSOR is x86_64 used CMAKE_SYSTEM_PROCESSOR by wolfssl is wrong

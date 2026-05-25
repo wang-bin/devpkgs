@@ -50,3 +50,9 @@
 [submodule "src/lz4"]
 	path = src/lz4
 	url = https://github.com/lz4/lz4.git
+[submodule "src/boringssl"]
+	path = src/boringssl
+	url = https://github.com/google/boringssl.git
+[submodule "src/curl"]
+	path = src/curl
+	url = https://github.com/curl/curl.git

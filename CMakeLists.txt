@@ -14,6 +14,8 @@ option(BUILD_HB "Build harfbuzz" ON) # OFF to build freetype, then ON and BUILD_
 option(BUILD_HB_FT "Build harfbuzz with freetype and hb-ft.h" OFF)
 option(WITH_VC_LTL "Build with VC-LTL crt for windows. Recommend to use with -DCMAKE_MSVC_RUNTIME_LIBRARY=MultiThreaded" OFF)
 option(BUILD_LZ4 "Build lz4" ON)
+option(BUILD_BORINGSSL "Build boringssl" OFF)
+option(BUILD_CURL "Build curl" OFF) # FIXME: must build & install ssl first then turn on curl
 set(VC_LTL_DIR "${CMAKE_CURRENT_SOURCE_DIR}/VC-LTL" CACHE STRING "VC-LTL dir")
 
 set(CMAKE_C_STANDARD 11)
@@ -178,6 +180,64 @@ if(BUILD_LZ4)
   message("Configuring lz4...")
   add_subdirectory(src/lz4/build/cmake)
   message("BUILD_SHARED_LIBS: ${BUILD_SHARED_LIBS}, BUILD_STATIC_LIBS: ${BUILD_STATIC_LIBS}, LZ4_BUNDLED_MODE: ${LZ4_BUNDLED_MODE}")
+endif()
+
+if(BUILD_BORINGSSL)
+  message("Configuring boringssl...")
+  set(BUILD_TESTING 0)
+  set(CMAKE_MACOSX_BUNDLE_OLD ${CMAKE_MACOSX_BUNDLE})
+  set(CMAKE_MACOSX_BUNDLE FALSE) # error: install TARGETS given no BUNDLE DESTINATION for MACOSX_BUNDLE executable target "bssl"
+  add_subdirectory(src/boringssl)
+  set(CMAKE_MACOSX_BUNDLE ${CMAKE_MACOSX_BUNDLE_OLD})
+endif()
+
+if(BUILD_CURL)
+  message("Configuring curl...")
+  set(CURL_USE_LIBPSL 0)
+  set(CURL_DISABLE_SMTP 1)
+  set(CURL_DISABLE_RTSP 1)
+  set(CURL_DISABLE_WEBSOCKETS 0)
+  set(CURL_DISABLE_MQTT 1)
+  set(CURL_DISABLE_IPFS 1)
+  set(CURL_DISABLE_FTP 1)
+  set(CURL_DISABLE_GOPHER 1)
+  set(CURL_DISABLE_IMAP 1)
+  set(CURL_DISABLE_POP3 1)
+  set(CURL_DISABLE_TFTP 1)
+  set(USE_APPLE_SECTRUST 0)
+  set(CURL_USE_LIBSSH 0)
+  set(BUILD_TESTING 0)
+  set(BUILD_CURL_EXE 0)
+
+  set(BUILD_SHARED_LIBS 1)
+  add_subdirectory(src/curl)
+  set_target_properties(libcurl_shared PROPERTIES LINKER_LANGUAGE CXX)
+  message("CURL_VERSION: ${CURL_VERSION}, CURL_VERSION_MAJOR: ${CURL_VERSION_MAJOR}, CURL_VERSION_MINOR: ${CURL_VERSION_MINOR}")
+  if(APPLE AND NOT CMAKE_SYSTEM_NAME STREQUAL Darwin)
+  # version: copy from curl CMakeLists.txt
+    file(STRINGS "src/curl/include/curl/curlver.h" _curl_version_h_contents REGEX "#define LIBCURL_VERSION( |_NUM )")
+    string(REGEX MATCH "#define LIBCURL_VERSION \"[^\"]*" _curl_version ${_curl_version_h_contents})
+    string(REGEX REPLACE "[^\"]+\"" "" _curl_version ${_curl_version})
+    string(REGEX MATCH "#define LIBCURL_VERSION_NUM 0x[0-9a-fA-F]+" _curl_version_num ${_curl_version_h_contents})
+    string(REGEX REPLACE "[^0]+0x" "" _curl_version_num ${_curl_version_num})
+    unset(_curl_version_h_contents)
+
+    string(REGEX REPLACE "([0-9]+\.[0-9]+\.[0-9]+).+" "\\1" _curl_version_sem "${_curl_version}")
+    string(REGEX REPLACE "([0-9]+\.[0-9]+)\.[0-9]+.+" "\\1" _curl_version_short_sem "${_curl_version}")
+    file(GLOB CURL_HEADERS "src/curl/include/curl/*.h")
+    target_sources(libcurl_shared PRIVATE # FILE_SET HEADERS FILES
+       ${CURL_HEADERS}) # required by framework/Headers
+    set_target_properties(libcurl_shared PROPERTIES
+      OUTPUT_NAME curl
+      MACOSX_RPATH ON
+      FRAMEWORK ON
+      MACOSX_FRAMEWORK_IDENTIFIER com.mediadevkit.libcurl
+      MACOSX_FRAMEWORK_BUNDLE_VERSION ${_curl_version_sem}
+      MACOSX_FRAMEWORK_SHORT_VERSION_STRING ${_curl_version_short_sem}
+      FRAMEWORK_VERSION A # codesign assumes framework version is A
+      PUBLIC_HEADER "${CURL_HEADERS}"
+    )
+  endif()
 endif()
 
 # android INTERPROCEDURAL_OPTIMIZATION: cmake will force gold linker if CMAKE_ANDROID_NDK_VERSION is not set(e.g. use ndk's cmake toolchain file) or less than 22

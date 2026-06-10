@@ -16,6 +16,7 @@ option(WITH_VC_LTL "Build with VC-LTL crt for windows. Recommend to use with -DC
 option(BUILD_LZ4 "Build lz4" ON)
 option(BUILD_BORINGSSL "Build boringssl" OFF)
 option(BUILD_CURL "Build curl" OFF) # FIXME: must build & install ssl first then turn on curl
+option(BUILD_CURL_SHARED "Build shared libcurl" ON)
 set(VC_LTL_DIR "${CMAKE_CURRENT_SOURCE_DIR}/VC-LTL" CACHE STRING "VC-LTL dir")
 
 set(CMAKE_C_STANDARD 11)
@@ -177,7 +178,7 @@ if(BUILD_SHADERC)
 endif()
 
 if(BUILD_LZ4)
-  set(LZ4_BUNDLED_MODE OFF)
+  set(LZ4_BUNDLED_MODE OFF) # disable BUILD_SHARED_LIBS
   set(LZ4_BUILD_CLI OFF)
   message("Configuring lz4...")
   add_subdirectory(src/lz4/build/cmake)
@@ -195,6 +196,7 @@ endif()
 
 if(BUILD_CURL)
   message("Configuring curl...")
+  set(CURL_CA_FALLBACK 0)
   set(CURL_USE_LIBPSL 0)
   set(CURL_DISABLE_SMTP 1)
   set(CURL_DISABLE_RTSP 1)
@@ -211,11 +213,13 @@ if(BUILD_CURL)
   set(BUILD_TESTING 0)
   set(BUILD_CURL_EXE 0)
 
-  set(BUILD_SHARED_LIBS 1)
+  set(BUILD_SHARED_LIBS ${BUILD_CURL_SHARED}) # default is enabled by curl: TARGET_SUPPORTS_SHARED_LIBS
   add_subdirectory(src/curl)
-  set_target_properties(libcurl_shared PROPERTIES LINKER_LANGUAGE CXX)
+  if(BUILD_SHARED_LIBS)
+    set_target_properties(libcurl_shared PROPERTIES LINKER_LANGUAGE CXX)
+  endif()
   message("CURL_VERSION: ${CURL_VERSION}, CURL_VERSION_MAJOR: ${CURL_VERSION_MAJOR}, CURL_VERSION_MINOR: ${CURL_VERSION_MINOR}")
-  if(APPLE AND NOT CMAKE_SYSTEM_NAME STREQUAL Darwin)
+  if(BUILD_SHARED_LIBS AND APPLE AND NOT CMAKE_SYSTEM_NAME STREQUAL Darwin)
   # version: copy from curl CMakeLists.txt
     file(STRINGS "src/curl/include/curl/curlver.h" _curl_version_h_contents REGEX "#define LIBCURL_VERSION( |_NUM )")
     string(REGEX MATCH "#define LIBCURL_VERSION \"[^\"]*" _curl_version ${_curl_version_h_contents})
@@ -244,7 +248,7 @@ endif()
 
 # android INTERPROCEDURAL_OPTIMIZATION: cmake will force gold linker if CMAKE_ANDROID_NDK_VERSION is not set(e.g. use ndk's cmake toolchain file) or less than 22
 # TODO: INTERPROCEDURAL_OPTIMIZATION is thin lto, how to enable full lto?
-foreach(tgt freetype harfbuzz fribidi_shared fribidi_static ass zlib) # TODO: no lto for other projects(ffmpeg)
+foreach(tgt freetype harfbuzz fribidi_shared fribidi_static ass zlib libcurl_shared) # TODO: no lto for other projects(ffmpeg)
   if(TARGET ${tgt})
     set_target_properties(${tgt} PROPERTIES
         INTERPROCEDURAL_OPTIMIZATION ${WITH_LTO})
@@ -254,8 +258,11 @@ endforeach()
 foreach(tgt snappy zlibstatic glfw
     va va_win32 va-drm va-x11 vdpau
     wolfssl
+    crypto ssl
+    libcurl_static
     )
   if(TARGET ${tgt})
+  #  message("set lto ${WITH_LTO_STATIC}: ${tgt}")
     set_target_properties(${tgt} PROPERTIES
         INTERPROCEDURAL_OPTIMIZATION ${WITH_LTO_STATIC})
   endif()

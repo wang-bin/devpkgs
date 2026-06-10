@@ -138,7 +138,7 @@ rm -rf install
 
 find dep-av -name share -type d -exec rm -rf {} \;
 
-find dep-av -name "*.pc" -exec sed -i $sed_bak 's,^prefix=.*,prefix=\${pcfiledir}\/..\/..\/,' {} \;
+find dep-av -name "*.pc" -exec sed -i $sed_bak 's,prefix=.*,prefix=\${pcfiledir}\/..\/..\/,' {} \;
 
 if [ -d /opt/homebrew/include/shaderc ]; then
     cp -avfL /opt/homebrew/include/shaderc dep/include/

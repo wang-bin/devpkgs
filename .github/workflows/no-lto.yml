@@ -445,7 +445,7 @@ jobs:
       uses: actions/cache@v5
       with:
         path: ./sysroot
-        key: sysroot-${{ env.TARGET_OS }}-${{ secrets.LINUX_SYSROOT_ID }}
+        key: sysroot-${{ env.TARGET_OS }}-${{ vars.LINUX_SYSROOT_ID }}
     - uses: ./.github/actions/install-llvm
       with:
         version: ${{ vars.LLVM_VER }}
@@ -520,7 +520,7 @@ jobs:
       uses: actions/cache@v5
       with:
         path: ./sysroot
-        key: sysroot-${{ env.TARGET_OS }}-${{ secrets.LINUX_SYSROOT_ID }}
+        key: sysroot-${{ env.TARGET_OS }}-${{ vars.LINUX_SYSROOT_ID }}
     - uses: ./.github/actions/install-llvm
       with:
         version: ${{ vars.LLVM_VER }}

@@ -16,7 +16,7 @@ option(WITH_VC_LTL "Build with VC-LTL crt for windows. Recommend to use with -DC
 option(BUILD_LZ4 "Build lz4" ON)
 option(BUILD_BORINGSSL "Build boringssl" OFF)
 option(BUILD_CURL "Build curl" OFF) # FIXME: must build & install ssl first then turn on curl
-option(BUILD_CURL_SHARED "Build shared libcurl" ON)
+option(BUILD_CURL_SHARED "Build shared libcurl" OFF)
 set(VC_LTL_DIR "${CMAKE_CURRENT_SOURCE_DIR}/VC-LTL" CACHE STRING "VC-LTL dir")
 
 set(CMAKE_C_STANDARD 11)
@@ -78,7 +78,7 @@ if(CMAKE_BUILD_TYPE MATCHES MinSizeRel AND WITH_DEB_INFO)
     endif()
     add_link_options(-DEBUG)
   else()
-    add_compile_options(-g)
+    add_compile_options(-gdwarf-5 -g1)
   endif()
 endif()
 
@@ -94,6 +94,7 @@ set(FT_DISABLE_BROTLI 1)
 set(FT_DISABLE_PNG 1)
 if((BUILD_LIBASS OR BUILD_FT) AND NOT BUILD_HB_FT)
   message("Configuring freetype...")
+  set(BUILD_SHARED_LIBS 0)
   add_subdirectory(src/freetype)
   if(WINRT) # freetype change uwp detection to _WINRT_DLL which is only defined by vs projects
     target_compile_definitions(freetype PRIVATE _WINRT_DLL=1)
@@ -108,6 +109,7 @@ if(BUILD_LIBASS OR BUILD_HB)
   if(BUILD_HB_FT)
     set(HB_HAVE_FREETYPE 1)
   endif()
+  set(BUILD_SHARED_LIBS 0)
   add_subdirectory(src/harfbuzz)
 endif()
 add_subdirectory(projects)
@@ -178,9 +180,10 @@ if(BUILD_SHADERC)
 endif()
 
 if(BUILD_LZ4)
-  set(LZ4_BUNDLED_MODE OFF) # disable BUILD_SHARED_LIBS
+  set(LZ4_BUNDLED_MODE OFF) # disable BUILD_SHARED_LIBS. ON: no install
   set(LZ4_BUILD_CLI OFF)
   message("Configuring lz4...")
+  set(BUILD_SHARED_LIBS OFF) #enabled by LZ4_BUNDLED_MODE
   add_subdirectory(src/lz4/build/cmake)
   message("BUILD_SHARED_LIBS: ${BUILD_SHARED_LIBS}, BUILD_STATIC_LIBS: ${BUILD_STATIC_LIBS}, LZ4_BUNDLED_MODE: ${LZ4_BUNDLED_MODE}")
 endif()
@@ -190,6 +193,7 @@ if(BUILD_BORINGSSL)
   set(BUILD_TESTING 0)
   set(CMAKE_MACOSX_BUNDLE_OLD ${CMAKE_MACOSX_BUNDLE})
   set(CMAKE_MACOSX_BUNDLE FALSE) # error: install TARGETS given no BUNDLE DESTINATION for MACOSX_BUNDLE executable target "bssl"
+  set(BUILD_SHARED_LIBS 0)
   add_subdirectory(src/boringssl)
   set(CMAKE_MACOSX_BUNDLE ${CMAKE_MACOSX_BUNDLE_OLD})
 endif()
@@ -206,13 +210,17 @@ if(BUILD_CURL)
   set(CURL_DISABLE_FTP 1)
   set(CURL_DISABLE_GOPHER 1)
   set(CURL_DISABLE_IMAP 1)
+  set(CURL_DISABLE_LDAP 1)
+  set(CURL_DISABLE_LDAPS 1)
   set(CURL_DISABLE_POP3 1)
   set(CURL_DISABLE_TFTP 1)
+  set(CURL_DISABLE_TELNET 1)
+  set(CURL_DISABLE_SMB 1)
   set(USE_APPLE_SECTRUST 0)
   set(CURL_USE_LIBSSH 0)
   set(BUILD_TESTING 0)
   set(BUILD_CURL_EXE 0)
-
+  message("BUILD_SHARED_LIBS: ${BUILD_SHARED_LIBS}")
   set(BUILD_SHARED_LIBS ${BUILD_CURL_SHARED}) # default is enabled by curl: TARGET_SUPPORTS_SHARED_LIBS
   add_subdirectory(src/curl)
   if(BUILD_SHARED_LIBS)
@@ -248,7 +256,9 @@ endif()
 
 # android INTERPROCEDURAL_OPTIMIZATION: cmake will force gold linker if CMAKE_ANDROID_NDK_VERSION is not set(e.g. use ndk's cmake toolchain file) or less than 22
 # TODO: INTERPROCEDURAL_OPTIMIZATION is thin lto, how to enable full lto?
-foreach(tgt freetype harfbuzz fribidi_shared fribidi_static ass zlib libcurl_shared) # TODO: no lto for other projects(ffmpeg)
+foreach(tgt freetype harfbuzz fribidi_shared fribidi_static ass zlib
+#    crypto ssl
+    libcurl_shared) # TODO: no lto for other projects(ffmpeg)
   if(TARGET ${tgt})
     set_target_properties(${tgt} PROPERTIES
         INTERPROCEDURAL_OPTIMIZATION ${WITH_LTO})

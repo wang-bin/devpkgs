@@ -155,7 +155,8 @@ endif()
 if(BUILD_WOLFSSL)
   message("Configuring wolfssl...")
   set(WOLFSSL_BUILD_OUT_OF_TREE yes)
-  set(WOLFSSL_FILESYSTEM no)
+  set(WOLFSSL_FILESYSTEM yes)   # ca
+  set(WOLFSSL_OPENSSLEXTRA yes) # ca
   # sni test: https://www.rmp-streaming.com/media/big-buck-bunny-360p.mp4  https://omc3i.codesandbox.io/ts/playlist.m3u8
   set(WOLFSSL_SNI yes)
   add_compile_definitions(NO_WOLFSSL_SERVER=1)

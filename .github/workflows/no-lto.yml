@@ -108,10 +108,10 @@ jobs:
         minver=8.0
         [[ "${{ matrix.os }}" == "tv"* ]] && minver=9.0
         [[ "${{ matrix.os }}" == "vision"* ]] && minver=1.0
-        cmake ${{ env.OPTIONS }} ${{ env.OPTIONS0 }} -DWITH_DEB_INFO=0 -DBUILD_WOLFSSL=1 -DHB_IOS=1 -DCMAKE_IOS_INSTALL_COMBINED=YES -DCMAKE_SYSTEM_NAME=${{ matrix.os }} -DCMAKE_OSX_DEPLOYMENT_TARGET=${minver} -DCMAKE_OSX_ARCHITECTURES=${{ env.ARCH }} -Bbuild/${{ env.ARCH }} -DCMAKE_BUILD_TYPE=${{ matrix.config }} -DCMAKE_INSTALL_PREFIX=install/${{ env.ARCH }}
+        cmake ${{ env.OPTIONS }} ${{ env.OPTIONS0 }} -DWITH_DEB_INFO=0 -DBUILD_WOLFSSL=0 -DHB_IOS=1 -DCMAKE_IOS_INSTALL_COMBINED=YES -DCMAKE_SYSTEM_NAME=${{ matrix.os }} -DCMAKE_OSX_DEPLOYMENT_TARGET=${minver} -DCMAKE_OSX_ARCHITECTURES=${{ env.ARCH }} -Bbuild/${{ env.ARCH }} -DCMAKE_BUILD_TYPE=${{ matrix.config }} -DCMAKE_INSTALL_PREFIX=install/${{ env.ARCH }}
         cmake --build build/${{ env.ARCH }}
         cmake --install build/${{ env.ARCH }}
-        cmake ${{ env.OPTIONS }} ${{ env.OPTIONS1 }} -DWITH_DEB_INFO=0 -DBUILD_WOLFSSL=1 -DHB_IOS=1 -DCMAKE_IOS_INSTALL_COMBINED=YES -DCMAKE_SYSTEM_NAME=${{ matrix.os }} -DCMAKE_OSX_DEPLOYMENT_TARGET=${minver} -DCMAKE_OSX_ARCHITECTURES=${{ env.ARCH }} -Bbuild/${{ env.ARCH }} -DCMAKE_BUILD_TYPE=${{ matrix.config }} -DCMAKE_INSTALL_PREFIX=install/${{ env.ARCH }}
+        cmake ${{ env.OPTIONS }} ${{ env.OPTIONS1 }} -DWITH_DEB_INFO=0 -DBUILD_WOLFSSL=0 -DHB_IOS=1 -DCMAKE_IOS_INSTALL_COMBINED=YES -DCMAKE_SYSTEM_NAME=${{ matrix.os }} -DCMAKE_OSX_DEPLOYMENT_TARGET=${minver} -DCMAKE_OSX_ARCHITECTURES=${{ env.ARCH }} -Bbuild/${{ env.ARCH }} -DCMAKE_BUILD_TYPE=${{ matrix.config }} -DCMAKE_INSTALL_PREFIX=install/${{ env.ARCH }}
         cmake --build build/${{ env.ARCH }}
         cmake --install build/${{ env.ARCH }}
     - name: Make SDK

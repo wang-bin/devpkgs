@@ -110,6 +110,7 @@ if(BUILD_LIBASS OR BUILD_HB)
     set(HB_HAVE_FREETYPE 1)
   endif()
   set(BUILD_SHARED_LIBS 0)
+  add_compile_options_if_supported(-Wno-unused-template) # clang-23?
   add_subdirectory(src/harfbuzz)
 endif()
 add_subdirectory(projects)

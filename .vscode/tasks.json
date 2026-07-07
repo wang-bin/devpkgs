@@ -328,6 +328,8 @@
                 "-DCMAKE_TOOLCHAIN_FILE=${env:OHOS_NDK}/build/cmake/ohos.toolchain.cmake",
                 "-DCMAKE_BUILD_TYPE=MinSizeRel",
                 "-DOHOS_ARCH=arm64-v8a",
+                "-DOHOS_COMPATIBLE_SDK_VERSION=12",
+                "-DOHOS_STL=c++_shared",
                 "-DCMAKE_C_COMPILER_FRONTEND_VARIANT=GNU",
                 "-DCMAKE_CXX_COMPILER_FRONTEND_VARIANT=GNU",
                 "-H${workspaceRoot}",
@@ -344,6 +346,34 @@
             "args": [
                 "--build",
                 "${workspaceRoot}/build/ohos-arm64"
+            ],
+            "group": "build",
+            "problemMatcher": []
+        },
+        {
+            "label": "config.ohos.x64",
+            "args": [
+                "-DCMAKE_TOOLCHAIN_FILE=${env:OHOS_NDK}/build/cmake/ohos.toolchain.cmake",
+                "-DCMAKE_BUILD_TYPE=MinSizeRel",
+                "-DOHOS_ARCH=x86_64",
+                "-DOHOS_COMPATIBLE_SDK_VERSION=12",
+                "-DOHOS_STL=c++_shared",
+                "-DCMAKE_ASM_NASM_COMPILER=/opt/homebrew/bin/nasm",
+                "-DCMAKE_C_COMPILER_FRONTEND_VARIANT=GNU",
+                "-DCMAKE_CXX_COMPILER_FRONTEND_VARIANT=GNU",
+                "-H${workspaceRoot}",
+                "-B${workspaceRoot}/build/ohos-x64",
+                "-GNinja",
+                "-DCMAKE_INSTALL_PREFIX=${workspaceRoot}/build/ohos-x64/install",
+            ],
+            "problemMatcher": []
+        },
+        {
+            "label": "build.ohos.x64",
+            "command": "cmake",
+            "args": [
+                "--build",
+                "${workspaceRoot}/build/ohos-x64"
             ],
             "group": "build",
             "problemMatcher": []
@@ -549,6 +579,7 @@
                 "-DUSE_LIBCXX=1",
                 "-DCMAKE_INSTALL_PREFIX=${workspaceRoot}/build/linux64.clang/install",
                 "-DCMAKE_CROSSCOMPILING=1",
+                "-DCMAKE_ASM_NASM_COMPILER=/opt/homebrew/bin/nasm",
                 //"-DCMAKE_C_COMPILER=clang-15",
                 "-DLINUX_SYSROOT=${env:LINUX_SYSROOT}",
                 "-DCMAKE_SYSTEM_PROCESSOR=amd64"

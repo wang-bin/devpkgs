@@ -562,6 +562,7 @@ jobs:
     env:
       TARGET_OS: android
       MIN_API: 19
+      ASM_NASM: /opt/homebrew/bin/nasm
     strategy:
       fail-fast: false
       matrix:
@@ -638,6 +639,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       TARGET_OS: ohos
+      ASM_NASM: /usr/bin/nasm
     strategy:
       fail-fast: false
       matrix:
@@ -648,12 +650,12 @@ jobs:
         submodules: 'recursive'
         fetch-tags: true
         fetch-depth: 0
-    - name: Setup HarmonyOS CLI tools
-      uses: ErBWs/setup-ohos@v1
+    - name: Setup OpenHarmony SDK
+      id: setup-ohos-sdk
+      uses: openharmony-rs/setup-ohos-sdk@v1.0.0
       with:
-        version: latest
+        version: ${{ vars.OH_SDK_VERSION }}
         cache: true
-    - run: hvigorw -v
     - name: Create Build Environment
       shell: bash
       run: |
@@ -669,10 +671,23 @@ jobs:
       shell: bash
       run: |
         export OHOS_NDK=$OHOS_NDK_HOME/native
-        cmake ${{ env.OPTIONS }} ${{ env.OPTIONS0 }} -DWITH_DEB_INFO=0 -DBUILD_WOLFSSL=1 -DOHOS_ARCH=${ARCH} -DCMAKE_TOOLCHAIN_FILE=$OHOS_NDK/build/cmake/ohos.toolchain.cmake -H$PWD -Bbuild/${ARCH} -DCMAKE_BUILD_TYPE=${{ matrix.config }} -DCMAKE_INSTALL_PREFIX=install/${ARCH}
+        cmake ${{ env.OPTIONS }} ${{ env.OPTIONS0 }} -DWITH_DEB_INFO=0 -DBUILD_WOLFSSL=1 -DOHOS_ARCH=${ARCH} -DOHOS_COMPATIBLE_SDK_VERSION=12 -DOHOS_STL=c++_shared -DCMAKE_TOOLCHAIN_FILE=$OHOS_NDK/build/cmake/ohos.toolchain.cmake -H$PWD -Bbuild/${ARCH} -DCMAKE_BUILD_TYPE=${{ matrix.config }} -DCMAKE_INSTALL_PREFIX=install/${ARCH}
         cmake --build build/${{ env.ARCH }}
         cmake --install build/${{ env.ARCH }}
-        cmake ${{ env.OPTIONS }} ${{ env.OPTIONS1 }} -DWITH_DEB_INFO=0 -DBUILD_WOLFSSL=1 -DOHOS_ARCH=${ARCH} -DCMAKE_TOOLCHAIN_FILE=$OHOS_NDK/build/cmake/ohos.toolchain.cmake -H$PWD -Bbuild/${ARCH} -DCMAKE_BUILD_TYPE=${{ matrix.config }} -DCMAKE_INSTALL_PREFIX=install/${ARCH}
+        cmake ${{ env.OPTIONS }} ${{ env.OPTIONS1 }} -DWITH_DEB_INFO=0 -DBUILD_WOLFSSL=1 -DOHOS_ARCH=${ARCH} -DOHOS_COMPATIBLE_SDK_VERSION=12 -DOHOS_STL=c++_shared -DCMAKE_TOOLCHAIN_FILE=$OHOS_NDK/build/cmake/ohos.toolchain.cmake -H$PWD -Bbuild/${ARCH} -DCMAKE_BUILD_TYPE=${{ matrix.config }} -DCMAKE_INSTALL_PREFIX=install/${ARCH}
+        cmake --build build/${{ env.ARCH }}
+        cmake --install build/${{ env.ARCH }}
+        $OHOS_NDK/llvm/bin/llvm-strip install/${ARCH}/lib/*.so
+    - name: Build for x86_64
+      env:
+        ARCH: x86_64
+      shell: bash
+      run: |
+        export OHOS_NDK=$OHOS_NDK_HOME/native
+        cmake ${{ env.OPTIONS }} ${{ env.OPTIONS0 }} -DWITH_DEB_INFO=0 -DBUILD_WOLFSSL=1 -DOHOS_ARCH=${ARCH} -DOHOS_COMPATIBLE_SDK_VERSION=12 -DOHOS_STL=c++_shared -DCMAKE_TOOLCHAIN_FILE=$OHOS_NDK/build/cmake/ohos.toolchain.cmake -H$PWD -Bbuild/${ARCH} -DCMAKE_BUILD_TYPE=${{ matrix.config }} -DCMAKE_INSTALL_PREFIX=install/${ARCH}
+        cmake --build build/${{ env.ARCH }}
+        cmake --install build/${{ env.ARCH }}
+        cmake ${{ env.OPTIONS }} ${{ env.OPTIONS1 }} -DWITH_DEB_INFO=0 -DBUILD_WOLFSSL=1 -DOHOS_ARCH=${ARCH} -DOHOS_COMPATIBLE_SDK_VERSION=12 -DOHOS_STL=c++_shared -DCMAKE_TOOLCHAIN_FILE=$OHOS_NDK/build/cmake/ohos.toolchain.cmake -H$PWD -Bbuild/${ARCH} -DCMAKE_BUILD_TYPE=${{ matrix.config }} -DCMAKE_INSTALL_PREFIX=install/${ARCH}
         cmake --build build/${{ env.ARCH }}
         cmake --install build/${{ env.ARCH }}
         $OHOS_NDK/llvm/bin/llvm-strip install/${ARCH}/lib/*.so

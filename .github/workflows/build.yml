@@ -523,6 +523,7 @@ jobs:
     env:
       TARGET_OS: android
       MIN_API: 19
+      ASM_NASM: /opt/homebrew/bin/nasm
     strategy:
       fail-fast: false
       matrix:
@@ -592,6 +593,7 @@ jobs:
     runs-on: macos-26
     env:
       TARGET_OS: ohos
+      ASM_NASM: /opt/homebrew/bin/nasm
     strategy:
       fail-fast: false
       matrix:
@@ -623,7 +625,17 @@ jobs:
       shell: bash
       run: |
         export OHOS_NDK=$OHOS_SDK_NATIVE
-        cmake ${{ env.OPTIONS }} -DWITH_DEB_INFO=0 -DBUILD_WOLFSSL=1 -DOHOS_ARCH=${ARCH} -DCMAKE_TOOLCHAIN_FILE=$OHOS_NDK/build/cmake/ohos.toolchain.cmake -H$PWD -Bbuild/${ARCH} -DCMAKE_BUILD_TYPE=${{ matrix.config }} -DCMAKE_INSTALL_PREFIX=install/${ARCH}
+        cmake ${{ env.OPTIONS }} -DWITH_DEB_INFO=0 -DBUILD_WOLFSSL=1 -DOHOS_ARCH=${ARCH} -DOHOS_COMPATIBLE_SDK_VERSION=12 -DOHOS_STL=c++_shared -DCMAKE_TOOLCHAIN_FILE=$OHOS_NDK/build/cmake/ohos.toolchain.cmake -H$PWD -Bbuild/${ARCH} -DCMAKE_BUILD_TYPE=${{ matrix.config }} -DCMAKE_INSTALL_PREFIX=install/${ARCH}
+        cmake --build build/${{ env.ARCH }}
+        cmake --install build/${{ env.ARCH }}
+        $OHOS_NDK/llvm/bin/llvm-strip install/${ARCH}/lib/*.so
+    - name: Build for x86_64
+      env:
+        ARCH: x86_64
+      shell: bash
+      run: |
+        export OHOS_NDK=$OHOS_SDK_NATIVE
+        cmake ${{ env.OPTIONS }} -DWITH_DEB_INFO=0 -DBUILD_WOLFSSL=1 -DOHOS_ARCH=${ARCH} -DOHOS_COMPATIBLE_SDK_VERSION=12 -DOHOS_STL=c++_shared -DCMAKE_TOOLCHAIN_FILE=$OHOS_NDK/build/cmake/ohos.toolchain.cmake -H$PWD -Bbuild/${ARCH} -DCMAKE_BUILD_TYPE=${{ matrix.config }} -DCMAKE_INSTALL_PREFIX=install/${ARCH}
         cmake --build build/${{ env.ARCH }}
         cmake --install build/${{ env.ARCH }}
         $OHOS_NDK/llvm/bin/llvm-strip install/${ARCH}/lib/*.so

@@ -159,6 +159,8 @@ endif()
 
 if(BUILD_WOLFSSL)
   message("Configuring wolfssl...")
+  #set(WOLFSSL_DEBUG yes) # ~50KB. runtime enable: wolfSSL_Debugging_ON()
+  set(WOLFSSL_ALT_CERT_CHAINS yes) # required by linux desktop? ASN_NO_SIGNER_E
   set(WOLFSSL_BUILD_OUT_OF_TREE yes)
   set(WOLFSSL_FILESYSTEM yes)   # ca
   set(WOLFSSL_OPENSSLEXTRA yes) # ca

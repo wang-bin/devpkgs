@@ -61,23 +61,28 @@ for A in x64 x86 arm64; do
 done
 rm -rf install
 
-mkdir -p dep/lib/Linux/{amd64,arm64,armhf}
+echo "linux clang"
+mkdir -p dep/lib/Linux/{x86_64,arm64,armhf}
 7z x -y devpkgs-linux-MinSizeRel.7z
 rsync -avm --include='*/' --include='*lz4*' --include='**/mfx/**' --include='*/libmfx.*' --include='**/vpl/**' --include='*/libvpl.*' --include='*/libcppcompat.a' --include='*shaderc*' --include='**/shaderc/**' --include='*wolfssl*' --include='**/wolfssl/**' --exclude='*' install/* dep-av/linux
-for A in amd64 arm64 armhf; do
+mv dep-av/linux/{x86_,amd}64
+for A in x86_64 arm64 armhf; do
     mv install/$A/lib/* dep/lib/Linux/$A/
     rm dep/lib/Linux/$A/lib{harfbuzz,freetype}*
 done
 find dep/lib/Linux -name "*wolfssl*" -exec rm -rf {} \;
+mv dep/lib/Linux/{x86_,amd}64
 rm -rf install
 
-mkdir -p dep/lib/LinuxGnuStl/amd64
+echo "linux gnu"
+mkdir -p dep/lib/LinuxGnuStl/x86_64
 7z x -y devpkgs-linux-MinSizeRel-gnustl.7z
-for A in amd64; do
+for A in x86_64; do
     mv install/$A/lib/* dep/lib/LinuxGnuStl/$A/
     rm dep/lib/LinuxGnuStl/$A/lib{harfbuzz,freetype}*
 done
 find dep/lib/LinuxGnuStl -name "*wolfssl*" -exec rm -rf {} \;
+mv dep/lib/LinuxGnuStl/{x86_,amd}64
 rm -rf install
 
 mkdir -p dep/lib/android/{arm64-v8a,armeabi-v7a}

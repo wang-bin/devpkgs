@@ -466,7 +466,7 @@ jobs:
         cmake --build build/host -t gen_tab
     - name: Build for x64
       env:
-        ARCH: amd64
+        ARCH: x86_64
       shell: bash
       run: |
         cmake ${{ env.OPTIONS }} -DWITH_DEB_INFO=0 -DBUILD_LZ4=0 -DBUILD_WOLFSSL=1 -DBUILD_LIBASS=0 -DUSE_LIBCXX=1 -DCMAKE_SYSTEM_PROCESSOR=${ARCH} -DCMAKE_TOOLCHAIN_FILE=$PWD/cmake/tools/linux.clang.cmake -DLINUX_SYSROOT=$PWD/sysroot -H$PWD -Bbuild/${ARCH} -DCMAKE_BUILD_TYPE=${{ matrix.config }} -DCMAKE_INSTALL_PREFIX=install/${ARCH}
@@ -541,7 +541,7 @@ jobs:
         cmake --build build/host -t gen_tab
     - name: Build for x64
       env:
-        ARCH: amd64
+        ARCH: x86_64
       shell: bash
       run: |
         cmake ${{ env.OPTIONS }} -DWITH_DEB_INFO=0 -DBUILD_LZ4=0 -DBUILD_WOLFSSL=1 -DBUILD_LIBASS=0 -DUSE_LIBCXX=0 -DCMAKE_SYSTEM_PROCESSOR=${ARCH} -DCMAKE_TOOLCHAIN_FILE=$PWD/cmake/tools/linux.clang.cmake -DLINUX_SYSROOT=$PWD/sysroot -H$PWD -Bbuild/${ARCH} -DCMAKE_BUILD_TYPE=${{ matrix.config }} -DCMAKE_INSTALL_PREFIX=install/${ARCH}

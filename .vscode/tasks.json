@@ -582,7 +582,7 @@
                 "-DCMAKE_ASM_NASM_COMPILER=/opt/homebrew/bin/nasm",
                 //"-DCMAKE_C_COMPILER=clang-15",
                 "-DLINUX_SYSROOT=${env:LINUX_SYSROOT}",
-                "-DCMAKE_SYSTEM_PROCESSOR=amd64"
+                "-DCMAKE_SYSTEM_PROCESSOR=x86_64",
             ],
             "problemMatcher": []
         },

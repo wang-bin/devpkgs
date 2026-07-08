@@ -110,8 +110,12 @@ if(BUILD_LIBASS OR BUILD_HB)
     set(HB_HAVE_FREETYPE 1)
   endif()
   set(BUILD_SHARED_LIBS 0)
-  add_compile_options_if_supported(-Wno-unused-template) # clang-23?
   add_subdirectory(src/harfbuzz)
+  # In clang-23+, -Wunused-template is part of the -Wunused group. harfbuzz's hb.hh uses
+  # "#pragma GCC diagnostic error -Wunused" which promotes it to an error inside the TU,
+  # overriding the command-line -Wno-unused-template flag. This macro disables those
+  # error-escalation pragmas so the build succeeds.
+  set_property(DIRECTORY src/harfbuzz APPEND PROPERTY COMPILE_DEFINITIONS HB_NO_PRAGMA_GCC_DIAGNOSTIC_ERROR)
 endif()
 add_subdirectory(projects)
 

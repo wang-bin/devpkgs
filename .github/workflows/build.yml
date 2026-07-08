@@ -22,7 +22,7 @@ jobs:
       matrix:
         config: [MinSizeRel]
     steps:
-    - uses: actions/checkout@v6
+    - uses: actions/checkout@v7
       with:
         submodules: 'recursive'
         fetch-tags: true
@@ -78,7 +78,7 @@ jobs:
         config: [MinSizeRel]
         os: [iOS, tvOS, visionOS]
     steps:
-    - uses: actions/checkout@v6
+    - uses: actions/checkout@v7
       with:
         submodules: 'recursive'
         fetch-tags: true
@@ -133,7 +133,7 @@ jobs:
           - config: Debug
             dll: 1
     steps:
-    - uses: actions/checkout@v6
+    - uses: actions/checkout@v7
       with:
         submodules: 'recursive'
         fetch-tags: true
@@ -205,7 +205,7 @@ jobs:
       matrix:
         config: [Release]
     steps:
-    - uses: actions/checkout@v6
+    - uses: actions/checkout@v7
       with:
         submodules: 'recursive'
         fetch-tags: true
@@ -271,7 +271,7 @@ jobs:
       matrix:
         config: [Release]
     steps:
-    - uses: actions/checkout@v6
+    - uses: actions/checkout@v7
       with:
         submodules: 'recursive'
         fetch-tags: true
@@ -344,7 +344,7 @@ jobs:
       matrix:
         config: [MinSizeRel]
     steps:
-    - uses: actions/checkout@v6
+    - uses: actions/checkout@v7
       with:
         submodules: 'recursive'
         fetch-tags: true
@@ -395,7 +395,7 @@ jobs:
       matrix:
         config: [MinSizeRel]
     steps:
-    - uses: actions/checkout@v6
+    - uses: actions/checkout@v7
       with:
         submodules: 'recursive'
         fetch-tags: true
@@ -471,7 +471,7 @@ jobs:
       matrix:
         config: [MinSizeRel]
     steps:
-    - uses: actions/checkout@v6
+    - uses: actions/checkout@v7
       with:
         submodules: 'recursive'
         fetch-tags: true
@@ -529,7 +529,7 @@ jobs:
       matrix:
         config: [MinSizeRel] # https://github.com/android/ndk/issues/721
     steps:
-    - uses: actions/checkout@v6
+    - uses: actions/checkout@v7
       with:
         submodules: 'recursive'
         fetch-tags: true
@@ -599,7 +599,7 @@ jobs:
       matrix:
         config: [MinSizeRel]
     steps:
-    - uses: actions/checkout@v6
+    - uses: actions/checkout@v7
       with:
         submodules: 'recursive'
         fetch-tags: true
@@ -652,7 +652,7 @@ jobs:
     runs-on: macos-26
     needs: [iOS, macOS, Android, ohos, Windows_VS2026, Windows_VS2026_LTL, UWP_VS2026, Linux_libcxx, Linux_gnustl]
     steps:
-    - uses: actions/checkout@v6
+    - uses: actions/checkout@v7
     - name: Download iOS libs
       uses: actions/download-artifact@v8
       with:

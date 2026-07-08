@@ -606,7 +606,7 @@ jobs:
         fetch-depth: 0
     - name: Setup OpenHarmony SDK
       id: setup-ohos-sdk
-      uses: openharmony-rs/setup-ohos-sdk@v1.0.0
+      uses: openharmony-rs/setup-ohos-sdk@v1.0.1
       with:
         version: ${{ vars.OH_SDK_VERSION }}
         cache: true

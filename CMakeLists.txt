@@ -17,6 +17,7 @@ option(BUILD_LZ4 "Build lz4" ON)
 option(BUILD_BORINGSSL "Build boringssl" OFF)
 option(BUILD_CURL "Build curl" OFF) # FIXME: must build & install ssl first then turn on curl
 option(BUILD_CURL_SHARED "Build shared libcurl" OFF)
+option(BUILD_NGTCP2 "Build ngtcp2" OFF)
 set(VC_LTL_DIR "${CMAKE_CURRENT_SOURCE_DIR}/VC-LTL" CACHE STRING "VC-LTL dir")
 
 set(CMAKE_C_STANDARD 11)
@@ -206,6 +207,19 @@ if(BUILD_BORINGSSL)
   set(CMAKE_MACOSX_BUNDLE ${CMAKE_MACOSX_BUNDLE_OLD})
 endif()
 
+if(BUILD_NGTCP2)
+  message("Configuring ngtcp2...")
+  set(BUILD_TESTING 0)
+  set(ENABLE_OPENSSL 0)
+  set(ENABLE_BORINGSSL 1)
+  set(ENABLE_STATIC_LIB 1)
+  set(ENABLE_SHARED_LIB 1)
+  set(BORINGSSL_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src/boringssl/include)
+  set(BORINGSSL_LIBRARIES ${CMAKE_INSTALL_PREFIX}/lib/libssl.a ${CMAKE_INSTALL_PREFIX}/lib/libcrypto.a) # FIXME:
+  # $<TARGET_FILE:crypto> $<TARGET_FILE:ssl>
+  add_subdirectory(src/ngtcp2)
+endif()
+
 if(BUILD_CURL)
   message("Configuring curl...")
   set(CURL_CA_FALLBACK 0)
@@ -266,6 +280,7 @@ endif()
 # TODO: INTERPROCEDURAL_OPTIMIZATION is thin lto, how to enable full lto?
 foreach(tgt freetype harfbuzz fribidi_shared fribidi_static ass zlib
 #    crypto ssl
+    ngtcp2
     libcurl_shared) # TODO: no lto for other projects(ffmpeg)
   if(TARGET ${tgt})
     set_target_properties(${tgt} PROPERTIES
@@ -277,6 +292,7 @@ foreach(tgt snappy zlibstatic glfw
     va va_win32 va-drm va-x11 vdpau
     wolfssl
     crypto ssl
+    ngtcp2_static
     libcurl_static
     )
   if(TARGET ${tgt})

@@ -56,3 +56,6 @@
 [submodule "src/curl"]
 	path = src/curl
 	url = https://github.com/curl/curl.git
+[submodule "src/ngtcp2"]
+	path = src/ngtcp2
+	url = https://github.com/ngtcp2/ngtcp2.git

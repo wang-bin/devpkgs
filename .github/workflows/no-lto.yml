@@ -576,14 +576,6 @@ jobs:
     - name: Create Build Environment
       shell: bash
       run: brew install nasm
-    - name: Apply patches
-      shell: bash
-      run: |
-        cd src/libass
-        for p in $(find ../../projects/libass/patches -name "*.patch"); do
-            echo $p
-            patch -p1 -N < $p
-        done
     - name: Build host gen_tab # native build first
       shell: bash
       run: |

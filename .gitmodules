@@ -12,7 +12,7 @@
 	url = https://github.com/freetype/freetype
 [submodule "src/libass"]
 	path = src/libass
-	url = https://github.com/libass/libass.git
+	url = https://github.com/wang-bin/libass
 	branch = master
 [submodule "src/snappy"]
 	path = src/snappy

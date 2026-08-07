@@ -174,6 +174,9 @@ endif()
 if(ANDROID)
   set(CONFIG_ANDROID 1)
 endif()
+if(OHOS)
+  set(CONFIG_OHOS 1)
+endif()
 if(ENABLE_LARGE_TILES)
   set(CONFIG_LARGE_TILES 1)
 else()
@@ -194,6 +197,11 @@ if(CONFIG_ANDROID)
 else()
   list(FILTER SRC_LIST EXCLUDE REGEX ".*ass_androidfonts.c$")
 endif()
+if(CONFIG_OHOS)
+  list(APPEND EXTRA_LIBS native_drawing)
+else()
+  list(FILTER SRC_LIST EXCLUDE REGEX ".*ass_ohosfonts.c$")
+endif()
 
 # FreeType face backend: keep by default; on Apple+CoreText can still keep for embedded fonts
 if(NOT CONFIG_FREETYPE)
@@ -201,7 +209,7 @@ if(NOT CONFIG_FREETYPE)
 endif()
 
 # TODO: android
-if(UNIX AND NOT APPLE)
+if(UNIX AND NOT APPLE AND NOT ANDROID AND NOT CONFIG_OHOS)
   include(FindFontconfig)
 endif()
 if(NOT Fontconfig_FOUND)
@@ -379,7 +387,7 @@ endforeach()
 # define if 1
 foreach(VAR
     HAVE_STRDUP
-    CONFIG_ANDROID
+    CONFIG_ANDROID CONFIG_OHOS
     CONFIG_CORETEXT CONFIG_FONTCONFIG CONFIG_DIRECTWRITE CONFIG_FREETYPE CONFIG_FRIBIDI CONFIG_ICONV CONFIG_LIBPNG CONFIG_RASTERIZER CONFIG_LARGE_TILES)
   if(${VAR})
     set(CONF "${CONF}\n#define ${VAR} ${${VAR}}")

@@ -1,6 +1,19 @@
 cmake_minimum_required(VERSION 3.15)
 
-project(dav1d VERSION 1.5.1)
+if(NOT SRC_DIR)
+  set(SRC_DIR ${CMAKE_CURRENT_SOURCE_DIR})
+endif()
+
+# package version from meson.build: version: 'x.y.z'
+file(STRINGS "${SRC_DIR}/meson.build" _DAV1D_VERSION_LINE
+  REGEX "^[\t ]*version:[\t ]*'[0-9]+\\.[0-9]+\\.[0-9]+'")
+if(NOT _DAV1D_VERSION_LINE MATCHES "version:[\t ]*'([0-9]+\\.[0-9]+\\.[0-9]+)'")
+  message(FATAL_ERROR "Failed to parse dav1d version from ${SRC_DIR}/meson.build")
+endif()
+set(DAV1D_VERSION "${CMAKE_MATCH_1}")
+message("DAV1D_VERSION: ${DAV1D_VERSION}")
+
+project(dav1d VERSION ${DAV1D_VERSION})
 include(CheckLibraryExists)
 include(CheckCCompilerFlag)
 include(CheckCSourceCompiles)
@@ -14,10 +27,6 @@ set(CMAKE_FIND_ROOT_PATH_MODE_LIBRARY ONLY)
 set(CMAKE_FIND_ROOT_PATH_MODE_INCLUDE ONLY)
 #list(APPEND CMAKE_FIND_ROOT_PATH ${CMAKE_INSTALL_PREFIX}) # affect yasm probe
 
-if(NOT SRC_DIR)
-  set(SRC_DIR ${PROJECT_SOURCE_DIR})
-endif()
-
 # used by rc file. for api version <= 7.0, set manually
 set(API_VERSION_MAJOR 7)
 set(API_VERSION_MINOR 0)
@@ -26,17 +35,17 @@ set(API_VERSION_REVISION 0)
 # since 1.5.0(api 7.0.0), parse version.h
 set(VERSION_H "${SRC_DIR}/include/dav1d/version.h")
 if(EXISTS "${VERSION_H}") # 1.5.0
-    foreach(V MAJOR MINOR PATCH)
-        file(STRINGS "${VERSION_H}" DAV1D_${V} REGEX "^#[\t ]*define[\t ]+DAV1D_API_VERSION_${V}[\t ]+[0-9]+$")
-        foreach(VLINE ${DAV1D_${V}})
-          if(VLINE MATCHES "^#[\t ]*define[\t ]+DAV1D_API_VERSION_${V}[\t ]+([0-9]+)$")
-            set(API_VERSION_${V} "${CMAKE_MATCH_1}")
-            break()
-          endif()
-        endforeach()
-        message("API_VERSION_${V}: ${API_VERSION_${V}}")
-    endforeach()
+  foreach(V MAJOR MINOR PATCH)
+    file(STRINGS "${VERSION_H}" _DAV1D_API_${V}
+      REGEX "^#[\t ]*define[\t ]+DAV1D_API_VERSION_${V}[\t ]+[0-9]+$")
+    if(_DAV1D_API_${V} MATCHES "^#[\t ]*define[\t ]+DAV1D_API_VERSION_${V}[\t ]+([0-9]+)$")
+      set(API_VERSION_${V} "${CMAKE_MATCH_1}")
+    endif()
+  endforeach()
+  set(API_VERSION_REVISION ${API_VERSION_PATCH})
 endif()
+message("API_VERSION: ${API_VERSION_MAJOR}.${API_VERSION_MINOR}.${API_VERSION_REVISION}")
+
 set(PROJECT_VERSION_REVISION ${PROJECT_VERSION_PATCH})
 # gen version.h
 set(DAV1D_API_VERSION_MAJOR ${API_VERSION_MAJOR})

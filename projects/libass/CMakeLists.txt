@@ -2,7 +2,13 @@ cmake_minimum_required(VERSION 3.15)
 
 # https://github.com/hozuki/libass-cmake/blob/master/cmake/libass.cmake
 
-PROJECT(libass VERSION 0.17.2) # TODO: read from RELEASEVERSION since 0.17.2
+if(NOT SRC_DIR)
+  set(SRC_DIR ${CMAKE_CURRENT_SOURCE_DIR})
+endif()
+file(STRINGS "${SRC_DIR}/RELEASEVERSION" LIBASS_VERSION LIMIT_COUNT 1)
+message("LIBASS_VERSION: ${LIBASS_VERSION}")
+
+PROJECT(libass VERSION ${LIBASS_VERSION})
 set(CMAKE_C_VISIBILITY_PRESET default) # hidden symbols can not be exported via libass.sym
 include(CheckCCompilerFlag)
 include(CheckIncludeFile)
@@ -12,10 +18,6 @@ set(CMAKE_FIND_ROOT_PATH_MODE_PROGRAM ONLY)
 set(CMAKE_FIND_ROOT_PATH_MODE_LIBRARY ONLY)
 set(CMAKE_FIND_ROOT_PATH_MODE_INCLUDE ONLY)
 #list(APPEND CMAKE_FIND_ROOT_PATH ${CMAKE_INSTALL_PREFIX}) # affect yasm probe
-
-if(NOT SRC_DIR)
-  set(SRC_DIR ${PROJECT_SOURCE_DIR})
-endif()
 
 file(STRINGS ${SRC_DIR}/libass/Makefile_library.am VERSION_LINES LIMIT_COUNT 4)
 foreach(VLINE ${VERSION_LINES})
